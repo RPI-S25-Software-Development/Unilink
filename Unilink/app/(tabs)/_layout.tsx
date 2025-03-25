@@ -5,7 +5,12 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 export default function Layout() {
   return (
-    <Tabs>
+    <Tabs screenOptions={{
+      tabBarActiveBackgroundColor: "#cccccc",
+      tabBarInactiveBackgroundColor: "#f2f2f2",
+      tabBarActiveTintColor: "#767676",
+      tabBarInactiveTintColor: "#767676"
+    }}>
       <Tabs.Screen name="home" options={{
         title: "Home",
         tabBarIcon: ({color}) => <AntDesign name="home" size={24} color={color} />
