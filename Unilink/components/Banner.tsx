@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Platform } from "react-native";
 
 type Props = {
     backgroundColor?: "#fff";
@@ -11,13 +11,13 @@ type Props = {
 export default function Banner({ backgroundColor, titleColor, title, titleFontFamily, titleFontWeight }: Props) {
     return <View style={{
         backgroundColor: backgroundColor,
-        paddingLeft: "1%",
-        paddingTop: "2%",
-        paddingBottom: "1%"
+        paddingLeft: Platform.OS !== "web" ? "5%" : "2%",
+        paddingTop: Platform.OS !== "web" ? "10%" : "2%",
+        paddingBottom: Platform.OS !== "web" ? "3%" : "1%",
     }}>
         <Text style={{
             color: titleColor,
-            fontSize: 32,
+            fontSize: 20,
             fontFamily: titleFontFamily,
             fontWeight: titleFontWeight
         }}>
