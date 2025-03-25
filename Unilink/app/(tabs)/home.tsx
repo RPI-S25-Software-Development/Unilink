@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet } from "react-native";
-import { Link } from "expo-router";
+
 import "@/global.css";
 
 export default function HomeScreen() {
