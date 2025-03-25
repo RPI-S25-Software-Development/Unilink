@@ -1,16 +1,6 @@
-import { Text, View } from "react-native";
+import { Redirect } from "expo-router";
 import "@/global.css";
 
 export default function NotFoundScreen() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Not Found</Text>
-    </View>
-  );
+  return <Redirect href="/"/>;
 }
