@@ -2,6 +2,10 @@ import { Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from 'react';
+import { View } from "react-native";
+import { StatusBar } from 'expo-status-bar';
+
+import Banner from "@/components/Banner";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -21,9 +25,14 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{headerShown: false}}>
-      <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
-      <Stack.Screen name="+not-found" options={{headerShown: false}}/>
-    </Stack>
+    <View style={{flex: 1}}>
+      <Banner backgroundColor="#DC0000" titleColor="#FFFFFF" title="RPI Unilink"
+            titleFontFamily="Inter" titleBold/>
+      <Stack screenOptions={{headerShown: false, contentStyle: {backgroundColor: "white"}}}>
+        <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
+        <Stack.Screen name="+not-found" options={{headerShown: false}}/>
+      </Stack>
+      <StatusBar/>
+    </View>
   );
 }
