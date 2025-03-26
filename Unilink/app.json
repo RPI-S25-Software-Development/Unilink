@@ -4,7 +4,7 @@
     "slug": "Unilink",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/Unilink_logo.png",
+    "icon": "./assets/images/Unilink_Logo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,21 +13,21 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/Unilink_logo.png",
+        "foregroundImage": "./assets/images/Unilink_Logo.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/Unilink_logo.png"
+      "favicon": "./assets/images/Unilink_Logo.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/Unilink_logo.png",
+          "image": "./assets/images/Unilink_Logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
