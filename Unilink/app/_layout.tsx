@@ -27,7 +27,7 @@ export default function RootLayout() {
   return (
     <View style={{flex: 1}}>
       <Banner backgroundColor="#DC0000" titleColor="#FFFFFF" title="RPI Unilink"
-            titleFontFamily="Inter" titleFontWeight="bold"/>
+            titleFontFamily="Inter" titleBold/>
       <Stack screenOptions={{headerShown: false}}>
         <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
         <Stack.Screen name="+not-found" options={{headerShown: false}}/>

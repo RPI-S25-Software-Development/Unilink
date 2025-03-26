@@ -5,11 +5,11 @@ type Props = {
     titleColor?: string;
     title: string;
     titleFontFamily?: string;
-    titleFontWeight?: string;
+    titleBold?: boolean;
 }
 
 export default function Banner({ backgroundColor = "#fff", titleColor = "#000000", title,
-titleFontFamily = "Inter", titleFontWeight = "normal" }: Props) {
+titleFontFamily = "Inter", titleBold = false }: Props) {
     return <View style={{
         backgroundColor: backgroundColor,
         paddingLeft: Platform.OS !== "web" ? "5%" : "2%",
@@ -20,7 +20,7 @@ titleFontFamily = "Inter", titleFontWeight = "normal" }: Props) {
             color: titleColor,
             fontSize: 20,
             fontFamily: titleFontFamily,
-            fontWeight: titleFontWeight
+            fontWeight: titleBold ? "bold" : "normal"
         }}>
             {title}
         </Text>

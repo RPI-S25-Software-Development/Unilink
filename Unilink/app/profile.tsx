@@ -1,55 +1,87 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, ScrollView } from "react-native";
+import { useState } from "react";
+import { Link } from "expo-router";
 
 import "@/global.css";
 
 import PlusButton from "@/components/PlusButton";
 import Dropdown from "@/components/Dropdown";
 import EventTag from "@/components/EventTag";
+import IconOption from "@/components/IconOption";
 
 export default function ProfileScreen() {
   const currentYear = new Date().getFullYear();
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  const disableNotifications = () => {
+    setNotificationsEnabled(false);
+  };
+
+  const enableNotifications = () => {
+    setNotificationsEnabled(true);
+  };
 
   return (
-    <View
-      style={{
+    <ScrollView stickyHeaderIndices={[0]}>
+      <View className="my-8" style={{
         flex: 1,
         alignItems: "center",
-      }}
-    >
-      <Text className="font-bold py-8" style={{fontSize: 48}}>Build Your Profile</Text>
-      <View style={{
-        flex: 8/10,
-        alignItems: "flex-start",
-        width: "100%",
-        paddingHorizontal: "5%"
       }}>
-        <View className="my-4">
-          <Text className="text-2xl font-bold underline">You as a Student</Text>
-          <View className="my-2" style={{alignItems: "flex-start"}}>
-            <Text className="text-xl font-bold">Major(s)</Text>
-            <PlusButton/>
-          </View>
-          <View className="my-2" style={{alignItems: "flex-start"}}>
-            <Text className="text-xl font-bold">Graduation Year</Text>
-            <Dropdown
-              dropdownItems={dropdownYears([currentYear, currentYear + 4], true)}
-            />
-          </View>
-        </View>
-        <View className="my-4">
-          <Text className="text-2xl font-bold underline">Your App Preferences</Text>
-          <View className="my-2" style={{alignItems: "flex-start"}}>
-            <Text className="text-xl font-bold">Tags of Interest</Text>
-            <View style={{flexDirection: "row", alignItems: "center"}}>
-              <EventTag backgroundColor="#FF8F8F" name="Academic"/>
-              <EventTag backgroundColor="#8FC9FF" name="Clubs"/>
-              <EventTag backgroundColor="#FFBC8F" name="Career"/>
-              <PlusButton size={20}/>
+        <Text className="font-bold" style={{fontSize: 48}}>Build Your Profile</Text>
+      </View>
+      <View style={{
+        flex: 9,
+        alignItems: "center",
+      }}>
+        <View style={{
+          flex: 8/10,
+          alignItems: "flex-start",
+          width: "100%",
+          paddingHorizontal: "5%"
+        }}>
+          <View className="my-4">
+            <Text className="text-2xl font-bold underline">You as a Student</Text>
+            <View className="my-2" style={{alignItems: "flex-start"}}>
+              <Text className="text-xl font-bold">Major(s)</Text>
+              <PlusButton/>
+            </View>
+            <View className="my-2" style={{alignItems: "flex-start"}}>
+              <Text className="text-xl font-bold">Graduation Year</Text>
+              <Dropdown
+                dropdownItems={dropdownYears([currentYear, currentYear + 4], true)}
+              />
             </View>
           </View>
+          <View className="my-4">
+            <Text className="text-2xl font-bold underline">Your App Preferences</Text>
+            <View className="my-2" style={{alignItems: "flex-start"}}>
+              <Text className="text-xl font-bold">Tags of Interest</Text>
+              <View style={{flexDirection: "row", alignItems: "center"}}>
+                <EventTag backgroundColor="#FF8F8F" name="Academic"/>
+                <EventTag backgroundColor="#8FC9FF" name="Clubs"/>
+                <EventTag backgroundColor="#FFBC8F" name="Career"/>
+                <PlusButton size={20}/>
+              </View>
+            </View>
+            <View className="my-2" style={{alignItems: "flex-start"}}>
+              <Text className="text-xl font-bold">Notification Preferences</Text>
+              <View style={{flexDirection: "row", alignItems: "center"}}>
+                <IconOption iconImageSource={require("@/assets/images/Bell off.png")} iconSize={32}
+                optionText="Disabled" optionTextColor="#656565" selected={!notificationsEnabled}
+                selectionColor="#656565" onPress={disableNotifications}/>
+                <IconOption iconImageSource={require("@/assets/images/Bell.png")} iconSize={32}
+                optionText="Enabled" optionTextColor="#656565" selected={notificationsEnabled}
+                selectionColor="#656565" onPress={enableNotifications}/>
+              </View>
+            </View>
+          </View>
+          <Link href="/home" className="my-2 rounded-lg" style={{backgroundColor: "#B61601", paddingHorizontal: 50,
+          paddingVertical: 20}}>
+            <Text className="text-white text-center text-lg">Continue</Text>
+          </Link>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
