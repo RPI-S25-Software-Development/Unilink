@@ -3,16 +3,16 @@ import { View, Platform } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
 type Props = {
-  dropdownItems: {label: string, value: string}[];
+  dropdownItems: {key: string, label: string}[];
   defaultValue?: string | null;
   placeholder?: string;
 }
 
-function pickerItemComponents(items: {label: string, value: string}[]) {
+function pickerItemComponents(items: {key: string, label: string}[]) {
   var result: JSX.Element[] = [];
 
   items.forEach(function(item) {
-    result.push(<Picker.Item label={item.label} value={item.value}/>)
+    result.push(<Picker.Item key={item.key} label={item.label}/>)
   });
   
   return result;

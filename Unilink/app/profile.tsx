@@ -83,15 +83,15 @@ export default function ProfileScreen() {
 }
 
 function dropdownYears(range: [number, number], backwards = false) {
-  var result: {label: string, value: string}[] = [];
+  var result: {key: string, label: string}[] = [];
 
   if(backwards) {
     for(var i: number = range[1]; i >= range[0]; i--) {
-      result.push({label: String(i), value: String(i)});
+      result.push({key: String(i), label: String(i)});
     }
   } else {
     for(var i: number = range[0]; i <= range[1]; i++) {
-      result.push({label: String(i), value: String(i)});
+      result.push({key: String(i), label: String(i)});
     }
   }
 
