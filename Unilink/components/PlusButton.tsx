@@ -1,4 +1,4 @@
-import { Text, Pressable, StyleSheet } from "react-native";
+import { Platform, Pressable } from "react-native";
 
 import AntDesign from '@expo/vector-icons/AntDesign';
 
@@ -14,7 +14,7 @@ size=16, shadow=true}: Props) {
   return (
     <Pressable className={`rounded-full m-2 ${shadow? "shadow-md": ""}`} style={{
       backgroundColor: backgroundColor,
-      paddingHorizontal: 5,
+      paddingHorizontal: Platform.OS === "web" ? 5 : 4,
       paddingVertical: 4
     }}>
       <AntDesign name="plus" size={size} color={plusColor}/>

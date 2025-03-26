@@ -12,7 +12,8 @@ export default function Layout() {
       tabBarInactiveBackgroundColor: "#f2f2f2",
       tabBarActiveTintColor: "#767676",
       tabBarInactiveTintColor: "#767676",
-      headerShown: false
+      headerShown: false,
+      sceneStyle: {backgroundColor: "white"}
     }}>
       <Tabs.Screen name="home" options={{
         title: "Home",

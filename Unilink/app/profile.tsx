@@ -23,23 +23,20 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView stickyHeaderIndices={[0]}>
-      <View className="my-8" style={{
+      <View className="md-8 bg-white" style={{
         flex: 1,
-        alignItems: "center",
+        alignItems: "center"
       }}>
-        <Text className="font-bold" style={{fontSize: 48}}>Build Your Profile</Text>
+        <Text className="font-bold p-6" style={{fontSize: 48}}>Build Your Profile</Text>
       </View>
-      <View style={{
-        flex: 9,
-        alignItems: "center",
-      }}>
+      <ScrollView horizontal>
         <View style={{
           flex: 8/10,
           alignItems: "flex-start",
           width: "100%",
-          paddingHorizontal: "5%"
+          paddingHorizontal: 25
         }}>
-          <View className="my-4">
+          <View className="my-2">
             <Text className="text-2xl font-bold underline">You as a Student</Text>
             <View className="my-2" style={{alignItems: "flex-start"}}>
               <Text className="text-xl font-bold">Major(s)</Text>
@@ -47,23 +44,23 @@ export default function ProfileScreen() {
             </View>
             <View className="my-2" style={{alignItems: "flex-start"}}>
               <Text className="text-xl font-bold">Graduation Year</Text>
-              <Dropdown
-                dropdownItems={dropdownYears([currentYear, currentYear + 4], true)}
-              />
+              <Dropdown dropdownItems={dropdownYears([currentYear, currentYear + 4], true)}/>
             </View>
           </View>
-          <View className="my-4">
-            <Text className="text-2xl font-bold underline">Your App Preferences</Text>
-            <View className="my-2" style={{alignItems: "flex-start"}}>
-              <Text className="text-xl font-bold">Tags of Interest</Text>
-              <View style={{flexDirection: "row", alignItems: "center"}}>
-                <EventTag backgroundColor="#FF8F8F" name="Academic"/>
-                <EventTag backgroundColor="#8FC9FF" name="Clubs"/>
-                <EventTag backgroundColor="#FFBC8F" name="Career"/>
-                <PlusButton size={20}/>
+          <View className="my-2">
+            <View className="my-2" style={{alignItems: "flex-start", width: "90%"}}>
+              <Text className="text-2xl font-bold underline">Your App Preferences</Text>
+              <View className="my-2" style={{alignItems: "flex-start"}}>
+                <Text className="text-xl font-bold">Tags of Interest</Text>
+                <View style={{flexDirection: "row", alignItems: "center", flexWrap: "wrap"}}>
+                  <EventTag backgroundColor="#FF8F8F" name="Academic"/>
+                  <EventTag backgroundColor="#8FC9FF" name="Clubs"/>
+                  <EventTag backgroundColor="#FFBC8F" name="Career"/>
+                  <PlusButton size={20}/>
+                </View>
               </View>
             </View>
-            <View className="my-2" style={{alignItems: "flex-start"}}>
+            <View className="my-2" style={{alignItems: "flex-start", width: "50%"}}>
               <Text className="text-xl font-bold">Notification Preferences</Text>
               <View style={{flexDirection: "row", alignItems: "center"}}>
                 <IconOption iconImageSource={require("@/assets/images/Bell off.png")} iconSize={32}
@@ -80,7 +77,7 @@ export default function ProfileScreen() {
             <Text className="text-white text-center text-lg">Continue</Text>
           </Link>
         </View>
-      </View>
+      </ScrollView>
     </ScrollView>
   );
 }
