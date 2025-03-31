@@ -8,7 +8,8 @@ CREATE TABLE unilink.universities (
 CREATE TABLE unilink.tags (
     tag_id UUID PRIMARY KEY,
     tag_name TEXT,
-    classification TEXT
+    classification TEXT,
+    color TEXT
 )
 
 CREATE TABLE unilink.users (
@@ -32,7 +33,8 @@ CREATE TABLE unilink.organizations (
     organization_id UUID PRIMARY KEY,
     organization_name TEXT,
     organization_bio TEXT,
-    organization_address TEXT
+    organization_address TEXT,
+    university_id UUID REFERENCES unilink.universities(university_id) ON DELETE CASCADE
 )
 
 CREATE TABLE unilink.events (
