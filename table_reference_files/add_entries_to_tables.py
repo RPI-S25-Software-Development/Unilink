@@ -9,12 +9,19 @@ conn = psycopg2.connect(
     dbname="postgres",
     user="postgres",
     password="post123",
-    host="3.144.27.117",
+    host="3.128.200.240",
     port="5432"
 )
 
 # Create a cursor to interact with the database
 cur = conn.cursor()
+
+# Function to generate random user preferences
+def generate_random_user_preferences():
+    notification_frequency = random.choice(['daily', 'weekly', 'none'])
+    tags_of_interest = json.dumps([f"interest_tag{random.randint(1, 5)}"])
+    
+    return (notification_frequency, tags_of_interest)
 
 # Function to generate random data for users
 def generate_random_user(i):
@@ -24,16 +31,17 @@ def generate_random_user(i):
     organization_name = f'Random Organization {i}' if user_type == 'organization' else None
     preferences = json.dumps({"tags": [f"tag{i}"]})
     login_type = 'university_sso' if user_type == 'student' else 'custom'
+    notif_freq, tags  = generate_random_user_preferences()
     created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
-    return (user_id, user_type, university, organization_name, preferences, login_type, created_at)
+    return (user_id, user_type, university, organization_name, preferences, login_type, notif_freq, tags, created_at)
 
 # Insert 30 Users
 for i in range(1, 31):
     user_data = generate_random_user(i)
     insert_query = """
-        INSERT INTO unilink.users (user_id, user_type, university, organization_name, preferences, login_type, created_at)
-        VALUES (%s, %s, %s, %s, %s, %s, %s);
+        INSERT INTO unilink.users (user_id, user_type, university, organization_name, preferences, login_type, notification_frequency, tags_of_interest, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
     """
     cur.execute(insert_query, user_data)
 
@@ -52,37 +60,15 @@ def generate_random_event(i, user_id):
     return (event_id, title, description, poster, tags, location, event_time, user_id, likes_count, max_attendees)
 
 # Insert 30 Events
-cur.execute("SELECT user_id FROM unilink.users WHERE user_type = 'student' LIMIT 1")
-user_id = cur.fetchone()[0]  # Get a user ID to use as the event creator
-
-for i in range(1, 31):
-    event_data = generate_random_event(i, user_id)
+cur.execute("SELECT user_id FROM unilink.users")
+user_ids = [row[0] for row in cur.fetchall()]
+for i in range(1, len(user_ids)):
+    event_data = generate_random_event(i, user_ids[i-1])
     insert_query = """
         INSERT INTO unilink.events (event_id, title, description, poster, tags, location, event_time, created_by, likes_count, max_attendees)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     """
     cur.execute(insert_query, event_data)
-
-# Function to generate random user preferences
-def generate_random_user_preferences(user_id):
-    notification_frequency = random.choice(['daily', 'weekly', 'none'])
-    tags_of_interest = json.dumps([f"interest_tag{random.randint(1, 5)}"])
-    
-    return (user_id, notification_frequency, tags_of_interest)
-
-# Insert 30 User Preferences
-cur.execute("SELECT user_id FROM unilink.users")
-user_ids = [row[0] for row in cur.fetchall()]
-for i in range(1, len(user_ids)+1):
-    
-    user_id = user_ids[i-1]  # Get a random user_id
-    
-    user_pref_data = generate_random_user_preferences(user_id)
-    insert_query = """
-        INSERT INTO unilink.user_preferences (user_id, notification_frequency, tags_of_interest)
-        VALUES (%s, %s, %s);
-    """
-    cur.execute(insert_query, user_pref_data)
 
 # Function to generate random trending events data
 def generate_random_trending_event(event_id):

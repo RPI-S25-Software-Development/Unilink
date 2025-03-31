@@ -2,11 +2,13 @@ CREATE SCHEMA unilink
 
 CREATE TABLE unilink.users (
     user_id UUID PRIMARY KEY, 
-    user_type TEXT CHECK (user_type IN ('student', 'organization')), 
+    user_type TEXT, 
     university TEXT, 
     organization_name TEXT, 
     preferences JSON, 
     login_type TEXT CHECK (login_type IN ('university_sso', 'custom')), 
+    notification_frequency TEXT CHECK (notification_frequency IN ('daily', 'weekly', 'none')), 
+    tags_of_interest JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 
@@ -21,12 +23,6 @@ CREATE TABLE unilink.events (
     created_by UUID REFERENCES unilink.users(user_id) ON DELETE CASCADE, 
     likes_count INT DEFAULT 0, 
     max_attendees INT NULL
-)
-
-CREATE TABLE unilink.user_preferences (
-    user_id UUID PRIMARY KEY REFERENCES unilink.users(user_id) ON DELETE CASCADE, 
-    notification_frequency TEXT CHECK (notification_frequency IN ('daily', 'weekly', 'none')), 
-    tags_of_interest JSON
 )
 
 CREATE TABLE unilink.trending_events (
@@ -45,8 +41,8 @@ CREATE TABLE unilink.calendar (
 
 CREATE TABLE unilink.notifications (
     notification_id UUID PRIMARY KEY, 
-    user_id UUID REFERENCES unilink.users(user_id) ON DELETE CASCADE, 
-    event_id UUID REFERENCES unilink.events(event_id) ON DELETE SET NULL, 
+    user_id UUID REFERENCES unilink.users(user_id) ON DELETE CASCADE,
+    event_id UUID REFERENCES unilink.events(event_id) ON DELETE SET NULL,
     notification_type TEXT, 
     message TEXT NOT NULL, 
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -67,4 +63,24 @@ CREATE TABLE unilink.event_signups (
     checked_in BOOLEAN DEFAULT FALSE, 
     signup_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
     preferences JSON
+)
+
+CREATE TABLE unilink.tags (
+    tag_id UUID PRIMARY KEY,
+    tag_name TEXT,
+    classification TEXT
+)
+
+CREATE TABLE unilink.likes (
+    like_id UUID PRIMARY KEY,
+    user_id UUID REFERENCES unilink.users(user_id) ON DELETE CASCADE,
+    event_id UUID REFERENCES unilink.events(event_id) ON DELETE CASCADE,
+    still_valid BOOLEAN
+)
+
+CREATE TABLE unilink.rsvps (
+    rsvp_id UUID PRIMARY KEY,
+    user_id UUID REFERENCES unilink.users(user_id) ON DELETE CASCADE,
+    event_id UUID REFERENCES unilink.events(event_id) ON DELETE CASCADE,
+    still_valid BOOLEAN
 )
