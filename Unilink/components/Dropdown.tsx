@@ -4,8 +4,7 @@ import { Picker } from "@react-native-picker/picker";
 
 type Props = {
   dropdownItems: {key: string, label: string}[];
-  defaultValue?: string | null;
-  placeholder?: string;
+  defaultValue?: string;
 }
 
 function pickerItemComponents(items: {key: string, label: string}[]) {
@@ -18,7 +17,7 @@ function pickerItemComponents(items: {key: string, label: string}[]) {
   return result;
 }
 
-export default function Dropdown({dropdownItems, defaultValue = null, placeholder = "(Select)"}: Props) {
+export default function Dropdown({dropdownItems, defaultValue}: Props) {
   const [selectedItem, setSelectedItem] = useState(defaultValue);
 
   return (
@@ -40,18 +39,5 @@ export default function Dropdown({dropdownItems, defaultValue = null, placeholde
         {pickerItemComponents(dropdownItems)}
       </Picker>
     </View>
-    // <DropDownPicker
-    //   open={open}
-    //   value={value}
-    //   items={items}
-    //   setOpen={setOpen}
-    //   setValue={setValue}
-    //   setItems={setItems}
-    //   placeholder={placeholder}
-    //   searchable={searchable}
-    //   style={{borderWidth: 3, minHeight: "90%", marginVertical: "5%", borderRadius: 15}}
-    //   dropDownContainerStyle={{borderWidth: 3}}
-    //   listMode="SCROLLVIEW"
-    // />
   )
 }
