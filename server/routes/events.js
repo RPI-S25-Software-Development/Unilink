@@ -1,8 +1,6 @@
 const express = require('express');
 const crypto = require("crypto");
 const pool = require('../db');
-const { title } = require('process');
-const { type } = require('os');
 const router = express.Router();
 
 // GET all events
@@ -131,14 +129,13 @@ router.post('/', async (req, res) => {
         const organization_id = req.body['organization_id'];
         const max_attendees = parseInt(req.body['max_attendees'],10);
         const expiration_date = new Date(req.body['expiration_date']);
-        const canceled = Boolean(req.body['canceled']);
 
         const query = `insert into unilink.events(event_id, title, event_description, poster_path,
-            event_location, event_time, organization_id, max_attendees, expiration_date, canceled)
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
+            event_location, event_time, organization_id, max_attendees, expiration_date)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
         try {
             const result = await pool.query(query, [event_id, title, event_description, poster_path, event_location, event_time,
-                organization_id, max_attendees, expiration_date, canceled]);
+                organization_id, max_attendees, expiration_date]);
             res.status(201).json(result.rows[0]);
         } catch (error) {
             console.error("Error fetching events:", error);
@@ -163,14 +160,13 @@ router.put('/:eventId', async (req, res) => {
         const organization_id = req.body['organization_id'];
         const max_attendees = parseInt(req.body['max_attendees'],10);
         const expiration_date = new Date(req.body['expiration_date']);
-        const canceled = Boolean(req.body['canceled']==='true');
 
         const query = `update unilink.events set title=$1, event_description=$2, poster_path=$3,
             event_location=$4, event_time=$5, organization_id=$6, max_attendees=$7, expiration_date=$8,
-            canceled=$9 where event_id=$10`;
+            where event_id=$9`;
         try {
             const result = await pool.query(query, [title, event_description, poster_path, event_location, event_time,
-                organization_id, max_attendees, expiration_date, canceled, req.params.eventId]);
+                organization_id, max_attendees, expiration_date, req.params.eventId]);
             res.json(result.rows[0]);
         } catch (error) {
             console.error("Error fetching events:", error);
@@ -185,11 +181,15 @@ router.put('/:eventId', async (req, res) => {
 
 // CANCEL AN EXISTING EVENT
 // MARKS AN EVENT AS CANCELED BUT LEAVES THE EVENT IN THE DB
-router.delete('/:eventId', async (req, res) => {
+// Also marks the corresponding rsvps associated with the event invalid
+router.delete('/eventId/:eventId', async (req, res) => {
+    // cancel event
     const query = `update unilink.events set canceled=$1 where event_id=$2`;
+    const query2 = `update unilink.rsvps set still_valid=$1 where event_id=$2`;
     try {
         const result = await pool.query(query, [true, req.params.eventId]);
-        res.json(result.rows[0]);
+        const result2 = await pool.query(query2, [true, req.params.eventId]);
+        res.json(result2.rows[0]);
     } catch (error) {
         console.error("Error fetching events:", error);
         res.status(500).json({ error: "Internal Server Error" });
