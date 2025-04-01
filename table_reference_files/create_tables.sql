@@ -46,7 +46,8 @@ CREATE TABLE unilink.events (
     event_time TIMESTAMPTZ NOT NULL, 
     organization_id UUID REFERENCES unilink.organizations(organization_id), 
     max_attendees INT NOT NULL,
-    expiration_date TIMESTAMPTZ NOT NULL
+    expiration_date TIMESTAMPTZ NOT NULL,
+    canceled BOOLEAN DEFAULT false
 )
 
 CREATE TABLE unilink.event_tags (

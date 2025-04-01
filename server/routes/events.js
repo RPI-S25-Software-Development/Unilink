@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 
 // GET all events with a specific tag name
 router.get('/tagName/:tagName', async (req, res) => {
-    const query = `select e.event_id, e.title, e.event_description, e.poster_path, e.event_location, e.event_time, e.organization_id, e.max_attendees, e.expiration_date, t.tag_id, t.tag_name
+    const query = `select e.event_id, e.title, e.event_description, e.poster_path, e.event_location, e.event_time, e.organization_id, e.max_attendees, e.expiration_date, e.canceled, t.tag_id, t.tag_name
     from unilink.tags t, unilink.event_tags et, unilink.events e
     where t.tag_id = et.tag_id and e.event_id = et.event_id and t.tag_name = '${req.params.tagName}'`;
     try {
@@ -32,7 +32,7 @@ router.get('/tagName/:tagName', async (req, res) => {
 
 // GET all events with a specific tag id
 router.get('/tagId/:tagId', async (req, res) => {
-    const query = `select e.event_id, e.title, e.event_description, e.poster_path, e.event_location, e.event_time, e.organization_id, e.max_attendees, e.expiration_date, t.tag_id, t.tag_name
+    const query = `select e.event_id, e.title, e.event_description, e.poster_path, e.event_location, e.event_time, e.organization_id, e.max_attendees, e.expiration_date, e.canceled, t.tag_id, t.tag_name
     from unilink.tags t, unilink.event_tags et, unilink.events e
     where t.tag_id = et.tag_id and e.event_id = et.event_id and t.tag_id = '${req.params.tagId}'`;
     try {
@@ -53,7 +53,7 @@ router.get('/eventId/:eventId', async (req, res) => {
     rsvps_count as (select count(event_id) as rsvps_count from unilink.rsvps
         where still_valid = true and event_id = '${req.params.eventId}')
     select e.event_id, e.title, e.event_description, e.poster_path, e.event_location, e.event_time,
-        e.organization_id, e.max_attendees, e.expiration_date, lc.likes_count, rc.rsvps_count
+        e.organization_id, e.max_attendees, e.expiration_date, e.canceled, lc.likes_count, rc.rsvps_count
         from unilink.events e, likes_count lc, rsvps_count rc
         where e.event_id = '${req.params.eventId}'`;
     try {
@@ -79,7 +79,7 @@ router.get('/title/:title', async (req, res) => {
         unilink.events e where still_valid = true and r.event_id = e.event_id and e.title =
         '${req.params.title}' group by r.event_id)
     select e.event_id, e.title, e.event_description, e.poster_path, e.event_location, e.event_time,
-        e.organization_id, e.max_attendees, e.expiration_date, lc.likes_count, rc.rsvps_count
+        e.organization_id, e.max_attendees, e.expiration_date, e.canceled, lc.likes_count, rc.rsvps_count
     from unilink.events e, likes_count lc, rsvps_count rc
     where e.title = '${req.params.title}' and lc.event_id = rc.event_id and e.event_id = lc.event_id`;
     try {
@@ -122,7 +122,6 @@ router.post('/', async (req, res) => {
     // Generate random UUID
     const event_id = crypto.randomUUID();
     // Pull params from request body
-    console.log(req.body);
     try {
         const title = req.body['title'];
         const event_description = req.body['event_description'];
@@ -132,14 +131,14 @@ router.post('/', async (req, res) => {
         const organization_id = req.body['organization_id'];
         const max_attendees = parseInt(req.body['max_attendees'],10);
         const expiration_date = new Date(req.body['expiration_date']);
+        const canceled = Boolean(req.body['canceled']);
 
-        const query = (`insert into unilink.events(event_id, title, event_description, poster_path,
-            event_location, event_time, organization_id, max_attendees, expiration_date)
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8)`,
-            [event_id, title, event_description, poster_path, event_location, event_time,
-            organization_id, max_attendees, expiration_date]);
+        const query = `insert into unilink.events(event_id, title, event_description, poster_path,
+            event_location, event_time, organization_id, max_attendees, expiration_date, canceled)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
         try {
-            const result = await pool.query(query);
+            const result = await pool.query(query, [event_id, title, event_description, poster_path, event_location, event_time,
+                organization_id, max_attendees, expiration_date, canceled]);
             res.status(201).json(result.rows[0]);
         } catch (error) {
             console.error("Error fetching events:", error);
@@ -148,7 +147,52 @@ router.post('/', async (req, res) => {
 
     } catch (error) {
         console.error("Error retrieving params:", error);
-        res.status(401).json({ error: "Request body incorrect/missing parameters" });
+        res.status(417).json({ error: "Request body incorrect/missing expected parameters" });
+    }
+});
+
+// EDIT AN EXISTING EVENT
+router.put('/:eventId', async (req, res) => {
+    // Pull params from request body
+    try {
+        const title = req.body['title'];
+        const event_description = req.body['event_description'];
+        const poster_path = req.body['poster_path'];
+        const event_location = req.body['event_location'];
+        const event_time = new Date(req.body['event_time']);
+        const organization_id = req.body['organization_id'];
+        const max_attendees = parseInt(req.body['max_attendees'],10);
+        const expiration_date = new Date(req.body['expiration_date']);
+        const canceled = Boolean(req.body['canceled']==='true');
+
+        const query = `update unilink.events set title=$1, event_description=$2, poster_path=$3,
+            event_location=$4, event_time=$5, organization_id=$6, max_attendees=$7, expiration_date=$8,
+            canceled=$9 where event_id=$10`;
+        try {
+            const result = await pool.query(query, [title, event_description, poster_path, event_location, event_time,
+                organization_id, max_attendees, expiration_date, canceled, req.params.eventId]);
+            res.json(result.rows[0]);
+        } catch (error) {
+            console.error("Error fetching events:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+
+    } catch (error) {
+        console.error("Error retrieving params:", error);
+        res.status(417).json({ error: "Request body incorrect/missing expected parameters" });
+    }
+});
+
+// CANCEL AN EXISTING EVENT
+// MARKS AN EVENT AS CANCELED BUT LEAVES THE EVENT IN THE DB
+router.delete('/:eventId', async (req, res) => {
+    const query = `update unilink.events set canceled=$1 where event_id=$2`;
+    try {
+        const result = await pool.query(query, [true, req.params.eventId]);
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error("Error fetching events:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
