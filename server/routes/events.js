@@ -122,40 +122,33 @@ router.post('/', async (req, res) => {
     // Generate random UUID
     const event_id = crypto.randomUUID();
     // Pull params from request body
+    console.log(req.body);
     try {
         const title = req.body['title'];
         const event_description = req.body['event_description'];
         const poster_path = req.body['poster_path'];
         const event_location = req.body['event_location'];
-        const event_time = req.body['event_time'];
+        const event_time = new Date(req.body['event_time']);
         const organization_id = req.body['organization_id'];
-        const max_attendees = req.body['max_attendees'];
-        const expiration_date = req.body['expiration_date'];
+        const max_attendees = parseInt(req.body['max_attendees'],10);
+        const expiration_date = new Date(req.body['expiration_date']);
 
-        // Check to ensure param types are correct
-        if (typeof title == "string" && typeof event_description == "string" && typeof poster_path == "string"
-            && typeof event_location == "string" && event_time instanceof Date && typeof organization_id == "string"
-            && typeof max_attendees == "number" && expiration_date instanceof Date) {
-
-                const query = (`insert into unilink.events(event_id, title, event_description, poster_path,
-                    event_location, event_time, organization_id, max_attendees, expiration_date)
-                    VALUES($1, $2, $3, $4, $5, $6, $7, $8)`,
-                    [event_id, title, event_description, poster_path, event_location, event_time,
-                    organization_id, max_attendees, expiration_date]);
-                try {
-                    const result = await pool.query(query);
-                    res.status(201).json(result.rows[0]);
-                } catch (error) {
-                    console.error("Error fetching events:", error);
-                    res.status(500).json({ error: "Internal Server Error" });
-                }
-            } else {
-                res.status(402).json({ error: "Request body contains incorrect data types" });
-            }
+        const query = (`insert into unilink.events(event_id, title, event_description, poster_path,
+            event_location, event_time, organization_id, max_attendees, expiration_date)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8)`,
+            [event_id, title, event_description, poster_path, event_location, event_time,
+            organization_id, max_attendees, expiration_date]);
+        try {
+            const result = await pool.query(query);
+            res.status(201).json(result.rows[0]);
+        } catch (error) {
+            console.error("Error fetching events:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
 
     } catch (error) {
         console.error("Error retrieving params:", error);
-        res.status(401).json({ error: "Request body missing parameters" });
+        res.status(401).json({ error: "Request body incorrect/missing parameters" });
     }
 });
 
