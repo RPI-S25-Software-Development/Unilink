@@ -39,9 +39,9 @@ function exportEventDetailsRow({ iconSource, text }: EventDetailsRow) {
   }
 
   return (
-      <View className="flex flex-row">
+      <View className="flex flex-row items-center">
           {icon}
-          <Text>{text}</Text>
+          <Text className="ml-1">{text}</Text>
       </View>
   );
 };
