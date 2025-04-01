@@ -1,7 +1,7 @@
 import psycopg2
 import uuid
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 
 # Establish a connection to your PostgreSQL database
@@ -16,96 +16,124 @@ conn = psycopg2.connect(
 # Create a cursor to interact with the database
 cur = conn.cursor()
 
-# Function to generate random user preferences
-def generate_random_user_preferences():
-    notification_frequency = random.choice(['daily', 'weekly', 'none'])
-    tags_of_interest = json.dumps([f"interest_tag{random.randint(1, 5)}"])
-    
-    return (notification_frequency, tags_of_interest)
+# Generate Universities
+universities = ["Rensselaer Polytechnic Institute", "Hudson Valley Community College", "Union College"]
+for university in universities:
+    university_id = str(uuid.uuid4())
+    insert_query = """
+        INSERT INTO unilink.universities (university_id, university_name)
+        VALUES (%s, %s);
+    """
+    cur.execute(insert_query, (university_id, university))
+
+# Generate Tags
+tags = ["Club Fair", "Career Fair", "Basketball", "Swim"]
+classifications = ["Club Event", "University Event", "Club Event", "University Event"]
+for i in range(len(tags)):
+    tag_id = str(uuid.uuid4())
+    tag = tags[i]
+    classification = classifications[i]
+    color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
+    insert_query = """
+        INSERT INTO unilink.tags (tag_id, tag_name, classification, color)
+        VALUES (%s, %s, %s, %s);
+    """
+    cur.execute(insert_query, (tag_id, tag, classification, color))
+
+cur.execute("SELECT university_id FROM unilink.universities")
+university_ids = [row[0] for row in cur.fetchall()]
 
 # Function to generate random data for users
 def generate_random_user(i):
     user_id = str(uuid.uuid4())
-    user_type = 'student' if i % 2 == 0 else 'organization'
-    university = f'RPI {i}' if user_type == 'student' else None
-    organization_name = f'Random Organization {i}' if user_type == 'organization' else None
-    preferences = json.dumps({"tags": [f"tag{i}"]})
-    login_type = 'university_sso' if user_type == 'student' else 'custom'
-    notif_freq, tags  = generate_random_user_preferences()
+    user_name = f'student{i}'
+    user_type = 'student'
+    university_id = random.choice(university_ids)
+    login_type = random.choice(('university_sso', 'custom'))
+    rec_frequency = random.choice(('daily', 'weekly', 'none'))
+    notif_freq  = random.choice((True,False))
     created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
-    return (user_id, user_type, university, organization_name, preferences, login_type, notif_freq, tags, created_at)
+    return (user_id, user_name, user_type, university_id, login_type, rec_frequency, notif_freq, created_at)
 
 # Insert 30 Users
 for i in range(1, 31):
     user_data = generate_random_user(i)
     insert_query = """
-        INSERT INTO unilink.users (user_id, user_type, university, organization_name, preferences, login_type, notification_frequency, tags_of_interest, created_at)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+        INSERT INTO unilink.users (user_id, user_name, user_type, university_id, login_type, rec_frequency, notifications, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
     """
     cur.execute(insert_query, user_data)
 
+cur.execute("SELECT tag_id FROM unilink.tags")
+tag_ids = [row[0] for row in cur.fetchall()]
+cur.execute("SELECT user_id FROM unilink.users")
+user_ids = [row[0] for row in cur.fetchall()]
+
+# generate user tags
+for user_id in user_ids:
+    num_tags = random.choice((1,2,3,4))
+    for i in range(num_tags):
+        user_tag_id = str(uuid.uuid4())
+        tag_id = tag_ids[i]
+        insert_query = """
+            INSERT INTO unilink.user_tags (user_tag_id, user_id, tag_id)
+            VALUES (%s, %s, %s);
+        """
+        cur.execute(insert_query, (user_tag_id, user_id, tag_id))
+
+# generate organizations
+for i in range(20):
+    org_id = str(uuid.uuid4())
+    org_name = f'org{i}'
+    org_bio = 'Description, social media links, etc.'
+    org_address = 'Somewhere in the universe (maybe)'
+    university_id = random.choice(university_ids)
+    insert_query = """
+        INSERT INTO unilink.organizations (organization_id, organization_name, organization_bio, organization_address, university_id)
+        VALUES (%s, %s, %s, %s, %s);
+    """
+    cur.execute(insert_query, (org_id, org_name, org_bio, org_address, university_id))
+
+cur.execute("SELECT organization_id FROM unilink.organizations")
+org_ids = [row[0] for row in cur.fetchall()]
+
 # Function to generate random event data
-def generate_random_event(i, user_id):
+def generate_random_event(i, org_id):
     event_id = str(uuid.uuid4())
     title = f"Event {i}"
     description = f"Description of Event {i}"
-    poster = f"https://example.com/poster{i}.jpg"
-    tags = json.dumps([f"tag{i}", f"event_tag{i}"])
+    poster_path = f"./poster{i}.jpg"
     location = f"Location {i}"
     event_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    likes_count = random.randint(0, 100)
-    max_attendees = random.randint(50, 500) if i % 2 == 0 else None
+    max_attendees = random.randint(10, 200)
+    expiration_date = (datetime.now() + timedelta(weeks=1)).strftime('%Y-%m-%d %H:%M:%S')
     
-    return (event_id, title, description, poster, tags, location, event_time, user_id, likes_count, max_attendees)
+    return (event_id, title, description, poster_path, location, event_time, org_id, max_attendees, expiration_date)
 
 # Insert 30 Events
-cur.execute("SELECT user_id FROM unilink.users")
-user_ids = [row[0] for row in cur.fetchall()]
-for i in range(1, len(user_ids)):
-    event_data = generate_random_event(i, user_ids[i-1])
+for i in range(1, len(org_ids)):
+    event_data = generate_random_event(i, org_ids[i-1])
     insert_query = """
-        INSERT INTO unilink.events (event_id, title, description, poster, tags, location, event_time, created_by, likes_count, max_attendees)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+        INSERT INTO unilink.events (event_id, title, event_description, poster_path, event_location, event_time, organization_id, max_attendees, expiration_date)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
     """
     cur.execute(insert_query, event_data)
 
-# Function to generate random trending events data
-def generate_random_trending_event(event_id):
-    trending_score = round(random.uniform(1.0, 10.0), 2)
-    date_ranked = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    
-    return (event_id, trending_score, date_ranked)
-
-# Insert 30 Trending Events
 cur.execute("SELECT event_id FROM unilink.events LIMIT 30")
 event_ids = [row[0] for row in cur.fetchall()]
 
+# generate event tags
 for event_id in event_ids:
-    trending_event_data = generate_random_trending_event(event_id)
-    insert_query = """
-        INSERT INTO unilink.trending_events (event_id, trending_score, date_ranked)
-        VALUES (%s, %s, %s);
-    """
-    cur.execute(insert_query, trending_event_data)
-
-# Function to generate random calendar entries
-def generate_random_calendar(user_id, event_id):
-    calendar_id = str(uuid.uuid4())
-    calendar_view = random.choice(['day', 'week', 'month'])
-    reminders_enabled = random.choice([True, False])
-    
-    return (calendar_id, user_id, event_id, calendar_view, reminders_enabled)
-
-# Insert 30 Calendar Entries
-for user_id in user_ids:
-    event_id = random.choice(event_ids)
-    calendar_data = generate_random_calendar(user_id, event_id)
-    insert_query = """
-        INSERT INTO unilink.calendar (calendar_id, user_id, event_id, calendar_view, reminders_enabled)
-        VALUES (%s, %s, %s, %s, %s);
-    """
-    cur.execute(insert_query, calendar_data)
+    num_tags = random.choice((1,2,3,4))
+    for i in range(num_tags):
+        event_tag_id = str(uuid.uuid4())
+        tag_id = tag_ids[i]
+        insert_query = """
+            INSERT INTO unilink.event_tags (event_tag_id, event_id, tag_id)
+            VALUES (%s, %s, %s);
+        """
+        cur.execute(insert_query, (event_tag_id, event_id, tag_id))
 
 # Function to generate random notifications
 def generate_random_notification(user_id, event_id):
@@ -116,10 +144,10 @@ def generate_random_notification(user_id, event_id):
     
     return (notification_id, user_id, event_id, notification_type, message, sent_at)
 
-# Insert 30 Notifications
-for i in range(len(event_ids)):
-    user_id = user_ids[i]
-    event_id = event_ids[i]
+# Insert 50 Notifications
+for i in range(50):
+    user_id = random.choice(user_ids)
+    event_id = random.choice(event_ids)
     notification_data = generate_random_notification(user_id, event_id)
     insert_query = """
         INSERT INTO unilink.notifications (notification_id, user_id, event_id, notification_type, message, sent_at)
@@ -127,44 +155,29 @@ for i in range(len(event_ids)):
     """
     cur.execute(insert_query, notification_data)
 
-# Function to generate random organization profiles
-def generate_random_organization_profile(organization_id):
-    profile_details = "Description, social media links, etc."
-    past_events = json.dumps(event_ids[:15])
-    upcoming_events = json.dumps(event_ids[15:])
-    
-    return (organization_id, profile_details, past_events, upcoming_events)
-
-# Insert Organization Profiles
-cur.execute("SELECT user_id FROM unilink.users WHERE user_type='organization'")
-organization_ids = [row[0] for row in cur.fetchall()]
-for organization_id in organization_ids:
-    org_profile_data = generate_random_organization_profile(organization_id)
+# Insert 50 likes
+for i in range(50):
+    like_id = str(uuid.uuid4())
+    user_id = random.choice(user_ids)
+    event_id = random.choice(event_ids)
+    still_valid = random.choice((True,True,True,True,False))
     insert_query = """
-        INSERT INTO unilink.organization_profiles (organization_id, profile_details, past_events, upcoming_events)
+        INSERT INTO unilink.likes (like_id, user_id, event_id, still_valid)
         VALUES (%s, %s, %s, %s);
     """
-    cur.execute(insert_query, org_profile_data)
+    cur.execute(insert_query, (like_id, user_id, event_id, still_valid))
 
-# Function to generate random event signups
-def generate_random_event_signup(user_id, event_id):
-    signup_id = str(uuid.uuid4())
-    rsvp_status = random.choice(['interested', 'going', 'not_going'])
-    checked_in = random.choice([True, False])
-    signup_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    preferences = json.dumps({"dietary_restrictions": f"none", "accessibility_needs": f"none"})
-    
-    return (signup_id, user_id, event_id, rsvp_status, checked_in, signup_time, preferences)
-
-# Insert 30 Event Signups
-for user_id in random.sample(user_ids, 30):
+# Insert 50 rsvps
+for i in range(50):
+    rsvp_id = str(uuid.uuid4())
+    user_id = random.choice(user_ids)
     event_id = random.choice(event_ids)
-    signup_data = generate_random_event_signup(user_id, event_id)
+    still_valid = random.choice((True,True,True,True,False))
     insert_query = """
-        INSERT INTO unilink.event_signups (signup_id, user_id, event_id, rsvp_status, checked_in, signup_time, preferences)
-        VALUES (%s, %s, %s, %s, %s, %s, %s);
+        INSERT INTO unilink.rsvps (rsvp_id, user_id, event_id, still_valid)
+        VALUES (%s, %s, %s, %s);
     """
-    cur.execute(insert_query, signup_data)
+    cur.execute(insert_query, (rsvp_id, user_id, event_id, still_valid))
 
 # Commit the transaction
 conn.commit()

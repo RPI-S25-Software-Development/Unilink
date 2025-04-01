@@ -19,7 +19,7 @@ CREATE TABLE unilink.users (
     university_id UUID REFERENCES unilink.universities(university_id) ON DELETE CASCADE, 
     login_type TEXT CHECK (login_type IN ('university_sso', 'custom')), 
     rec_frequency TEXT CHECK (rec_frequency IN ('daily', 'weekly', 'none')), 
-    notications BOOLEAN,
+    notifications BOOLEAN,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 )
 
@@ -46,7 +46,7 @@ CREATE TABLE unilink.events (
     event_time TIMESTAMPTZ NOT NULL, 
     organization_id UUID REFERENCES unilink.organizations(organization_id), 
     max_attendees INT NOT NULL,
-    expirtation_date TIMESTAMPTZ NOT NULL
+    expiration_date TIMESTAMPTZ NOT NULL
 )
 
 CREATE TABLE unilink.event_tags (
