@@ -12,8 +12,8 @@ export default function HomeScreen() {
   const PlaceHolderEvent = <EventBox
     imageSource={PlaceholderImage}
     eventText={{eventTitle: EventTitle, eventDescription: EventDescription, eventDetails: [
-      { iconSource: {evilIconName: "location"}, text: "'87 Gym" },
-      { iconSource: {evilIconName: "clock"}, text: "Oct 27, 12-4" }
+      { key: "location", iconSource: {evilIconName: "location"}, text: "'87 Gym" },
+      { key: "clock", iconSource: {evilIconName: "clock"}, text: "Oct 27, 12-4" }
     ]}}
   />
 

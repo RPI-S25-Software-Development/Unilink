@@ -11,6 +11,7 @@ type IconSource = {
 };
 
 type EventDetailsRow = {
+  key: string;
   iconSource: IconSource;
   text: string;
 };
@@ -79,28 +80,3 @@ export default function EventBox({ imageSource, eventText }: Props) {
     </RoundedBox>
   )
 };
-
-  //   return (
-  //     <RoundedBox width={325} height={500}>
-  //       <ImageViewer imgSource={imageSource} />
-  //       <View className="flex">
-  //         <Text className="m-1">@SSTF</Text>
-  //         <Text className="m-1">Join us for the Litter Bug Battle!</Text>
-  //         <View className="flex flex-col ml-1 mt-1">
-  //           <View className="flex flex-row">
-  //             <EvilIcons name="location" size={26} color="black" />
-  //             <Text className="m-1">'87 Gym</Text>
-  //           </View>
-  //           <View className="flex flex-row">
-  //             <EvilIcons name="clock" size={26} color="black" />
-  //             <Text className="m-1">Oct 27, 12-4</Text>
-  //           </View>
-  //         </View>
-  //       </View>
-  //       <View className="flex flex-row justify-end">
-  //         <SmallButton icon={'heart'}/>
-  //         <SmallButton icon={'star'}/>
-  //       </View>
-  //     </RoundedBox>
-  //   );
-  // }

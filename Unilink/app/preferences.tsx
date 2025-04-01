@@ -8,6 +8,7 @@ import PlusButton from "@/components/PlusButton";
 import Dropdown from "@/components/Dropdown";
 import EventTag from "@/components/EventTag";
 import IconOption from "@/components/IconOption";
+import RoundedBox from "@/components/RoundedBox";
 
 export default function ProfileScreen() {
   const currentYear = new Date().getFullYear();
@@ -29,6 +30,7 @@ export default function ProfileScreen() {
       }}>
         <Text className="font-bold p-6" style={{fontSize: 48}}>Preferences</Text>
       </View>
+      {/* <RoundedBox width="95%" height={250} className="mx-auto my-5"/> */}
       <ScrollView horizontal>
         <View style={{
           flex: 8/10,
