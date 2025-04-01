@@ -22,19 +22,16 @@ export default function Dropdown({dropdownItems, defaultValue}: Props) {
 
   return (
     <View style={{
-      backgroundColor: "white",
-      borderColor: "black",
       borderWidth: 3,
-      width: 150,
-      height: 50,
-      marginVertical: "5%",
-      borderRadius: 15,
-      padding: Platform.OS === "web" ? 15 : 0
+      borderRadius: 32,
+      borderColor: "black",
+      width: 200,
+      padding: (Platform.OS === "web" ? 10 : 0)
     }}>
       <Picker
         selectedValue={selectedItem}
         onValueChange={(itemValue, itemIndex) => setSelectedItem(itemValue)}
-        style={{marginTop: -2}}
+        style={{fontSize: 18, outline: "none"}}
       >
         {pickerItemComponents(dropdownItems)}
       </Picker>

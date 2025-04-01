@@ -9,6 +9,7 @@ import Dropdown from "@/components/Dropdown";
 import EventTag from "@/components/EventTag";
 import IconOption from "@/components/IconOption";
 import RoundedBox from "@/components/RoundedBox";
+import HeaderText from "@/components/HeaderText";
 
 export default function ProfileScreen() {
   const currentYear = new Date().getFullYear();
@@ -23,79 +24,26 @@ export default function ProfileScreen() {
   };
 
   return (
-    <ScrollView stickyHeaderIndices={[0]}>
-      <View className="md-8 bg-white" style={{
-        flex: 1,
-        alignItems: "center"
-      }}>
-        <Text className="font-bold p-6" style={{fontSize: 48}}>Preferences</Text>
+    <ScrollView>
+      <HeaderText fontSize={48} className="m-10">Manage Your Preferences</HeaderText>
+      <HeaderText fontSize={32}>Your Tags of Interest</HeaderText>
+      <RoundedBox width="90%" height="auto" className="mx-auto my-5 flex flex-row flex-wrap justify-center">
+        <EventTag backgroundColor="#FF8F8F" name="Academic"/>
+        <EventTag backgroundColor="#8FC9FF" name="Clubs"/>
+        <EventTag backgroundColor="#FFBC8F" name="Career"/>
+      </RoundedBox>
+      <View className="m-10">
+        <HeaderText fontSize={20} centerText={false} className="pb-5">
+          Choose your Academic Interests:
+        </HeaderText>
+        <Dropdown dropdownItems={[
+          {key: "academic-1", label: "Academic 1"},
+          {key: "academic-2", label: "Academic 2"},
+          {key: "academic-3", label: "Academic 3"},
+          {key: "academic-4", label: "Academic 4"},
+          {key: "academic-5", label: "Academic 5"}
+        ]}/>
       </View>
-      {/* <RoundedBox width="95%" height={250} className="mx-auto my-5"/> */}
-      <ScrollView horizontal>
-        <View style={{
-          flex: 8/10,
-          alignItems: "flex-start",
-          width: "100%",
-          paddingHorizontal: 25
-        }}>
-          <View className="my-2">
-            <Text className="text-2xl font-bold underline">You as a Student</Text>
-            <View className="my-2" style={{alignItems: "flex-start"}}>
-              <Text className="text-xl font-bold">Major(s)</Text>
-              <PlusButton/>
-            </View>
-            <View className="my-2" style={{alignItems: "flex-start"}}>
-              <Text className="text-xl font-bold">Graduation Year</Text>
-              <Dropdown dropdownItems={dropdownYears([currentYear, currentYear + 4], true)}/>
-            </View>
-          </View>
-          <View className="my-2">
-            <View className="my-2" style={{alignItems: "flex-start", width: "90%"}}>
-              <Text className="text-2xl font-bold underline">Your App Preferences</Text>
-              <View className="my-2" style={{alignItems: "flex-start"}}>
-                <Text className="text-xl font-bold">Tags of Interest</Text>
-                <View style={{flexDirection: "row", alignItems: "center", flexWrap: "wrap"}}>
-                  <EventTag backgroundColor="#FF8F8F" name="Academic"/>
-                  <EventTag backgroundColor="#8FC9FF" name="Clubs"/>
-                  <EventTag backgroundColor="#FFBC8F" name="Career"/>
-                  <PlusButton size={20}/>
-                </View>
-              </View>
-            </View>
-            <View className="my-2" style={{alignItems: "flex-start", width: "50%"}}>
-              <Text className="text-xl font-bold">Notification Preferences</Text>
-              <View style={{flexDirection: "row", alignItems: "center"}}>
-                <IconOption iconSource={{featherIconName: "bell-off"}} iconSize={32} iconColor="#656565"
-                optionText="Disabled" optionTextColor="#656565" selected={!notificationsEnabled}
-                selectionColor="#656565" onPress={disableNotifications}/>
-                <IconOption iconSource={{featherIconName: "bell"}} iconSize={32} iconColor="#656565"
-                optionText="Enabled" optionTextColor="#656565" selected={notificationsEnabled}
-                selectionColor="#656565" onPress={enableNotifications}/>
-              </View>
-            </View>
-          </View>
-          <Link href="/home" className="my-2 rounded-lg" style={{backgroundColor: "#B61601", paddingHorizontal: 50,
-          paddingVertical: 20}}>
-            <Text className="text-white text-center text-lg">Continue</Text>
-          </Link>
-        </View>
-      </ScrollView>
     </ScrollView>
   );
-}
-
-function dropdownYears(range: [number, number], backwards = false) {
-  var result: {key: string, label: string}[] = [];
-
-  if(backwards) {
-    for(var i: number = range[1]; i >= range[0]; i--) {
-      result.push({key: String(i), label: String(i)});
-    }
-  } else {
-    for(var i: number = range[0]; i <= range[1]; i++) {
-      result.push({key: String(i), label: String(i)});
-    }
-  }
-
-  return result;
 }
