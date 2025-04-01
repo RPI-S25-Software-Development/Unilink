@@ -27,7 +27,7 @@ export default function ProfileScreen() {
         flex: 1,
         alignItems: "center"
       }}>
-        <Text className="font-bold p-6" style={{fontSize: 48}}>Build Your Profile</Text>
+        <Text className="font-bold p-6" style={{fontSize: 48}}>Preferences</Text>
       </View>
       <ScrollView horizontal>
         <View style={{
@@ -63,10 +63,10 @@ export default function ProfileScreen() {
             <View className="my-2" style={{alignItems: "flex-start", width: "50%"}}>
               <Text className="text-xl font-bold">Notification Preferences</Text>
               <View style={{flexDirection: "row", alignItems: "center"}}>
-                <IconOption iconImageSource={require("@/assets/images/Bell off.png")} iconSize={32}
+                <IconOption iconSource={{featherIconName: "bell-off"}} iconSize={32} iconColor="#656565"
                 optionText="Disabled" optionTextColor="#656565" selected={!notificationsEnabled}
                 selectionColor="#656565" onPress={disableNotifications}/>
-                <IconOption iconImageSource={require("@/assets/images/Bell.png")} iconSize={32}
+                <IconOption iconSource={{featherIconName: "bell"}} iconSize={32} iconColor="#656565"
                 optionText="Enabled" optionTextColor="#656565" selected={notificationsEnabled}
                 selectionColor="#656565" onPress={enableNotifications}/>
               </View>

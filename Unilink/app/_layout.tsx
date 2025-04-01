@@ -30,6 +30,7 @@ export default function RootLayout() {
             titleFontFamily="Inter" titleBold/>
       <Stack screenOptions={{headerShown: false, contentStyle: {backgroundColor: "white"}}}>
         <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
+        <Stack.Screen name="preferences" options={{headerShown: false}}/>
         <Stack.Screen name="+not-found" options={{headerShown: false}}/>
       </Stack>
       <StatusBar/>
