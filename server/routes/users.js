@@ -87,20 +87,13 @@ router.put('/userId/:userId', async (req, res) => {
 
 // DELETE AN EXISTING USER
 router.delete('/userId/:userId', async (req, res) => {
-    // Pull params from request body
+    const query = `delete from unilink.users where user_id=$1`;
     try {
-        const query = `delete from unilink.users where user_id=$1`;
-        try {
-            const result = await pool.query(query, [req.params.userId]);
-            res.json(result.rows[0]);
-        } catch (error) {
-            console.error("Error fetching users:", error);
-            res.status(500).json({ error: "Internal Server Error" });
-        }
-
+        const result = await pool.query(query, [req.params.userId]);
+        res.json(result.rows[0]);
     } catch (error) {
-        console.error("Error retrieving params:", error);
-        res.status(417).json({ error: "Request body incorrect/missing expected parameters" });
+        console.error("Error fetching users:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
