@@ -71,8 +71,10 @@ export default function EventBox({ imageSource, eventText }: Props) {
   
   return (
     <RoundedBox width={boxWidth} height={boxHeight}>
-      <ImageViewer imgSource={imageSource}/>
-      {exportEventDetails(eventText)}
+      <View style={{marginHorizontal: "auto"}}>
+        <ImageViewer imgSource={imageSource}/>
+        {exportEventDetails(eventText)}
+      </View>
       <View className="flex flex-row justify-end">
         <SmallButton icon="heart"/>
         <SmallButton icon="star"/>

@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { View, Platform } from "react-native";
+import { View, Platform, DimensionValue } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
 type Props = {
   dropdownItems: {key: string, label: string}[];
+  width: DimensionValue;
   defaultValue?: string;
 }
 
@@ -17,7 +18,7 @@ function pickerItemComponents(items: {key: string, label: string}[]) {
   return result;
 }
 
-export default function Dropdown({dropdownItems, defaultValue}: Props) {
+export default function Dropdown({dropdownItems, width, defaultValue}: Props) {
   const [selectedItem, setSelectedItem] = useState(defaultValue);
 
   return (
@@ -25,10 +26,11 @@ export default function Dropdown({dropdownItems, defaultValue}: Props) {
       borderWidth: 3,
       borderRadius: 32,
       borderColor: "black",
-      width: 200,
+      width: width,
       padding: (Platform.OS === "web" ? 10 : 0)
     }}>
       <Picker
+        mode="dropdown"
         selectedValue={selectedItem}
         onValueChange={(itemValue, itemIndex) => setSelectedItem(itemValue)}
         style={{fontSize: 18, outline: "none"}}
