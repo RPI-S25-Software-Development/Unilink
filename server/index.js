@@ -1,5 +1,6 @@
 //ROUTES
 const express = require('express');
+const startScheduler = require('./api_scheduler');
 // const cors = require('cors');
 const app = express();
 // app.use(cors);
@@ -29,6 +30,10 @@ app.use('/notications', notificationsRoutes);
 app.use('/university', universityRoutes);
 app.use('/eventTags', eventTagsRoutes);
 app.use('/userTags', userTagsRoutes);
+
+// start the scheduled job to delete expired events in the last 24 hours
+// and create notifications for events starting in the next 24 hours
+// startScheduler();
 
 app.get('/', (req, res) => {
   res.send('Hello, World!');
