@@ -18,7 +18,18 @@ async function scheduledJobs() {
         const result3 = await pool.query(query3, [false, event_id]);
     }
 
-    // TASK 2: 
+    // TASK 2: generate notifications for upcoming events
+    // fetch all event_ids coming up in the next 24 hours
+    const result4 = await pool.query("select event_id from unilink.events where event_time >= NOW() and event_time <= NOW() + INTERVAL '1 day'");
+    for (const row of result4.rows) {
+        const event_id = row['event_id'];
+        // check rsvps to retrieve users signed up for this event
+        const result5 = await pool.query(`select user_id from unilink.rsvps where event_id='${event_id} and still_valid'${true}`);
+        for (const user_id of result5.rows) {
+            // Create and send event notification
+            // Post notification entry to db?
+        }
+    }
 }
 
 // Call API immediately, then every 24 hours (86400000 ms)
