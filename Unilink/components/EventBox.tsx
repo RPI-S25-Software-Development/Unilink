@@ -1,9 +1,10 @@
 import { Text, View, Image } from "react-native";
-import ImageViewer from '@/components/ImageViewer';
+import { EvilIcons } from "@expo/vector-icons";
+
+import ImageViewer from "@/components/ImageViewer";
 import RoundedBox from "@/components/RoundedBox";
 import SmallButton from "@/components/SmallButton";
-
-import { EvilIcons } from '@expo/vector-icons';
+import EventTag from "@/components/EventTag";
 
 type IconSource = {
   evilIconName?: keyof typeof EvilIcons.glyphMap;
@@ -56,6 +57,11 @@ function exportEventDetails({ eventTitle, eventDescription, eventDetails }: Even
 
   return (
       <View className="flex">
+          <View className="flex flex-row flex-wrap">
+            <EventTag backgroundColor="#8FC9FF" name={"Clubs & Organizations"} compact={true}/>
+            <EventTag backgroundColor="#9FEA8E" name={"Volunteering"} compact={true}/>
+            <EventTag backgroundColor="#C98FFF" name={"Social Gatherings"} compact={true}/>
+          </View>
           <Text className="m-1">{eventTitle}</Text>
           <Text className="m-1">{eventDescription}</Text>
           <View className="flex flex-col ml-1 mt-1">
@@ -67,10 +73,9 @@ function exportEventDetails({ eventTitle, eventDescription, eventDetails }: Even
 
 export default function EventBox({ imageSource, eventText }: Props) {
   const boxWidth = 325;
-  const boxHeight = 500;
   
   return (
-    <RoundedBox width={boxWidth} height={boxHeight}>
+    <RoundedBox width={boxWidth} height="auto">
       <View style={{marginHorizontal: "auto"}}>
         <ImageViewer imgSource={imageSource}/>
         {exportEventDetails(eventText)}

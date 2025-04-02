@@ -15,7 +15,6 @@ function getTagsFromDropdownItems(items: string[], tagColor: string) {
   var result = [];
   
     for(var item of items) {
-      // result.push(<EventTag key={item.key} backgroundColor={tagColor} name={item.label}/>)
       result.push(<EventTag key={item} backgroundColor={tagColor} name={item}/>)
     }
 
