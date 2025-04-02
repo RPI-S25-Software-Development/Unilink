@@ -11,10 +11,18 @@ export default function HomeScreen() {
   const EventDescription = "Join us for the Litter Bug Battle!";
   const PlaceHolderEvent = <EventBox
     imageSource={PlaceholderImage}
-    eventText={{eventTitle: EventTitle, eventDescription: EventDescription, eventDetails: [
-      { key: "location", iconSource: {evilIconName: "location"}, text: "'87 Gym" },
-      { key: "clock", iconSource: {evilIconName: "clock"}, text: "Oct 27, 12-4" }
-    ]}}
+    eventText={{
+      tags: [
+        { backgroundColor: "#8FC9FF", name: "Clubs & Organizations" },
+        { backgroundColor: "#9FEA8E", name: "Volunteering" },
+        { backgroundColor: "#C98FFF", name: "Social Gatherings" }
+      ],
+      title: EventTitle, description: EventDescription,
+      details: [
+        { key: "location", iconSource: {evilIconName: "location"}, text: "'87 Gym" },
+        { key: "time", iconSource: {evilIconName: "clock"}, text: "Oct 27, 12-4" }
+      ]
+    }}
   />
 
   return (

@@ -1,9 +1,10 @@
 import { Text, View, Image } from "react-native";
-import ImageViewer from '@/components/ImageViewer';
+import { EvilIcons } from "@expo/vector-icons";
+
+import ImageViewer from "@/components/ImageViewer";
 import RoundedBox from "@/components/RoundedBox";
 import SmallButton from "@/components/SmallButton";
-
-import { EvilIcons } from '@expo/vector-icons';
+import EventTag from "@/components/EventTag";
 
 type IconSource = {
   evilIconName?: keyof typeof EvilIcons.glyphMap;
@@ -16,16 +17,30 @@ type EventDetailsRow = {
   text: string;
 };
 
+type EventTagProps = {
+  backgroundColor: string;
+  textColor?: string;
+  name: string;
+}
+
 type EventTextProps = {
-  eventTitle: string;
-  eventDescription: string;
-  eventDetails: EventDetailsRow[];
+  tags: EventTagProps[];
+  title: string;
+  description: string;
+  details: EventDetailsRow[];
 };
 
 type Props = {
   imageSource: any;
   eventText: EventTextProps;
 };
+
+function exportEventTag({ backgroundColor, textColor = "white", name }: EventTagProps) {
+  return (
+    <EventTag key={name} backgroundColor={backgroundColor} textColor={textColor} name={name}
+    compact={true}/>
+  );
+}
 
 function exportEventDetailsRow({ key, iconSource, text }: EventDetailsRow) {
   const iconSize = 26;
@@ -47,17 +62,24 @@ function exportEventDetailsRow({ key, iconSource, text }: EventDetailsRow) {
   );
 };
 
-function exportEventDetails({ eventTitle, eventDescription, eventDetails }: EventTextProps) {
-  var exportedDetails = [];
+function exportEventText({ tags, title, description, details }: EventTextProps) {
+  var exportedTags = [];
+  for(var tag of tags) {
+    exportedTags.push(exportEventTag(tag));
+  }
 
-  for(var detailRow of eventDetails) {
+  var exportedDetails = [];
+  for(var detailRow of details) {
       exportedDetails.push(exportEventDetailsRow(detailRow));
   }
 
   return (
       <View className="flex">
-          <Text className="m-1">{eventTitle}</Text>
-          <Text className="m-1">{eventDescription}</Text>
+          <View className="flex flex-row flex-wrap">
+            {exportedTags}
+          </View>
+          <Text className="m-1">{title}</Text>
+          <Text className="m-1">{description}</Text>
           <View className="flex flex-col ml-1 mt-1">
               {exportedDetails}
           </View>
@@ -67,13 +89,12 @@ function exportEventDetails({ eventTitle, eventDescription, eventDetails }: Even
 
 export default function EventBox({ imageSource, eventText }: Props) {
   const boxWidth = 325;
-  const boxHeight = 500;
   
   return (
-    <RoundedBox width={boxWidth} height={boxHeight}>
+    <RoundedBox width={boxWidth} height="auto">
       <View style={{marginHorizontal: "auto"}}>
         <ImageViewer imgSource={imageSource}/>
-        {exportEventDetails(eventText)}
+        {exportEventText(eventText)}
       </View>
       <View className="flex flex-row justify-end">
         <SmallButton icon="heart"/>
