@@ -180,15 +180,18 @@ router.put('/eventId/:eventId', async (req, res) => {
 
 // CANCEL AN EXISTING EVENT
 // MARKS AN EVENT AS CANCELED BUT LEAVES THE EVENT IN THE DB
-// Also marks the corresponding rsvps associated with the event invalid
+// Then marks the corresponding rsvps associated with the event invalid
+// Finally marks the notifications associated with the event as inactive
 router.delete('/eventId/:eventId', async (req, res) => {
     // cancel event
     const query = `update unilink.events set canceled=$1 where event_id=$2`;
     const query2 = `update unilink.rsvps set still_valid=$1 where event_id=$2`;
+    const query3 = `update unilink.notifications set active=$1 where event_id=$2`;
     try {
         const result = await pool.query(query, [true, req.params.eventId]);
-        const result2 = await pool.query(query2, [true, req.params.eventId]);
-        res.json(result2.rows[0]);
+        const result2 = await pool.query(query2, [false, req.params.eventId]);
+        const result3 = await pool.query(query3, [false, req.params.eventId]);
+        res.json(result3.rows[0]);
     } catch (error) {
         console.error("Error fetching events:", error);
         res.status(500).json({ error: "Internal Server Error" });

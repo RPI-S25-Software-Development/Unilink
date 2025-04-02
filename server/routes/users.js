@@ -38,12 +38,14 @@ router.post('/', async (req, res) => {
         const rec_frequency = req.body['rec_frequency'];
         const notifications = req.body['notifications']==='true';
         const created_at = new Date(req.body['created_at']);
+        const email = req.body['email'];
+        const password = req.body['password'];
 
         const query = `insert into unilink.users(user_id, user_name, user_type, university_id, login_type,
-            rec_frequency, notifications, created_at) VALUES($1, $2, $3, $4, $5, $6, $7, $8)`;
+            rec_frequency, notifications, created_at, email, password) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
         try {
             const result = await pool.query(query, [user_id, user_name, user_type, university_id,
-                login_type, rec_frequency, notifications, created_at]);
+                login_type, rec_frequency, notifications, created_at, email, password]);
             res.status(201).json(result.rows[0]);
         } catch (error) {
             console.error("Error fetching users:", error);
@@ -67,12 +69,14 @@ router.put('/userId/:userId', async (req, res) => {
         const rec_frequency = req.body['rec_frequency'];
         const notifications = req.body['notifications']==='true';
         const created_at = new Date(req.body['created_at']);
+        const email = req.body['email'];
+        const password = req.body['password'];
 
         const query = `update unilink.users set user_name=$1, user_type=$2, university_id=$3,
-        login_type=$4, rec_frequency=$5, notifications=$6, created_at=$7 where user_id=$8`;
+        login_type=$4, rec_frequency=$5, notifications=$6, created_at=$7, email=$8, password=$9 where user_id=$10`;
         try {
             const result = await pool.query(query, [user_name, user_type, university_id, login_type,
-                rec_frequency, notifications, created_at, req.params.userId]);
+                rec_frequency, notifications, created_at, email, password, req.params.userId]);
             res.json(result.rows[0]);
         } catch (error) {
             console.error("Error fetching users:", error);
@@ -86,11 +90,17 @@ router.put('/userId/:userId', async (req, res) => {
 });
 
 // DELETE AN EXISTING USER
+// Then marks the corresponding rsvps associated with the user invalid
+// Finally marks the notifications associated with the user as inactive
 router.delete('/userId/:userId', async (req, res) => {
     const query = `delete from unilink.users where user_id=$1`;
+    const query2 = `update unilink.rsvps set still_valid=$1 where user_id=$2`;
+    const query3 = `update unilink.notifications set active=$1 where user_id=$2`;
     try {
         const result = await pool.query(query, [req.params.userId]);
-        res.json(result.rows[0]);
+        const result2 = await pool.query(query2, [false, req.params.userId]);
+        const result3 = await pool.query(query3, [false, req.params.userId]);
+        res.json(result3.rows[0]);
     } catch (error) {
         console.error("Error fetching users:", error);
         res.status(500).json({ error: "Internal Server Error" });
