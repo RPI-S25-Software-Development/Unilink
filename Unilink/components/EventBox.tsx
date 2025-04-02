@@ -30,9 +30,15 @@ type EventTextProps = {
   details: EventDetailsRow[];
 };
 
+export type InteractionCounts = {
+  likeCount: number;
+  rsvpCount: number;
+}
+
 type Props = {
   imageSource: any;
   eventText: EventTextProps;
+  interactionCounts: InteractionCounts;
 };
 
 function exportEventTag({ backgroundColor, textColor = "white", name }: EventTagProps) {
@@ -87,7 +93,7 @@ function exportEventText({ tags, title, description, details }: EventTextProps) 
   );
 };
 
-export default function EventBox({ imageSource, eventText }: Props) {
+export default function EventBox({ imageSource, eventText, interactionCounts }: Props) {
   const boxWidth = 325;
   
   return (
@@ -97,8 +103,14 @@ export default function EventBox({ imageSource, eventText }: Props) {
         {exportEventText(eventText)}
       </View>
       <View className="flex flex-row justify-end">
-        <SmallButton icon="heart"/>
-        <SmallButton icon="star"/>
+        <View className="flex flex-col items-center">
+          <SmallButton icon="heart"/>
+          <Text className="text-lg font-bold">{interactionCounts.likeCount}</Text>
+        </View>
+        <View className="flex flex-col items-center">
+          <SmallButton icon="star"/>
+          <Text className="text-lg font-bold">{interactionCounts.rsvpCount}</Text>
+        </View>
       </View>
     </RoundedBox>
   )

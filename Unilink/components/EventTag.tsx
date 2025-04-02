@@ -14,7 +14,7 @@ compact = false}: Props) {
   const marginClasses = compact ? "my-1 mr-1" : "my-2 mr-2"
 
   return <View className={marginClasses}
-  style={{backgroundColor: backgroundColor, borderRadius: 15, borderWidth: 3}}>
+  style={{backgroundColor: backgroundColor, borderRadius: 15, borderWidth: 2, borderColor: "gray"}}>
     <Text className={`${paddingClasses} ${textSizeClass}`} style={{color: textColor}}>{name}</Text>
   </View>
 };
