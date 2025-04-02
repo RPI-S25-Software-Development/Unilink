@@ -15,12 +15,14 @@ const organizationsRoutes = require('./routes/organizations');
 const rsvpsRoutes = require('./routes/rsvps');
 const likesRoutes = require('./routes/likes');
 const tagsRoutes = require('./routes/tags');
+const notificationsRoutes = require('./routes/notifications')
 app.use('/users', userRoutes);
 app.use('/events', eventsRoutes);
 app.use('/organizations', organizationsRoutes);
 app.use('/rsvps', rsvpsRoutes);
 app.use('/likes', likesRoutes);
 app.use('/tags', tagsRoutes);
+app.use('/notications', notificationsRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello, World!');
