@@ -38,7 +38,7 @@ export default function RootLayout() {
             }}>RPI Unilink</Text>
           </Link>
           <Link href="/preferences"
-          style={{borderColor: "white", borderWidth: 2, borderRadius: "100%", paddingHorizontal: 6, paddingVertical: 5,
+          style={{borderColor: "white", borderWidth: 2, borderRadius: 32, paddingHorizontal: 6, paddingVertical: 5,
           //backgroundColor: "rgba(255,255,255,0.5)"
           }}>
             <AntDesign name="user" size={24} color="white"/>

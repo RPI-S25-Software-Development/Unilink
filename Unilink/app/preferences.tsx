@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { useState } from "react";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 import { ScrollView } from "react-native-virtualized-view";
 
 import "@/global.css";
@@ -32,6 +32,8 @@ export default function ProfileScreen() {
   const [sportsItems, setSportsItems] = useState<string[]>([]);
   const [clubItems, setClubItems] = useState<string[]>([]);
   const [careerItems, setCareerItems] = useState<string[]>([]);
+
+  const router = useRouter();
 
   return (
     <ScrollView>
@@ -76,10 +78,8 @@ export default function ProfileScreen() {
           {key: "Career 5"}
         ]} selectedItemsState={{selectedItems: careerItems, setSelectedItems: setCareerItems}}
         noItemsSelectedText="Choose your Career Interests" itemsSelectedText="Career Interests"/>
-        <Link href="/home">
-          <MedButton label="Save" backgroundColor="#B61601" textColor="white"
-          scale={1.5}/>
-        </Link>
+        <MedButton label="Save" backgroundColor="#B61601" textColor="white"
+        scale={1.5} onPress={() => router.navigate("/home")}/>
       </View>
     </ScrollView>
   );
