@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import { useState } from "react";
 import { Link } from "expo-router";
-import { ScrollView } from 'react-native-virtualized-view';
+import { ScrollView } from "react-native-virtualized-view";
 
 import "@/global.css";
 

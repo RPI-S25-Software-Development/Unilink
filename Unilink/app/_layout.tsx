@@ -4,6 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from 'react';
 import { View, Text } from "react-native";
 import { StatusBar } from 'expo-status-bar';
+import { AntDesign } from '@expo/vector-icons';
 
 import Banner from "@/components/Banner";
 
@@ -27,14 +28,22 @@ export default function RootLayout() {
   return (
     <View style={{flex: 1}}>
       <Banner backgroundColor="#DC0000">
-        <Link href="/home" className="w-fit">
-          <Text style={{
-              color: "#FFFFFF",
-              fontSize: 20,
-              fontFamily: "Inter",
-              fontWeight: "bold",
-          }}>RPI Unilink</Text>
-        </Link>
+        <View className="flex flex-row justify-between items-end">
+          <Link href="/home" className="w-fit">
+            <Text style={{
+                color: "#FFFFFF",
+                fontSize: 20,
+                fontFamily: "Inter",
+                fontWeight: "bold",
+            }}>RPI Unilink</Text>
+          </Link>
+          <Link href="/preferences"
+          style={{borderColor: "white", borderWidth: 2, borderRadius: "100%", paddingHorizontal: 6, paddingVertical: 5,
+          //backgroundColor: "rgba(255,255,255,0.5)"
+          }}>
+            <AntDesign name="user" size={24} color="white"/>
+          </Link>
+        </View>
       </Banner>
       <Stack screenOptions={{headerShown: false, contentStyle: {backgroundColor: "white"}}}>
         <Stack.Screen  name="(tabs)" options={{headerShown: false}}/>
