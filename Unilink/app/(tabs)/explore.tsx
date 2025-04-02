@@ -1,4 +1,4 @@
-import { ScrollView, View } from "react-native";
+import { ScrollView, View, TextInput } from "react-native";
 import "@/global.css";
 
 import { PlaceHolderEvent } from "@/app/(tabs)/home";
@@ -11,7 +11,9 @@ export default function ExploreScreen() {
   return (
       <ScrollView className="flex-1">
         <View className="items-center py-4">
-          <RoundedBox width="90%" height={10} className="my-3"/>
+          <RoundedBox width={500} height={10} className="my-3">
+            <TextInput style={{padding: 0}}/>
+          </RoundedBox>
           <View className="my-3">
             <HeaderText fontSize={24}>Explore by Category</HeaderText>
             <ScrollView horizontal style={{maxHeight: 75}}>
