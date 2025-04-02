@@ -63,9 +63,8 @@ router.get('/eventId/:eventId', async (req, res) => {
     }
 });
 
-// GET all events with a specific event id
+// GET all events with a specific title
 // Also returns the number of RSVPs and SAVEs associated with each
-
 // WARNING: IF THERE ARE MULTIPLE EVENTS WITH THE SAME NAME, MULTIPLE RESULTS WILL BE RETURNED
 // EACH WITH THEIR RESPECTIVE LIKES AND RSVPS COUNT
 router.get('/title/:title', async (req, res) => {
@@ -149,7 +148,7 @@ router.post('/', async (req, res) => {
 });
 
 // EDIT AN EXISTING EVENT
-router.put('/:eventId', async (req, res) => {
+router.put('/eventId/:eventId', async (req, res) => {
     // Pull params from request body
     try {
         const title = req.body['title'];

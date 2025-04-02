@@ -9,7 +9,7 @@ router.get('/eventId/:eventId', async (req, res) => {
         const result = await pool.query("select * from unilink.rsvps where event_id=$1", [req.params.eventId]);
         res.json(result.rows);
     } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching rsvps:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
@@ -20,7 +20,7 @@ router.get('/userId/:userId', async (req, res) => {
         const result = await pool.query("select * from unilink.rsvps where user_id=$1", [req.params.userId]);
         res.json(result.rows);
     } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching rsvps:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
                 res.status(201).json(result.rows[0]);
             }
         } catch (error) {
-            console.error("Error fetching events:", error);
+            console.error("Error fetching rsvps:", error);
             res.status(500).json({ error: "Internal Server Error" });
         }
 
@@ -70,7 +70,7 @@ router.delete('/rsvpId/:rsvpId', async (req, res) => {
         const result = await pool.query(query, [false, req.params.rsvpId]);
         res.json(result.rows[0]);
     } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching rsvps:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
