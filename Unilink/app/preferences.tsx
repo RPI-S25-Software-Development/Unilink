@@ -69,7 +69,7 @@ export default function ProfileScreen() {
         itemsSelectedText="Career Interests"/>
         <Link href="/home">
           <MedButton label="Save Your Preferences" backgroundColor="#B61601" textColor="white"
-          scale={1.4}/>
+          scale={1.5} baseFontSize={12}/>
         </Link>
       </View>
     </ScrollView>

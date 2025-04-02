@@ -5,19 +5,20 @@ type Props = {
   backgroundColor?: string;
   textColor?: string;
   scale?: number;
+  baseFontSize?: number;
 };
 
-export default function MedButton({ label, backgroundColor = "white", textColor = "black", scale = 1 }: Props) {
+export default function MedButton({ label, backgroundColor = "white", textColor = "black", scale = 1, baseFontSize = 14 }: Props) {
   const height = 50 * scale;
   const width = 150 * scale;
-  const fontSize = 14 * scale;
+  const fontSize = baseFontSize * scale;
   
   return (
     <View className="items-center">
       <Pressable className="rounded-lg flex items-center justify-center
-      shadow-md shadow-gray m-3 p-2 border-2 border-gray-300"
+      shadow-md shadow-gray m-3 p-3 border-2 border-gray-300"
       style={{backgroundColor: backgroundColor, height: height, width: width}}>
-        <Text style={{color: textColor, fontSize: fontSize}}>{label}</Text>
+        <Text style={{color: textColor, fontSize: fontSize, textAlign: "center"}}>{label}</Text>
       </Pressable>
     </View>
   );
