@@ -1,26 +1,33 @@
 import { useState } from "react";
-import { View, Platform, DimensionValue } from "react-native";
+import { View, DimensionValue } from "react-native";
+import { DropdownItem } from "@/components/Dropdown";
 import MultiSelect from "react-native-multiple-select";
 
-type DropdownItem = {
-  key: string,
-  label: string
-}
-
 type Props = {
-  dropdownItems: DropdownItem[];
+  dropdownItems: {key: string}[];
+  selectedItemsState?: {
+    selectedItems: string[];
+    setSelectedItems: React.Dispatch<React.SetStateAction<string[]>>;
+  };
   width: DimensionValue;
   noItemsSelectedText?: string;
   itemsSelectedText?: string;
   className?: string;
 }
 
-export default function Dropdown({dropdownItems, width, noItemsSelectedText, itemsSelectedText,
-className = ""}: Props) {
-  const [selectedItems, setSelectedItems] = useState<DropdownItem[]>([]);
+export default function DropdownMultiSelect({dropdownItems, selectedItemsState, width, noItemsSelectedText,
+itemsSelectedText, className = ""}: Props) {
+  var selectedItems: string[];
+  var setSelectedItems: React.Dispatch<React.SetStateAction<string[]>>;
+  if(selectedItemsState) {
+    selectedItems = selectedItemsState.selectedItems;
+    setSelectedItems = selectedItemsState.setSelectedItems;
+  } else {
+    [selectedItems, setSelectedItems] = useState<string[]>([]);
+  }
 
-  var onSelectedItemsChange = (selectedItems: DropdownItem[]) => {
-    setSelectedItems(selectedItems);
+  var onSelectedItemsChange = (dropdownSelectedItems: string[]) => {
+    setSelectedItems(dropdownSelectedItems);
   }
 
   return (
@@ -35,7 +42,7 @@ className = ""}: Props) {
     }} className={className}>
       <MultiSelect
         uniqueKey="key"
-        displayKey="label"
+        displayKey="key"
         items={dropdownItems}
         onSelectedItemsChange={onSelectedItemsChange}
         selectedItems={selectedItems}
@@ -50,6 +57,10 @@ className = ""}: Props) {
           (noItemsSelectedText ? noItemsSelectedText: "Select an item")
           : (itemsSelectedText ? itemsSelectedText: "")
         }
+        styleItemsContainer={{backgroundColor: "white", paddingVertical: "5%"}}
+        hideSubmitButton={true}
+        selectedItemTextColor="black"
+        selectedItemIconColor="black"
       />
     </View>
   )

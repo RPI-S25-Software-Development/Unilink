@@ -2,8 +2,13 @@ import { useState } from "react";
 import { View, Platform, DimensionValue } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
+export type DropdownItem = {
+  key: string;
+  label: string;
+}
+
 type Props = {
-  dropdownItems: {key: string, label: string}[];
+  dropdownItems: DropdownItem[];
   width: DimensionValue;
   defaultValue?: string;
 }
