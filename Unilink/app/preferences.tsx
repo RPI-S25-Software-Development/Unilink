@@ -1,101 +1,86 @@
-import { Text, View, ScrollView } from "react-native";
+import { View } from "react-native";
 import { useState } from "react";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
+import { ScrollView } from "react-native-virtualized-view";
 
 import "@/global.css";
 
-import PlusButton from "@/components/PlusButton";
-import Dropdown from "@/components/Dropdown";
+import DropdownMultiSelect from "@/components/DropdownMultiSelect";
 import EventTag from "@/components/EventTag";
-import IconOption from "@/components/IconOption";
 import RoundedBox from "@/components/RoundedBox";
+import HeaderText from "@/components/HeaderText";
+import MedButton from "@/components/MedButton";
 
-export default function ProfileScreen() {
-  const currentYear = new Date().getFullYear();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-
-  const disableNotifications = () => {
-    setNotificationsEnabled(false);
-  };
-
-  const enableNotifications = () => {
-    setNotificationsEnabled(true);
-  };
-
-  return (
-    <ScrollView stickyHeaderIndices={[0]}>
-      <View className="md-8 bg-white" style={{
-        flex: 1,
-        alignItems: "center"
-      }}>
-        <Text className="font-bold p-6" style={{fontSize: 48}}>Preferences</Text>
-      </View>
-      {/* <RoundedBox width="95%" height={250} className="mx-auto my-5"/> */}
-      <ScrollView horizontal>
-        <View style={{
-          flex: 8/10,
-          alignItems: "flex-start",
-          width: "100%",
-          paddingHorizontal: 25
-        }}>
-          <View className="my-2">
-            <Text className="text-2xl font-bold underline">You as a Student</Text>
-            <View className="my-2" style={{alignItems: "flex-start"}}>
-              <Text className="text-xl font-bold">Major(s)</Text>
-              <PlusButton/>
-            </View>
-            <View className="my-2" style={{alignItems: "flex-start"}}>
-              <Text className="text-xl font-bold">Graduation Year</Text>
-              <Dropdown dropdownItems={dropdownYears([currentYear, currentYear + 4], true)}/>
-            </View>
-          </View>
-          <View className="my-2">
-            <View className="my-2" style={{alignItems: "flex-start", width: "90%"}}>
-              <Text className="text-2xl font-bold underline">Your App Preferences</Text>
-              <View className="my-2" style={{alignItems: "flex-start"}}>
-                <Text className="text-xl font-bold">Tags of Interest</Text>
-                <View style={{flexDirection: "row", alignItems: "center", flexWrap: "wrap"}}>
-                  <EventTag backgroundColor="#FF8F8F" name="Academic"/>
-                  <EventTag backgroundColor="#8FC9FF" name="Clubs"/>
-                  <EventTag backgroundColor="#FFBC8F" name="Career"/>
-                  <PlusButton size={20}/>
-                </View>
-              </View>
-            </View>
-            <View className="my-2" style={{alignItems: "flex-start", width: "50%"}}>
-              <Text className="text-xl font-bold">Notification Preferences</Text>
-              <View style={{flexDirection: "row", alignItems: "center"}}>
-                <IconOption iconSource={{featherIconName: "bell-off"}} iconSize={32} iconColor="#656565"
-                optionText="Disabled" optionTextColor="#656565" selected={!notificationsEnabled}
-                selectionColor="#656565" onPress={disableNotifications}/>
-                <IconOption iconSource={{featherIconName: "bell"}} iconSize={32} iconColor="#656565"
-                optionText="Enabled" optionTextColor="#656565" selected={notificationsEnabled}
-                selectionColor="#656565" onPress={enableNotifications}/>
-              </View>
-            </View>
-          </View>
-          <Link href="/home" className="my-2 rounded-lg" style={{backgroundColor: "#B61601", paddingHorizontal: 50,
-          paddingVertical: 20}}>
-            <Text className="text-white text-center text-lg">Continue</Text>
-          </Link>
-        </View>
-      </ScrollView>
-    </ScrollView>
-  );
-}
-
-function dropdownYears(range: [number, number], backwards = false) {
-  var result: {key: string, label: string}[] = [];
-
-  if(backwards) {
-    for(var i: number = range[1]; i >= range[0]; i--) {
-      result.push({key: String(i), label: String(i)});
+function getTagsFromDropdownItems(items: string[], tagColor: string) {
+  var result = [];
+  
+    for(var item of items) {
+      // result.push(<EventTag key={item.key} backgroundColor={tagColor} name={item.label}/>)
+      result.push(<EventTag key={item} backgroundColor={tagColor} name={item}/>)
     }
-  } else {
-    for(var i: number = range[0]; i <= range[1]; i++) {
-      result.push({key: String(i), label: String(i)});
-    }
-  }
 
   return result;
+};
+
+export default function ProfileScreen() {
+  const AcademicTagColor = "#FF8F8F";
+  const SportsTagColor = "#0033cc";
+  const ClubsTagColor = "#8FC9FF";
+  const CareerTagColor = "#FFBC8F";
+
+  const [academicItems, setAcademicItems] = useState<string[]>([]);
+  const [sportsItems, setSportsItems] = useState<string[]>([]);
+  const [clubItems, setClubItems] = useState<string[]>([]);
+  const [careerItems, setCareerItems] = useState<string[]>([]);
+
+  const router = useRouter();
+
+  return (
+    <ScrollView>
+      <HeaderText fontSize={48} className="m-10">Manage Your Preferences</HeaderText>
+      <HeaderText fontSize={32}>Your Tags of Interest</HeaderText>
+      <RoundedBox width="90%" height="auto" className="mx-auto my-5 flex flex-row flex-wrap justify-center">
+        {getTagsFromDropdownItems(academicItems, AcademicTagColor)}
+        {getTagsFromDropdownItems(sportsItems, SportsTagColor)}
+        {getTagsFromDropdownItems(clubItems, ClubsTagColor)}
+        {getTagsFromDropdownItems(careerItems, CareerTagColor)}
+      </RoundedBox>
+      <View className="my-10 flex flex-col gap-10 items-center">
+        <DropdownMultiSelect width={350} dropdownItems={[
+          {key: "Academic 1"},
+          {key: "Academic 2"},
+          {key: "Academic 3"},
+          {key: "Academic 4"},
+          {key: "Academic 5"}
+        ]} selectedItemsState={{selectedItems: academicItems, setSelectedItems: setAcademicItems}}
+        noItemsSelectedText="Choose your Academic Interests" itemsSelectedText="Academic Interests"/>
+        <DropdownMultiSelect width={350} dropdownItems={[
+          {key: "Sports 1"},
+          {key: "Sports 2"},
+          {key: "Sports 3"},
+          {key: "Sports 4"},
+          {key: "Sports 5"}
+        ]} selectedItemsState={{selectedItems: sportsItems, setSelectedItems: setSportsItems}}
+        noItemsSelectedText="Choose your Sports Interests" itemsSelectedText="Sports Interests"/>
+        <DropdownMultiSelect width={350} dropdownItems={[
+          {key: "Club 1"},
+          {key: "Club 2"},
+          {key: "Club 3"},
+          {key: "Club 4"},
+          {key: "Club 5"}
+        ]} selectedItemsState={{selectedItems: clubItems, setSelectedItems: setClubItems}}
+        noItemsSelectedText="Choose your Club Interests" itemsSelectedText="Club Interests"/>
+        <DropdownMultiSelect width={350} dropdownItems={[
+          {key: "Career 1"},
+          {key: "Career 2"},
+          {key: "Career 3"},
+          {key: "Career 4"},
+          {key: "Career 5"}
+        ]} selectedItemsState={{selectedItems: careerItems, setSelectedItems: setCareerItems}}
+        noItemsSelectedText="Choose your Career Interests" itemsSelectedText="Career Interests"/>
+        <MedButton label="Save" backgroundColor="#B61601" textColor="white"
+        scale={1.5} onPress={() => router.navigate("/home")}/>
+      </View>
+    </ScrollView>
+  );
 }

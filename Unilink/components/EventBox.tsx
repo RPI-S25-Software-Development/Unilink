@@ -27,7 +27,7 @@ type Props = {
   eventText: EventTextProps;
 };
 
-function exportEventDetailsRow({ iconSource, text }: EventDetailsRow) {
+function exportEventDetailsRow({ key, iconSource, text }: EventDetailsRow) {
   const iconSize = 26;
   const iconColor = "black";
   
@@ -40,7 +40,7 @@ function exportEventDetailsRow({ iconSource, text }: EventDetailsRow) {
   }
 
   return (
-      <View className="flex flex-row items-center">
+      <View key={key} className="flex flex-row items-center">
           {icon}
           <Text className="ml-1">{text}</Text>
       </View>
@@ -71,8 +71,10 @@ export default function EventBox({ imageSource, eventText }: Props) {
   
   return (
     <RoundedBox width={boxWidth} height={boxHeight}>
-      <ImageViewer imgSource={imageSource}/>
-      {exportEventDetails(eventText)}
+      <View style={{marginHorizontal: "auto"}}>
+        <ImageViewer imgSource={imageSource}/>
+        {exportEventDetails(eventText)}
+      </View>
       <View className="flex flex-row justify-end">
         <SmallButton icon="heart"/>
         <SmallButton icon="star"/>

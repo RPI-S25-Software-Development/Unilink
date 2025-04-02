@@ -2,13 +2,26 @@ import { Text, View, Pressable } from 'react-native';
 
 type Props = {
   label: string;
+  backgroundColor?: string;
+  textColor?: string;
+  scale?: number;
+  baseFontSize?: number;
+  onPress?: () => void;
 };
 
-export default function MedButton({ label }: Props) {
+export default function MedButton({ label, backgroundColor = "white", textColor = "black",
+scale = 1, baseFontSize = 14, onPress }: Props) {
+  const height = 50 * scale;
+  const width = 150 * scale;
+  const fontSize = baseFontSize * scale;
+  
   return (
     <View className="items-center">
-      <Pressable className="h-12 w-[155] bg-white rounded-lg flex items-center justify-center shadow-md shadow-gray m-2 p-2 border-2 border-gray-300">
-        <Text>{label}</Text>
+      <Pressable className="rounded-lg flex items-center justify-center
+      shadow-md shadow-gray m-3 p-3 border-2 border-gray-300"
+      style={{backgroundColor: backgroundColor, height: height, width: width}}
+      onPress={onPress}>
+        <Text style={{color: textColor, fontSize: fontSize, textAlign: "center"}}>{label}</Text>
       </Pressable>
     </View>
   );
