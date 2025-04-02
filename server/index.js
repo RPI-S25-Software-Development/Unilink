@@ -1,14 +1,20 @@
 //ROUTES
+require('dotenv').config();
 const express = require('express');
-const startScheduler = require('./api_scheduler');
-// const cors = require('cors');
+const startScheduler = require('./scheduled_jobs');
+const cors = require('cors');
 const app = express();
-// app.use(cors);
+if (process.env.ENV === 'Prod') {
+    app.use(cors);
+} else {
+    console.log("Dev");
+}
 app.use(express.json());
 app.use(express.urlencoded({
   extended: true
 }));
-const port = 3000;
+const host = process.env.ENV === 'Prod' ? process.env.HOST : 'localhost';
+const port = process.env.API_PORT;
 
 const userRoutes = require('./routes/users');
 const eventsRoutes = require('./routes/events');
@@ -33,12 +39,12 @@ app.use('/userTags', userTagsRoutes);
 
 // start the scheduled job to delete expired events in the last 24 hours
 // and create notifications for events starting in the next 24 hours
-// startScheduler();
+startScheduler();
 
 app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
 
 app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
+  console.log(`Server listening at https://${host}:${port}`);
 });

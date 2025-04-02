@@ -14,6 +14,17 @@ router.get('/', async (req, res) => {
     }
 });
 
+// GET all events which have expired in the last 24 hours
+router.get('/lastDay', async (req, res) => {
+    try {
+        const result = await pool.query("select event_id from unilink.events where expiration_date <= NOW() and expiration_date >= NOW() - INTERVAL '1 day'");
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error fetching events:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 // GET all events with a specific tag name
 router.get('/tagName/:tagName', async (req, res) => {
     const query = `select e.event_id, e.title, e.event_description, e.poster_path, e.event_location, e.event_time, e.organization_id, e.max_attendees, e.expiration_date, e.canceled, t.tag_id, t.tag_name
