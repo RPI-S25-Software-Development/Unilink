@@ -67,6 +67,9 @@ itemsSelectedText, className = ""}: Props) {
         selectedItemTextColor="black"
         selectedItemIconColor="black"
         hideDropdown={true}
+        textInputProps={{
+          autoFocus: false
+        }}
       />
     </View>
   )
