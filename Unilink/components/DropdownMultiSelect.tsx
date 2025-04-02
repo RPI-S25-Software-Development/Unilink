@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { View, DimensionValue } from "react-native";
-import { DropdownItem } from "@/components/Dropdown";
 import MultiSelect from "react-native-multiple-select";
 
 type Props = {
@@ -17,17 +16,22 @@ type Props = {
 
 export default function DropdownMultiSelect({dropdownItems, selectedItemsState, width, noItemsSelectedText,
 itemsSelectedText, className = ""}: Props) {
-  var selectedItems: string[];
-  var setSelectedItems: React.Dispatch<React.SetStateAction<string[]>>;
-  if(selectedItemsState) {
-    selectedItems = selectedItemsState.selectedItems;
-    setSelectedItems = selectedItemsState.setSelectedItems;
-  } else {
-    [selectedItems, setSelectedItems] = useState<string[]>([]);
-  }
+  var componentRef: MultiSelect | null = null;
+
+  const [localSelectedItems, setLocalSelectedItems] = useState<string[]>(selectedItemsState ?
+    selectedItemsState.selectedItems : []);
 
   var onSelectedItemsChange = (dropdownSelectedItems: string[]) => {
-    setSelectedItems(dropdownSelectedItems);
+    setLocalSelectedItems(dropdownSelectedItems);
+    if(!(componentRef?.state as any).selector && selectedItemsState) {
+      selectedItemsState.setSelectedItems(dropdownSelectedItems);
+    }
+  }
+
+  var onToggleList = () => {
+    if((componentRef?.state as any).selector && selectedItemsState) {
+      selectedItemsState.setSelectedItems(localSelectedItems);
+    }
   }
 
   return (
@@ -38,14 +42,16 @@ itemsSelectedText, className = ""}: Props) {
       width: width,
       paddingHorizontal: 15,
       paddingTop: 10,
-      paddingBottom: selectedItems.length == 0 ? 0: 10
+      paddingBottom: localSelectedItems.length == 0 ? 0: 10
     }} className={className}>
       <MultiSelect
+        ref = {(component) => {componentRef = component;}}
         uniqueKey="key"
         displayKey="key"
         items={dropdownItems}
         onSelectedItemsChange={onSelectedItemsChange}
-        selectedItems={selectedItems}
+        onToggleList={onToggleList}
+        selectedItems={localSelectedItems}
         tagRemoveIconColor="lightgray"
         tagTextColor="gray"
         tagBorderColor="gray"
@@ -53,14 +59,14 @@ itemsSelectedText, className = ""}: Props) {
         styleTextDropdown={{fontWeight:"bold"}}
         styleTextDropdownSelected={{fontWeight:"bold"}}
         fontSize={16}
-        selectText={selectedItems.length == 0 ?
+        selectText={localSelectedItems.length == 0 ?
           (noItemsSelectedText ? noItemsSelectedText: "Select an item")
           : (itemsSelectedText ? itemsSelectedText: "")
         }
         styleItemsContainer={{backgroundColor: "white", paddingVertical: "5%"}}
-        hideSubmitButton={true}
         selectedItemTextColor="black"
         selectedItemIconColor="black"
+        hideDropdown={true}
       />
     </View>
   )
