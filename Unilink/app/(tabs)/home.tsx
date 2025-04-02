@@ -23,6 +23,10 @@ export default function HomeScreen() {
         { key: "time", iconSource: {evilIconName: "clock"}, text: "Oct 27, 12-4" }
       ]
     }}
+    interactionCounts={{
+      likeCount: 42,
+      rsvpCount: 28
+    }}
   />
 
   return (
