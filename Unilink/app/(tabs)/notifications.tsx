@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
 import "@/global.css";
 
-export default function MapScreen() {
+export default function NotificaionsScreen() {
   return (
     <View
       style={{
@@ -10,7 +10,7 @@ export default function MapScreen() {
         alignItems: "center",
       }}
     >
-      <Text>Map</Text>
+      <Text>Notifications</Text>
     </View>
   );
 }
