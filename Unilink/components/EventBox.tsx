@@ -94,22 +94,24 @@ function exportEventText({ tags, title, description, details }: EventTextProps) 
 };
 
 export default function EventBox({ imageSource, eventText, interactionCounts }: Props) {
-  const boxWidth = 325;
+  const contentWidth = 300;
   
   return (
-    <RoundedBox width={boxWidth} height="auto">
-      <View style={{marginHorizontal: "auto"}}>
-        <ImageViewer imgSource={imageSource}/>
-        {exportEventText(eventText)}
-      </View>
-      <View className="flex flex-row justify-end">
-        <View className="flex flex-col items-center">
-          <SmallButton icon="heart"/>
-          <Text className="text-lg font-bold">{interactionCounts.likeCount}</Text>
+    <RoundedBox width="auto" height="auto" className="p-3">
+      <View style={{width: contentWidth}}>
+        <View style={{marginHorizontal: "auto"}}>
+          <ImageViewer imgSource={imageSource}/>
+          {exportEventText(eventText)}
         </View>
-        <View className="flex flex-col items-center">
-          <SmallButton icon="star"/>
-          <Text className="text-lg font-bold">{interactionCounts.rsvpCount}</Text>
+        <View className="flex flex-row justify-end">
+          <View className="flex flex-col items-center">
+            <SmallButton icon="heart"/>
+            <Text className="text-lg font-bold">{interactionCounts.likeCount}</Text>
+          </View>
+          <View className="flex flex-col items-center">
+            <SmallButton icon="star"/>
+            <Text className="text-lg font-bold">{interactionCounts.rsvpCount}</Text>
+          </View>
         </View>
       </View>
     </RoundedBox>
