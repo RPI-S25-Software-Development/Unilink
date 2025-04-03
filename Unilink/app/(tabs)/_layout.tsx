@@ -1,8 +1,6 @@
 import { Tabs } from "expo-router";
 import { AntDesign, Entypo, FontAwesome, Feather } from "@expo/vector-icons";
 
-import Banner from "@/components/Banner";
-
 export default function Layout() {
   return (
     <Tabs screenOptions={{

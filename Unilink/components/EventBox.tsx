@@ -11,7 +11,7 @@ type IconSource = {
   imageSource?: any;
 };
 
-type EventDetailsRow = {
+export type EventDetailsItem = {
   key: string;
   iconSource: IconSource;
   text: string;
@@ -27,7 +27,7 @@ type EventTextProps = {
   tags: EventTagProps[];
   title: string;
   description: string;
-  details: EventDetailsRow[];
+  details: EventDetailsItem[];
 };
 
 export type InteractionCounts = {
@@ -48,7 +48,7 @@ function exportEventTag({ backgroundColor, textColor = "white", name }: EventTag
   );
 }
 
-function exportEventDetailsRow({ key, iconSource, text }: EventDetailsRow) {
+function exportEventDetailsRow({ key, iconSource, text }: EventDetailsItem) {
   const iconSize = 26;
   const iconColor = "black";
   
