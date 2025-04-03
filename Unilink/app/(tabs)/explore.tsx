@@ -12,9 +12,9 @@ export default function ExploreScreen() {
   return (
       <ScrollView className="flex-1">
         <View className="items-center py-4">
-          <RoundedBox width={500} height="auto" className="my-3 py-2 px-4 flex flex-row items-center">
-            <FontAwesome name="search" size={24} color="black" className="mr-4"/>
-            <TextInput style={{width: "100%", padding: 0, fontSize: 24, outline: "none"}}/>
+          <RoundedBox width={350} height="auto" className="my-3 py-2 px-4 flex flex-row items-center">
+            <FontAwesome name="search" size={16} color="black" className="mr-4"/>
+            <TextInput style={{width: "100%", padding: 0, fontSize:16, outline: "none"}}/>
           </RoundedBox>
           <View className="my-3">
             <HeaderText fontSize={24}>Explore by Category</HeaderText>
