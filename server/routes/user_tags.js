@@ -6,7 +6,7 @@ const router = express.Router();
 // GET all user tags for a specific user
 router.get('/userId/:userId', async (req, res) => {
     try {
-        const result = await pool.query("select * from unilink.user_tags where user_id=$1", [req.params.userId]);
+        const result = await pool.query("select user_tag_id, user_id, t.tag_id, tag_name, classification, color from unilink.user_tags ut, unilink.tags t where ut.tag_id=t.tag_id and user_id=$1", [req.params.userId]);
         res.json(result.rows);
     } catch (error) {
         console.error("Error fetching user tags:", error);
@@ -17,7 +17,7 @@ router.get('/userId/:userId', async (req, res) => {
 // GET all user tags for a specific tag id
 router.get('/tagId/:tagId', async (req, res) => {
     try {
-        const result = await pool.query("select * from unilink.user_tags where tag_id=$1", [req.params.tagId]);
+        const result = await pool.query("select user_tag_id, user_id, t.tag_id, tag_name, classification, color from unilink.user_tags ut, unilink.tags t where ut.tag_id=t.tag_id tag_id=$1", [req.params.tagId]);
         res.json(result.rows);
     } catch (error) {
         console.error("Error fetching user tags:", error);
