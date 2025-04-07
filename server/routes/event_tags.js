@@ -6,7 +6,7 @@ const router = express.Router();
 // GET all event tags for a specific event
 router.get('/eventId/:eventId', async (req, res) => {
     try {
-        const result = await pool.query("select * from unilink.event_tags where event_id=$1", [req.params.eventId]);
+        const result = await pool.query("select event_tag_id, event_id, t.tag_id, tag_name, classification, color from unilink.event_tags et, unilink.tags t where et.tag_id=t.tag_id and event_id=$1", [req.params.eventId]);
         res.json(result.rows);
     } catch (error) {
         console.error("Error fetching event tags:", error);
@@ -17,7 +17,7 @@ router.get('/eventId/:eventId', async (req, res) => {
 // GET all event tags for a specific tag id
 router.get('/tagId/:tagId', async (req, res) => {
     try {
-        const result = await pool.query("select * from unilink.event_tags where tag_id=$1", [req.params.tagId]);
+        const result = await pool.query("select event_tag_id, event_id, t.tag_id, tag_name, classification, color from unilink.event_tags et, unilink.tags t where et.tag_id=t.tag_id and tag_id=$1", [req.params.tagId]);
         res.json(result.rows);
     } catch (error) {
         console.error("Error fetching event tags:", error);
