@@ -110,9 +110,10 @@ router.post("/login", async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ error: "Invalid email or password" });
         }
+        const user_id = user.user_id; 
+        const access_token = jwt.sign({ id: user_id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        res.status(200).json({ message: "Login successful", access_token, user_id});
 
-        const access_token = jwt.sign({ id: user.user_id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-        res.status(200).json({ message: "Login successful", access_token });
     } catch (error) {
         console.error("Login error:", error);
         res.status(500).json({ error: "Internal Server Error" });

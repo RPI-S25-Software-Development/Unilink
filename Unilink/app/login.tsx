@@ -18,13 +18,16 @@ export default function Login() {
                 email,
                 password
             });
-            const { access_token } = response.data;
+            const { access_token, user_id } = response.data;
             console.log(email)
 
             // Store token in AsyncStorage
             await AsyncStorage.setItem('access_token', access_token);
+            await AsyncStorage.setItem('user_id', user_id);
             const savedToken = await AsyncStorage.getItem("access_token");
+            const userID = await AsyncStorage.getItem("user_id");
             console.log("Saved token:", savedToken);
+            console.log("User id:", userID)
             router.navigate("/home"); // Navigate on successful signup
         } catch (error) {
             console.error("Login error:", error);
