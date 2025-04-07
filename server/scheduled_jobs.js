@@ -13,9 +13,7 @@ async function scheduledJobs() {
         const result = await pool.query(query, [true, event_id]);
         // Set the corresponding rsvps and notifications as invalid/inactive
         const query2 = `update unilink.rsvps set still_valid=$1 where event_id=$2`;
-        const query3 = `update unilink.notifications set active=$1 where event_id=$2`;
         const result2 = await pool.query(query2, [false, event_id]);
-        const result3 = await pool.query(query3, [false, event_id]);
     }
 
     // TASK 2: generate notifications for upcoming events

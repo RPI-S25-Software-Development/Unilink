@@ -90,17 +90,14 @@ router.put('/userId/:userId', async (req, res) => {
 });
 
 // DELETE AN EXISTING USER
-// Then marks the corresponding rsvps associated with the user invalid
-// Finally marks the notifications associated with the user as inactive
+// Then mark the corresponding rsvps associated with the user invalid
 router.delete('/userId/:userId', async (req, res) => {
     const query = `delete from unilink.users where user_id=$1`;
     const query2 = `update unilink.rsvps set still_valid=$1 where user_id=$2`;
-    const query3 = `update unilink.notifications set active=$1 where user_id=$2`;
     try {
         const result = await pool.query(query, [req.params.userId]);
         const result2 = await pool.query(query2, [false, req.params.userId]);
-        const result3 = await pool.query(query3, [false, req.params.userId]);
-        res.json(result3.rows[0]);
+        res.json(result2.rows[0]);
     } catch (error) {
         console.error("Error fetching users:", error);
         res.status(500).json({ error: "Internal Server Error" });
