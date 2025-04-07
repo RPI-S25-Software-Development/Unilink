@@ -5,12 +5,6 @@ const startScheduler = require('./scheduled_jobs');
 const cors = require('cors');
 const app = express();
 
-// if (process.env.ENV === 'Prod') {
-//     app.use(cors);
-// } else {
-//     console.log("Dev");
-// }
-
 app.use(cors({
   origin: 'http://localhost:8081', 
   credentials: true
@@ -56,6 +50,6 @@ app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', async () => {
   console.log(`Server listening at https://${host}:${port}`);
 });
