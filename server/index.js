@@ -5,8 +5,11 @@ const startScheduler = require('./scheduled_jobs');
 const cors = require('cors');
 const app = express();
 
+const host = process.env.ENV === 'Prod' ? process.env.HOST : 'localhost';
+const port = process.env.API_PORT;
+
 app.use(cors({
-  origin: 'http://localhost:8081', 
+  origin: `http://${host}:8081`,
   credentials: true
 }));
 
@@ -14,9 +17,6 @@ app.use(express.json());
 app.use(express.urlencoded({
   extended: true
 }));
-
-const host = process.env.ENV === 'Prod' ? process.env.HOST : 'localhost';
-const port = process.env.API_PORT;
 
 const userRoutes = require('./routes/users');
 const eventsRoutes = require('./routes/events');
