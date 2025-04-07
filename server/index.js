@@ -56,6 +56,6 @@ app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
 
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`Server listening at https://${host}:${port}`);
 });
