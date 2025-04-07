@@ -3,6 +3,17 @@ const crypto = require("crypto");
 const pool = require('../db')
 const router = express.Router();
 
+// GET all user tags
+router.get('/userId/:userId', async (req, res) => {
+    try {
+        const result = await pool.query("select * from unilink.user_tags");
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error fetching user tags:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 // GET all user tags for a specific user
 router.get('/userId/:userId', async (req, res) => {
     try {
