@@ -4,7 +4,7 @@ const pool = require('../db')
 const router = express.Router();
 
 // GET all user tags
-router.get('/userId/:userId', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const result = await pool.query("select * from unilink.user_tags");
         res.json(result.rows);
