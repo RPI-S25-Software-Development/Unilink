@@ -13,11 +13,11 @@ docker push ecarson2021/unilink_backend:latest
 On EC2 console:
 To refresh/start client:
 docker pull ecarson2021/unilink_frontend
-docker run -d -p 8081:8081 ecarson2021/unilink_frontend
+docker run -d --rm -p 8081:8081 -p 19000:19000 -p 19001:19001 -p 19002:19002 -p 19006:19006 ecarson2021/unilink_frontend
 
 To refresh/start server:
 docker pull ecarson2021/unilink_backend
-docker run -d -p 3000:3000 ecarson2021/unilink_backend
+docker run -d --rm -p 3000:3000 ecarson2021/unilink_backend
 
 To start postgresql container:
 docker start postgresql

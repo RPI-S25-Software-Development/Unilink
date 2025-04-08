@@ -7,13 +7,14 @@ import TextField from "@/components/TextField";
 import HeaderText from "@/components/HeaderText";
 
 export default function SignUp() {
+    const host = process.env.ENV === 'Prod' ? process.env.HOST : 'localhost';
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const handleSignup = async () => {
         try {
-            const response = await axios.post("http://localhost:3000/auth/usersignup", {
+            const response = await axios.post(`http://${host}:3000/auth/usersignup`, {
                 email,
                 password
             });
