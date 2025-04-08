@@ -1,6 +1,6 @@
-import { View, ActivityIndicator } from "react-native";
+import { View } from "react-native";
 import { useState, useEffect } from "react";
-import { useRouter } from "expo-router";
+import { useRouter, Redirect } from "expo-router";
 import { ScrollView } from "react-native-virtualized-view";
 
 import "@/global.css";
@@ -22,27 +22,34 @@ type TagsData = Map<string, {
 }>;
 
 type TagDataAPI = {
-  tagId: string;
-  tagName: string;
-  tagCategory: string;
-  tagColor: string;
+  tag_id: string;
+  tag_name: string;
+  classification: string;
+  color: string;
 };
 
-function getTagsWithCategory(category: string, allTagsData: TagsData) {
-  return new Map(
-    [...allTagsData.entries()].filter(([key, item]) => item.category === category)
-  );
+function getTagNames(tagsData?: TagsData, category?: string) {
+  var result = [];
+  
+  if(tagsData) {
+    for(var [tagKey, tagData] of tagsData) {
+      if(!category || (category && tagData.category === category))
+        result.push(tagData.name);
+    }
+  }
+
+  return result;
 };
 
 function tagsAPIDataToMap(tagsAPIData: TagDataAPI[]) {
   var result: TagsData = new Map();
 
   for(var tagAPIData of tagsAPIData) {
-    if(!result.has(tagAPIData.tagId)) {
-      result.set(tagAPIData.tagId, {
-        name: tagAPIData.tagName,
-        category: tagAPIData.tagCategory,
-        color: tagAPIData.tagColor
+    if(!result.has(tagAPIData.tag_id)) {
+      result.set(tagAPIData.tag_id, {
+        name: tagAPIData.tag_name,
+        category: tagAPIData.classification,
+        color: tagAPIData.color
       });
     }
   };
@@ -70,105 +77,102 @@ function dropdownItemsFromKeys(keys: string[]) {
   return result;
 };
 
-function createTagsDropdown(tagCategory: string, allTagsData: TagsData,
-selectedItemsState: DropdownSelectedItemsState) {
+function createTagsDropdown(tagsData: TagsData | undefined, interestsText: string,
+selectedItemsState: DropdownSelectedItemsState, tagCategory?: string) {
   return (
     <DropdownMultiSelect width={350}
     dropdownItems={
-      dropdownItemsFromKeys(Array.from(getTagsWithCategory(tagCategory, allTagsData).keys()))
+      dropdownItemsFromKeys(getTagNames(tagsData, tagCategory))
     }
     selectedItemsState={selectedItemsState}
-    noItemsSelectedText={"Choose your " + tagCategory + " Interests"}
-    itemsSelectedText={tagCategory + " Interests"}/>
+    noItemsSelectedText={"Choose your " + interestsText + " Interests"}
+    itemsSelectedText={interestsText + " Interests"}/>
   );
 }
 
 const getUserID = async () => {
-  return await AsyncStorage.getItem("user_id");
+  const userID = await AsyncStorage.getItem("user_id");
+  console.log("User ID: " + userID);
+  return userID;
 }
 
 const getTags = async() => {
   const response = await axios.get("http://localhost:3000/tags/");
+  console.log(response);
   return response.data;
 };
 
 export default function PreferencesScreen() {
   const router = useRouter();
 
-  const [content, setContent] = useState<JSX.Element>(<LoadingSpinner scale={2} margin="5%"/>);
+  const [userID, setUserID] = useState<string | null>(null);
 
-  getUserID().then((response) => {
-    if(response) {
-      console.log(`User ID: ${response}`);
+  const [allTags, setAllTags] = useState<TagsData>();
 
-      getTags().then((response) => {
+  const [selectedAcademicTags, selectAcademicTags] = useState<string[]>([]);
+  const [selectedSportsTags, selectSportsTags] = useState<string[]>([]);
+  const [selectedClubTags, selectClubTags] = useState<string[]>([]);
+  const [selectedCareerTags, selectCareerTags] = useState<string[]>([]);
 
+  var content: JSX.Element | null = null;
+
+  useEffect(() => {
+    if(!userID) {
+      getUserID().then((response) => {
+        setUserID(response);
       });
-    } else {
-      //router.navigate("/login");
-    }
+    } else if(!allTags) {
+      getTags().then((response) => {
+        setAllTags(tagsAPIDataToMap(response));
+      });
+    };
   });
+
+  if(userID) {
+    if(allTags) {
+      content =
+        <View>
+          <HeaderText fontSize={32}>Your Tags of Interest</HeaderText>
+          <RoundedBox width="90%" height="auto" className="mx-auto my-5 flex flex-row flex-wrap justify-center">
+            {/* {getTagsFromDropdownItems(academicItems, AcademicTagColor)}
+            {getTagsFromDropdownItems(sportsItems, SportsTagColor)}
+            {getTagsFromDropdownItems(clubItems, ClubsTagColor)}
+            {getTagsFromDropdownItems(careerItems, CareerTagColor)} */}
+          </RoundedBox>
+          <View className="my-10 flex flex-col gap-10 items-center">
+            {createTagsDropdown(allTags, "Academic", {
+              selectedItems: selectedAcademicTags,
+              setSelectedItems: selectAcademicTags
+            }, "academics")}
+
+            {createTagsDropdown(allTags, "Sports", {
+              selectedItems: selectedSportsTags,
+              setSelectedItems: selectSportsTags
+            }, "sports")}
+
+            {createTagsDropdown(allTags, "Club", {
+              selectedItems: selectedClubTags,
+              setSelectedItems: selectClubTags
+            }, "clubs")}
+
+            {createTagsDropdown(allTags, "Career", {
+              selectedItems: selectedCareerTags,
+              setSelectedItems: selectCareerTags
+            }, "career")}
+
+            <MedButton label="Save" backgroundColor="#B61601" textColor="white"
+            scale={1.5} onPress={() => router.navigate("/home")}/>
+          </View>
+        </View>;
+    } else {
+      content = <LoadingSpinner scale={2} margin="5%"/>;
+    }
+  } else {
+    return <Redirect href="/login"/>;
+  };
 
   return <ScrollView>
     <HeaderText fontSize={48} className="m-10">Manage Your Preferences</HeaderText>
     {content}
   </ScrollView>;
-
-  // const [userID, setUserID] = useState<string | null>(null);
-
-  // const [allTags, setAllTags] = useState<TagsData>(new Map());
-
-  // const [selectedAcademicTags, selectAcademicTags] = useState<string[]>([]);
-  // const [selectedSportsTags, selectSportsTags] = useState<string[]>([]);
-  // const [selectedClubTags, selectClubTags] = useState<string[]>([]);
-  // const [selectedCareerTags, selectCareerTags] = useState<string[]>([]);
-
-  // useEffect(() => {
-  //   getUserID().then((response) => {
-  //     setUserID(userID);
-  //     console.log(`User ID: ${response}`);
-  //     if(!response) router.navigate("/login");
-  //   })
-
-  //   getTags().then((response) => {
-  //     setAllTags(tagsAPIDataToMap(response));
-  //   });
-  // });
-
-  // return (
-  //   <ScrollView>
-  //     <HeaderText fontSize={48} className="m-10">Manage Your Preferences</HeaderText>
-  //     <HeaderText fontSize={32}>Your Tags of Interest</HeaderText>
-  //     <RoundedBox width="90%" height="auto" className="mx-auto my-5 flex flex-row flex-wrap justify-center">
-  //       {/* {getTagsFromDropdownItems(academicItems, AcademicTagColor)}
-  //       {getTagsFromDropdownItems(sportsItems, SportsTagColor)}
-  //       {getTagsFromDropdownItems(clubItems, ClubsTagColor)}
-  //       {getTagsFromDropdownItems(careerItems, CareerTagColor)} */}
-  //     </RoundedBox>
-  //     <View className="my-10 flex flex-col gap-10 items-center">
-  //       {createTagsDropdown("Academic", allTags, {
-  //         selectedItems: selectedAcademicTags,
-  //         setSelectedItems: selectAcademicTags
-  //       })}
-
-  //       {createTagsDropdown("Sports", allTags, {
-  //         selectedItems: selectedSportsTags,
-  //         setSelectedItems: selectSportsTags
-  //       })}
-
-  //       {createTagsDropdown("Club", allTags, {
-  //         selectedItems: selectedClubTags,
-  //         setSelectedItems: selectClubTags
-  //       })}
-
-  //       {createTagsDropdown("Career", allTags, {
-  //         selectedItems: selectedCareerTags,
-  //         setSelectedItems: selectCareerTags
-  //       })}
-
-  //       <MedButton label="Save" backgroundColor="#B61601" textColor="white"
-  //       scale={1.5} onPress={() => router.navigate("/home")}/>
-  //     </View>
-  //   </ScrollView>
-  // );
 }
