@@ -24,7 +24,6 @@ itemsSelectedText, className = ""}: Props) {
     selectedItemsState.selectedItems : []);
 
   var onSelectedItemsChange = (dropdownSelectedItems: string[]) => {
-
     setLocalSelectedItems(dropdownSelectedItems);
     if(!(componentRef?.state as any).selector && selectedItemsState) {
       selectedItemsState.setSelectedItems(dropdownSelectedItems);

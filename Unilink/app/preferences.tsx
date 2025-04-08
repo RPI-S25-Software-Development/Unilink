@@ -16,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 
 type TagsData = Map<string, {
-  name: string;
+  id: string;
   category: string;
   color: string;
 }>;
@@ -28,13 +28,24 @@ type TagDataAPI = {
   color: string;
 };
 
-function getTagNames(tagsData?: TagsData, category?: string) {
+function getTagIds(tagsData?: TagsData) {
+  var result = [];
+
+  if(tagsData) {
+    for(var [tagName, tagData] of tagsData) {
+      result.push(tagData.id);
+    }
+  }
+
+  return result;
+}
+
+function getTagNamesByCategory(category: string, tagsData?: TagsData) {
   var result = [];
   
   if(tagsData) {
-    for(var [tagKey, tagData] of tagsData) {
-      if(!category || (category && tagData.category === category))
-        result.push(tagData.name);
+    for(var [tagName, tagData] of tagsData) {
+      if(tagData.category === category) result.push(tagName);
     }
   }
 
@@ -46,8 +57,8 @@ function tagsAPIDataToMap(tagsAPIData: TagDataAPI[]) {
 
   for(var tagAPIData of tagsAPIData) {
     if(!result.has(tagAPIData.tag_id)) {
-      result.set(tagAPIData.tag_id, {
-        name: tagAPIData.tag_name,
+      result.set(tagAPIData.tag_name, {
+        id: tagAPIData.tag_id,
         category: tagAPIData.classification,
         color: tagAPIData.color
       });
@@ -57,11 +68,16 @@ function tagsAPIDataToMap(tagsAPIData: TagDataAPI[]) {
   return result;
 };
 
-function createTagComponents(tagsData: TagsData) {
+function createTagComponents(tagNames: string[], tagsData?: TagsData) {
   var result = [];
   
-  for(var [tagId, tagData] of tagsData) {
-    result.push(<EventTag key={tagId} name={tagData.name} backgroundColor={tagData.color}/>)
+  if(tagsData) {
+    for(var tagName of tagNames) {
+      var tagData = tagsData.get(tagName);
+      if(tagData) {
+        result.push(<EventTag key={tagData.id} name={tagName} backgroundColor={tagData.color}/>);
+      }
+    }
   }
 
   return result;
@@ -78,11 +94,11 @@ function dropdownItemsFromKeys(keys: string[]) {
 };
 
 function createTagsDropdown(tagsData: TagsData | undefined, interestsText: string,
-selectedItemsState: DropdownSelectedItemsState, tagCategory?: string) {
+selectedItemsState: DropdownSelectedItemsState) {
   return (
     <DropdownMultiSelect width={350}
     dropdownItems={
-      dropdownItemsFromKeys(getTagNames(tagsData, tagCategory))
+      dropdownItemsFromKeys(tagsData ? Array.from(tagsData?.keys()) : [])
     }
     selectedItemsState={selectedItemsState}
     noItemsSelectedText={"Choose your " + interestsText + " Interests"}
@@ -159,10 +175,10 @@ export default function PreferencesScreen() {
         <View>
           <HeaderText fontSize={32}>Your Tags of Interest</HeaderText>
           <RoundedBox width="90%" height="auto" className="mx-auto my-5 flex flex-row flex-wrap justify-center">
-            {/* {getTagsFromDropdownItems(academicItems, AcademicTagColor)}
-            {getTagsFromDropdownItems(sportsItems, SportsTagColor)}
-            {getTagsFromDropdownItems(clubItems, ClubsTagColor)}
-            {getTagsFromDropdownItems(careerItems, CareerTagColor)} */}
+            {createTagComponents(selectedAcademicTags, academicTags)}
+            {createTagComponents(selectedSportsTags, sportsTags)}
+            {createTagComponents(selectedClubTags, clubTags)}
+            {createTagComponents(selectedCareerTags, careerTags)}
           </RoundedBox>
           <View className="my-10 flex flex-col gap-10 items-center">
             {createTagsDropdown(academicTags, "Academic", {
