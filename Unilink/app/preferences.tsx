@@ -15,11 +15,13 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 
-type TagsData = Map<string, {
+type TagData = {
   id: string;
   category: string;
   color: string;
-}>;
+}
+
+type TagsData = Map<string, TagData>;
 
 type TagDataAPI = {
   tag_id: string;
@@ -28,24 +30,25 @@ type TagDataAPI = {
   color: string;
 };
 
-function getTagIds(tagsData?: TagsData) {
+function getTagsField(tagsData: TagsData | undefined, field: keyof TagData) {
   var result = [];
 
   if(tagsData) {
     for(var [tagName, tagData] of tagsData) {
-      result.push(tagData.id);
+      result.push(tagData[field]);
     }
   }
 
   return result;
 }
 
-function getTagNamesByCategory(category: string, tagsData?: TagsData) {
+function getTagNamesByField(tagsData: TagsData | undefined, field: keyof TagData,
+fieldValue: string) {
   var result = [];
   
   if(tagsData) {
     for(var [tagName, tagData] of tagsData) {
-      if(tagData.category === category) result.push(tagName);
+      if(tagData[field] === fieldValue) result.push(tagName);
     }
   }
 
@@ -68,7 +71,7 @@ function tagsAPIDataToMap(tagsAPIData: TagDataAPI[]) {
   return result;
 };
 
-function createTagComponents(tagNames: string[], tagsData?: TagsData) {
+function createTagComponents(tagNames: string[], tagsData: TagsData | undefined) {
   var result = [];
   
   if(tagsData) {
