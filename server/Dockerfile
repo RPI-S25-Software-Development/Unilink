@@ -6,4 +6,4 @@ COPY package*.json ./
 RUN npm install
 # Now copy the rest of the files
 COPY . .
-CMD ["npm", "run", "start"]
+CMD ["node", "index.js"]
