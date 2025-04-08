@@ -102,12 +102,23 @@ const getTags = async() => {
   return response.data;
 };
 
+const getTagsByCategory = async(category: string) => {
+  const response = await axios.get("http://localhost:3000/tags/classification/" + category);
+  console.log(response);
+  return response.data;
+}
+
 export default function PreferencesScreen() {
   const router = useRouter();
 
   const [userID, setUserID] = useState<string | null>(null);
 
-  const [allTags, setAllTags] = useState<TagsData>();
+  const [allTags, setAllTags] = useState<boolean>(false);
+
+  const [academicTags, setAcademicTags] = useState<TagsData>();
+  const [sportsTags, setSportsTags] = useState<TagsData>();
+  const [clubTags, setClubTags] = useState<TagsData>();
+  const [careerTags, setCareerTags] = useState<TagsData>();
 
   const [selectedAcademicTags, selectAcademicTags] = useState<string[]>([]);
   const [selectedSportsTags, selectSportsTags] = useState<string[]>([]);
@@ -122,10 +133,24 @@ export default function PreferencesScreen() {
         setUserID(response);
       });
     } else if(!allTags) {
-      getTags().then((response) => {
-        setAllTags(tagsAPIDataToMap(response));
-      });
-    };
+      getTagsByCategory("academics").then((response) => {
+        setAcademicTags(tagsAPIDataToMap(response));
+      })
+
+      getTagsByCategory("sports").then((response) => {
+        setSportsTags(tagsAPIDataToMap(response));
+      })
+
+      getTagsByCategory("clubs").then((response) => {
+        setClubTags(tagsAPIDataToMap(response));
+      })
+
+      getTagsByCategory("career").then((response) => {
+        setCareerTags(tagsAPIDataToMap(response));
+      })
+
+      setAllTags(true);
+    }
   });
 
   if(userID) {
@@ -140,25 +165,25 @@ export default function PreferencesScreen() {
             {getTagsFromDropdownItems(careerItems, CareerTagColor)} */}
           </RoundedBox>
           <View className="my-10 flex flex-col gap-10 items-center">
-            {createTagsDropdown(allTags, "Academic", {
+            {createTagsDropdown(academicTags, "Academic", {
               selectedItems: selectedAcademicTags,
               setSelectedItems: selectAcademicTags
-            }, "academics")}
+            })}
 
-            {createTagsDropdown(allTags, "Sports", {
+            {createTagsDropdown(sportsTags, "Sports", {
               selectedItems: selectedSportsTags,
               setSelectedItems: selectSportsTags
-            }, "sports")}
+            })}
 
-            {createTagsDropdown(allTags, "Club", {
+            {createTagsDropdown(clubTags, "Club", {
               selectedItems: selectedClubTags,
               setSelectedItems: selectClubTags
-            }, "clubs")}
+            })}
 
-            {createTagsDropdown(allTags, "Career", {
+            {createTagsDropdown(careerTags, "Career", {
               selectedItems: selectedCareerTags,
               setSelectedItems: selectCareerTags
-            }, "career")}
+            })}
 
             <MedButton label="Save" backgroundColor="#B61601" textColor="white"
             scale={1.5} onPress={() => router.navigate("/home")}/>
