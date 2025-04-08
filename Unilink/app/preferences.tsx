@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { ScrollView } from "react-native-virtualized-view";
@@ -10,6 +10,7 @@ import EventTag from "@/components/EventTag";
 import RoundedBox from "@/components/RoundedBox";
 import HeaderText from "@/components/HeaderText";
 import MedButton from "@/components/MedButton";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
@@ -33,16 +34,20 @@ function getTagsWithCategory(category: string, allTagsData: TagsData) {
   );
 };
 
-function addTagAPIDataToTagsData(tagsAPIData: TagDataAPI[], allTagsData: TagsData) {
+function tagsAPIDataToMap(tagsAPIData: TagDataAPI[]) {
+  var result: TagsData = new Map();
+
   for(var tagAPIData of tagsAPIData) {
-    if(!allTagsData.has(tagAPIData.tagId)) {
-      allTagsData.set(tagAPIData.tagId, {
+    if(!result.has(tagAPIData.tagId)) {
+      result.set(tagAPIData.tagId, {
         name: tagAPIData.tagName,
         category: tagAPIData.tagCategory,
         color: tagAPIData.tagColor
       });
     }
   };
+
+  return result;
 };
 
 function createTagComponents(tagsData: TagsData) {
@@ -88,63 +93,82 @@ const getTags = async() => {
 };
 
 export default function PreferencesScreen() {
-  const [userID, setUserID] = useState<string | null>(null);
-
-  var allTags: TagsData = new Map();
-
-  const [selectedAcademicTags, selectAcademicTags] = useState<string[]>([]);
-  const [selectedSportsTags, selectSportsTags] = useState<string[]>([]);
-  const [selectedClubTags, selectClubTags] = useState<string[]>([]);
-  const [selectedCareerTags, selectCareerTags] = useState<string[]>([]);
-
-  useEffect(() => {
-    getUserID().then((response) => {
-      setUserID(userID);
-      console.log(`User ID: ${response}`);
-      if(!response) router.navigate("/login");
-    })
-  });
-
-  // getTags().then(result => {
-  //   addTagAPIDataToTagsData(result, allTags);
-  // });
-
   const router = useRouter();
 
-  return (
-    <ScrollView>
-      <HeaderText fontSize={48} className="m-10">Manage Your Preferences</HeaderText>
-      <HeaderText fontSize={32}>Your Tags of Interest</HeaderText>
-      <RoundedBox width="90%" height="auto" className="mx-auto my-5 flex flex-row flex-wrap justify-center">
-        {/* {getTagsFromDropdownItems(academicItems, AcademicTagColor)}
-        {getTagsFromDropdownItems(sportsItems, SportsTagColor)}
-        {getTagsFromDropdownItems(clubItems, ClubsTagColor)}
-        {getTagsFromDropdownItems(careerItems, CareerTagColor)} */}
-      </RoundedBox>
-      <View className="my-10 flex flex-col gap-10 items-center">
-        {createTagsDropdown("Academic", allTags, {
-          selectedItems: selectedAcademicTags,
-          setSelectedItems: selectAcademicTags
-        })}
+  const [content, setContent] = useState<JSX.Element>(<LoadingSpinner scale={2} margin="5%"/>);
 
-        {createTagsDropdown("Sports", allTags, {
-          selectedItems: selectedSportsTags,
-          setSelectedItems: selectSportsTags
-        })}
+  getUserID().then((response) => {
+    if(response) {
+      console.log(`User ID: ${response}`);
 
-        {createTagsDropdown("Club", allTags, {
-          selectedItems: selectedClubTags,
-          setSelectedItems: selectClubTags
-        })}
+      getTags().then((response) => {
 
-        {createTagsDropdown("Career", allTags, {
-          selectedItems: selectedCareerTags,
-          setSelectedItems: selectCareerTags
-        })}
+      });
+    } else {
+      //router.navigate("/login");
+    }
+  });
 
-        <MedButton label="Save" backgroundColor="#B61601" textColor="white"
-        scale={1.5} onPress={() => router.navigate("/home")}/>
-      </View>
-    </ScrollView>
-  );
+  return <ScrollView>
+    <HeaderText fontSize={48} className="m-10">Manage Your Preferences</HeaderText>
+    {content}
+  </ScrollView>;
+
+  // const [userID, setUserID] = useState<string | null>(null);
+
+  // const [allTags, setAllTags] = useState<TagsData>(new Map());
+
+  // const [selectedAcademicTags, selectAcademicTags] = useState<string[]>([]);
+  // const [selectedSportsTags, selectSportsTags] = useState<string[]>([]);
+  // const [selectedClubTags, selectClubTags] = useState<string[]>([]);
+  // const [selectedCareerTags, selectCareerTags] = useState<string[]>([]);
+
+  // useEffect(() => {
+  //   getUserID().then((response) => {
+  //     setUserID(userID);
+  //     console.log(`User ID: ${response}`);
+  //     if(!response) router.navigate("/login");
+  //   })
+
+  //   getTags().then((response) => {
+  //     setAllTags(tagsAPIDataToMap(response));
+  //   });
+  // });
+
+  // return (
+  //   <ScrollView>
+  //     <HeaderText fontSize={48} className="m-10">Manage Your Preferences</HeaderText>
+  //     <HeaderText fontSize={32}>Your Tags of Interest</HeaderText>
+  //     <RoundedBox width="90%" height="auto" className="mx-auto my-5 flex flex-row flex-wrap justify-center">
+  //       {/* {getTagsFromDropdownItems(academicItems, AcademicTagColor)}
+  //       {getTagsFromDropdownItems(sportsItems, SportsTagColor)}
+  //       {getTagsFromDropdownItems(clubItems, ClubsTagColor)}
+  //       {getTagsFromDropdownItems(careerItems, CareerTagColor)} */}
+  //     </RoundedBox>
+  //     <View className="my-10 flex flex-col gap-10 items-center">
+  //       {createTagsDropdown("Academic", allTags, {
+  //         selectedItems: selectedAcademicTags,
+  //         setSelectedItems: selectAcademicTags
+  //       })}
+
+  //       {createTagsDropdown("Sports", allTags, {
+  //         selectedItems: selectedSportsTags,
+  //         setSelectedItems: selectSportsTags
+  //       })}
+
+  //       {createTagsDropdown("Club", allTags, {
+  //         selectedItems: selectedClubTags,
+  //         setSelectedItems: selectClubTags
+  //       })}
+
+  //       {createTagsDropdown("Career", allTags, {
+  //         selectedItems: selectedCareerTags,
+  //         setSelectedItems: selectCareerTags
+  //       })}
+
+  //       <MedButton label="Save" backgroundColor="#B61601" textColor="white"
+  //       scale={1.5} onPress={() => router.navigate("/home")}/>
+  //     </View>
+  //   </ScrollView>
+  // );
 }
