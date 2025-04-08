@@ -5,6 +5,7 @@ const startScheduler = require('./scheduled_jobs');
 const cors = require('cors');
 const app = express();
 
+console.log(process.env.ENV);
 const host = process.env.ENV === 'Prod' ? process.env.HOST : 'localhost';
 const port = process.env.API_PORT;
 

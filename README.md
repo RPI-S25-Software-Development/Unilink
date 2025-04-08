@@ -3,13 +3,11 @@ Docker command to create the PSQL container: docker run --name postgresql -e POS
 
 On local PC:
 Client container:
-docker build -t unilink_frontend .
-docker tag unilink_frontend ecarson2021/unilink_frontend:latest
+docker build -t ecarson2021/unilink_frontend .
 docker push ecarson2021/unilink_frontend:latest
 
 Server container:
-docker build -t unilink_backend .
-docker tag unilink_backend ecarson2021/unilink_backend:latest
+docker build -t ecarson2021/unilink_backend .
 docker push ecarson2021/unilink_backend:latest
 
 On EC2 console:
