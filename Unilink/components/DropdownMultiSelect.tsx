@@ -2,12 +2,14 @@ import { useState } from "react";
 import { View, DimensionValue } from "react-native";
 import MultiSelect from "react-native-multiple-select";
 
+export type DropdownSelectedItemsState = {
+  selectedItems: string[];
+  setSelectedItems: React.Dispatch<React.SetStateAction<string[]>>;
+};
+
 type Props = {
   dropdownItems: {key: string}[];
-  selectedItemsState?: {
-    selectedItems: string[];
-    setSelectedItems: React.Dispatch<React.SetStateAction<string[]>>;
-  };
+  selectedItemsState?: DropdownSelectedItemsState;
   width: DimensionValue;
   noItemsSelectedText?: string;
   itemsSelectedText?: string;
@@ -22,6 +24,7 @@ itemsSelectedText, className = ""}: Props) {
     selectedItemsState.selectedItems : []);
 
   var onSelectedItemsChange = (dropdownSelectedItems: string[]) => {
+
     setLocalSelectedItems(dropdownSelectedItems);
     if(!(componentRef?.state as any).selector && selectedItemsState) {
       selectedItemsState.setSelectedItems(dropdownSelectedItems);
