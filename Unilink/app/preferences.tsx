@@ -1,5 +1,5 @@
 import { View } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { ScrollView } from "react-native-virtualized-view";
 
@@ -88,7 +88,7 @@ const getTags = async() => {
 };
 
 export default function PreferencesScreen() {
-  var userID: string | null = null;
+  const [userID, setUserID] = useState<string | null>(null);
 
   var allTags: TagsData = new Map();
 
@@ -97,11 +97,13 @@ export default function PreferencesScreen() {
   const [selectedClubTags, selectClubTags] = useState<string[]>([]);
   const [selectedCareerTags, selectCareerTags] = useState<string[]>([]);
 
-  // getUserID().then(result => {
-  //   userID = result;
-  // });
-
-  // console.log(userID);
+  useEffect(() => {
+    getUserID().then((response) => {
+      setUserID(userID);
+      console.log(`User ID: ${response}`);
+      if(!response) router.navigate("/login");
+    })
+  });
 
   // getTags().then(result => {
   //   addTagAPIDataToTagsData(result, allTags);
