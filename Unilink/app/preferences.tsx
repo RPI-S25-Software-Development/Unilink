@@ -30,7 +30,7 @@ type TagDataAPI = {
   color: string;
 };
 
-function getTagsField(tagsData: TagsData | undefined, field: keyof TagData) {
+function getTagsField(tagsData: TagsData, field: keyof TagData) {
   var result = [];
 
   if(tagsData) {
@@ -42,8 +42,7 @@ function getTagsField(tagsData: TagsData | undefined, field: keyof TagData) {
   return result;
 }
 
-function getTagNamesByField(tagsData: TagsData | undefined, field: keyof TagData,
-fieldValue: string) {
+function getTagNamesByField(tagsData: TagsData, field: keyof TagData, fieldValue: string) {
   var result = [];
   
   if(tagsData) {
@@ -71,7 +70,7 @@ function tagsAPIDataToMap(tagsAPIData: TagDataAPI[]) {
   return result;
 };
 
-function createTagComponents(tagNames: string[], tagsData: TagsData | undefined) {
+function createTagComponents(tagNames: string[], tagsData: TagsData) {
   var result = [];
   
   if(tagsData) {
@@ -96,7 +95,7 @@ function dropdownItemsFromKeys(keys: string[]) {
   return result;
 };
 
-function createTagsDropdown(tagsData: TagsData | undefined, interestsText: string,
+function createTagsDropdown(tagsData: TagsData, interestsText: string,
 selectedItemsState: DropdownSelectedItemsState) {
   return (
     <DropdownMultiSelect width={350}
@@ -134,10 +133,10 @@ export default function PreferencesScreen() {
 
   const [allTags, setAllTags] = useState<boolean>(false);
 
-  const [academicTags, setAcademicTags] = useState<TagsData>();
-  const [sportsTags, setSportsTags] = useState<TagsData>();
-  const [clubTags, setClubTags] = useState<TagsData>();
-  const [careerTags, setCareerTags] = useState<TagsData>();
+  const [academicTags, setAcademicTags] = useState<TagsData>(new Map());
+  const [sportsTags, setSportsTags] = useState<TagsData>(new Map());
+  const [clubTags, setClubTags] = useState<TagsData>(new Map());
+  const [careerTags, setCareerTags] = useState<TagsData>(new Map());
 
   const [selectedAcademicTags, selectAcademicTags] = useState<string[]>([]);
   const [selectedSportsTags, selectSportsTags] = useState<string[]>([]);
