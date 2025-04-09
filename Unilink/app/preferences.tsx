@@ -1,6 +1,6 @@
-import { View } from "react-native";
+import { View, Alert } from "react-native";
 import { useState, useEffect } from "react";
-import { useRouter, Redirect } from "expo-router";
+import { useRouter, Router, Redirect } from "expo-router";
 import { ScrollView } from "react-native-virtualized-view";
 
 import "@/global.css";
@@ -137,7 +137,7 @@ selectedItemsState: DropdownSelectedItemsState) {
   );
 }
 
-const getUserID = async () => {
+async function getUserId(){
   try {
     const userID = await AsyncStorage.getItem("user_id");
     console.log("User ID: " + userID);
@@ -147,7 +147,7 @@ const getUserID = async () => {
   }
 };
 
-const getTags = async() => {
+async function getTags(){
   try {
     const response = await axios.get("http://localhost:3000/tags/");
     console.log(response);
@@ -157,7 +157,7 @@ const getTags = async() => {
   }
 };
 
-const getTagsByCategory = async(category: string) => {
+async function getTagsByCategory (category: string) {
   try {
     const response = await axios.get("http://localhost:3000/tags/classification/" + category);
     console.log(response);
@@ -167,7 +167,7 @@ const getTagsByCategory = async(category: string) => {
   }
 };
 
-const getUserTags = async(userId: string) => {
+async function getUserTags(userId: string) {
   try {
     const response = await axios.get("http://localhost:3000/userTags/userId/" + userId);
     console.log(response);
@@ -177,10 +177,10 @@ const getUserTags = async(userId: string) => {
   }
 };
 
-const getUserTagsByCategory = async(userId: string, category: string) => {
+async function getUserTagsByCategory(userId: string, category: string) {
   try {
     const response = await axios.get("http://localhost:3000/userTags/userId/" + userId
-    + "/classification/" + category, {});
+    + "/classification/" + category);
 
     console.log(response);
     return response.data;
@@ -209,6 +209,31 @@ selectCategoryTags: React.Dispatch<React.SetStateAction<string[] | undefined>>) 
   });
 }
 
+async function postUserTags(userId: string, allTagsData: {selected: string[], all: TagsData}[],
+router: Router) {
+  var tagIdsCombined: string[] = [];
+
+  for(var tagsData of allTagsData) {
+    var tagIds = getTagsField(getTagsDataByNames(tagsData.selected, tagsData.all), "id");
+    tagIdsCombined = tagIdsCombined.concat(tagIds);
+  }
+
+  try {
+    const response = await axios.post("http://localhost:3000/userTags/bulk", {
+      user_id: userId,
+      tag_ids: tagIdsCombined
+    });
+
+    console.log(response);
+    router.navigate("/home");
+
+    return;
+  } catch (error) {
+    console.error("Error posting user tags:", error);
+    Alert.alert("Save Failed", "Could not save your preferences.");
+  }
+};
+
 export default function PreferencesScreen() {
   const router = useRouter();
 
@@ -227,7 +252,7 @@ export default function PreferencesScreen() {
   var content: JSX.Element | null = null;
 
   useEffect(() => {
-    getUserID().then((userIdResponse) => {
+    getUserId().then((userIdResponse) => {
       if(userIdResponse) {
         setUserId(userIdResponse);
 
@@ -279,7 +304,12 @@ export default function PreferencesScreen() {
             })}
 
             <MedButton label="Save" backgroundColor="#B61601" textColor="white"
-            scale={1.5} onPress={() => router.navigate("/home")}/>
+            scale={1.5} onPress={() => postUserTags(userId,
+            [{selected: selectedAcademicTags, all: academicTags},
+            {selected: selectedSportsTags, all: sportsTags},
+            {selected: selectedClubTags, all: clubTags},
+            {selected: selectedCareerTags, all: careerTags}],
+            router)}/>
           </View>
         </View>;
     } else {
