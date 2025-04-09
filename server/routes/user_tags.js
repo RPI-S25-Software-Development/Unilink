@@ -87,6 +87,9 @@ router.put('/userId/:userId', async (req, res) => {
     const existing = [];
 
     try {
+        const deleteQuery = `DELETE FROM unilink.user_tags WHERE user_id = $1`
+        const deleteResponse = await pool.query(deleteQuery, [req.params.userId]);
+
         for (const tag_id of tag_ids) {
             const checkQuery = `SELECT * FROM unilink.user_tags WHERE tag_id = $1 AND user_id = $2`;
             const checkRes = await pool.query(checkQuery, [tag_id, req.params.userId]);
@@ -102,12 +105,12 @@ router.put('/userId/:userId', async (req, res) => {
         }
 
         res.status(201).json({
-            message: "Bulk user_tags processed",
+            message: "User tags for user processed",
             created,
             existing
         });
     } catch (error) {
-        console.error("Error creating user tags in bulk:", error);
+        console.error("Error updating user's user tags:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
