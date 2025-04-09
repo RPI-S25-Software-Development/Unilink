@@ -219,8 +219,7 @@ router: Router) {
   }
 
   try {
-    const response = await axios.put("http://localhost:3000/userTags/bulk", {
-      user_id: userId,
+    const response = await axios.put("http://localhost:3000/userTags/userId/" + userId, {
       tag_ids: tagIdsCombined
     });
 

@@ -75,12 +75,12 @@ router.post('/', async (req, res) => {
     }
 });
 
-// BULK CREATE user_tags
-router.put('/bulk', async (req, res) => {
-    const { user_id, tag_ids } = req.body;
+// UPDATE user_tags for a specific user id
+router.put('/userId/:userId', async (req, res) => {
+    const { tag_ids } = req.body;
 
-    if (!user_id || !Array.isArray(tag_ids)) {
-        return res.status(400).json({ error: "Request body must include 'user_id' and 'tag_ids' (array)" });
+    if (!Array.isArray(tag_ids)) {
+        return res.status(400).json({ error: "Request body must include 'tag_ids' (array)" });
     }
 
     const created = [];
@@ -89,12 +89,12 @@ router.put('/bulk', async (req, res) => {
     try {
         for (const tag_id of tag_ids) {
             const checkQuery = `SELECT * FROM unilink.user_tags WHERE tag_id = $1 AND user_id = $2`;
-            const checkRes = await pool.query(checkQuery, [tag_id, user_id]);
+            const checkRes = await pool.query(checkQuery, [tag_id, req.params.userId]);
 
             if (checkRes.rows.length === 0) {
                 const user_tag_id = crypto.randomUUID();
                 const insertQuery = `INSERT INTO unilink.user_tags(user_tag_id, user_id, tag_id) VALUES ($1, $2, $3)`;
-                await pool.query(insertQuery, [user_tag_id, user_id, tag_id]);
+                await pool.query(insertQuery, [user_tag_id, req.params.userId, tag_id]);
                 created.push(tag_id);
             } else {
                 existing.push(tag_id);
