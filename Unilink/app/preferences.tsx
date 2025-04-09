@@ -167,9 +167,9 @@ const getTagsByCategory = async(category: string) => {
   }
 };
 
-const getUserTags = async(userID: string) => {
+const getUserTags = async(userId: string) => {
   try {
-    const response = await axios.get("http://localhost:3000/userTags/userId/" + userID);
+    const response = await axios.get("http://localhost:3000/userTags/userId/" + userId);
     console.log(response);
     return response.data;
   } catch (error) {
@@ -177,9 +177,9 @@ const getUserTags = async(userID: string) => {
   }
 };
 
-const getUserTagsByCategory = async(userID: string, category: string) => {
+const getUserTagsByCategory = async(userId: string, category: string) => {
   try {
-    const response = await axios.get("http://localhost:3000/userTags/userId/" + userID
+    const response = await axios.get("http://localhost:3000/userTags/userId/" + userId
     + "/classification/" + category, {});
 
     console.log(response);
@@ -189,7 +189,7 @@ const getUserTagsByCategory = async(userID: string, category: string) => {
   }
 };
 
-function setCategoryTags(tagCategory: string, userID: string,
+function setCategoryTags(tagCategory: string, userId: string,
 setAllCategoryTags: React.Dispatch<React.SetStateAction<TagsData | undefined>>,
 selectCategoryTags: React.Dispatch<React.SetStateAction<string[] | undefined>>) {
   getTagsByCategory(tagCategory).then((categoryTagsResponse) => {
@@ -197,7 +197,7 @@ selectCategoryTags: React.Dispatch<React.SetStateAction<string[] | undefined>>) 
       var academicTagsData = convertTagsAPIData(categoryTagsResponse);
       setAllCategoryTags(academicTagsData);
 
-      getUserTagsByCategory(userID, tagCategory).then((userCategoryTagsResponse) => {
+      getUserTagsByCategory(userId, tagCategory).then((userCategoryTagsResponse) => {
         if(userCategoryTagsResponse) {
           var selectedTagIds = convertUserTagsAPIData(userCategoryTagsResponse);
           var selectedTagNames = getTagNamesByFieldValues(
@@ -212,7 +212,7 @@ selectCategoryTags: React.Dispatch<React.SetStateAction<string[] | undefined>>) 
 export default function PreferencesScreen() {
   const router = useRouter();
 
-  const [userID, setUserID] = useState<string>();
+  const [userId, setUserId] = useState<string>();
 
   const [academicTags, setAcademicTags] = useState<TagsData>();
   const [sportsTags, setSportsTags] = useState<TagsData>();
@@ -227,19 +227,19 @@ export default function PreferencesScreen() {
   var content: JSX.Element | null = null;
 
   useEffect(() => {
-    getUserID().then((userIDResponse) => {
-      if(userIDResponse) {
-        setUserID(userIDResponse);
+    getUserID().then((userIdResponse) => {
+      if(userIdResponse) {
+        setUserId(userIdResponse);
 
-        setCategoryTags("academics", userIDResponse, setAcademicTags, selectAcademicTags);
-        setCategoryTags("sports", userIDResponse, setSportsTags, selectSportsTags);
-        setCategoryTags("clubs", userIDResponse, setClubTags, selectClubTags);
-        setCategoryTags("career", userIDResponse, setCareerTags, selectCareerTags);
+        setCategoryTags("academics", userIdResponse, setAcademicTags, selectAcademicTags);
+        setCategoryTags("sports", userIdResponse, setSportsTags, selectSportsTags);
+        setCategoryTags("clubs", userIdResponse, setClubTags, selectClubTags);
+        setCategoryTags("career", userIdResponse, setCareerTags, selectCareerTags);
       }
     });
   }, []);
 
-  if(userID) {
+  if(userId) {
     if(academicTags
     && sportsTags
     && clubTags
