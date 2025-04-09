@@ -1,5 +1,5 @@
 import { Text, View, Image } from "react-native";
-import { EvilIcons, Octicons } from "@expo/vector-icons";
+import { EvilIcons } from "@expo/vector-icons";
 
 import ImageViewer from "@/components/ImageViewer";
 import RoundedBox from "@/components/RoundedBox";
@@ -8,7 +8,6 @@ import EventTag from "@/components/EventTag";
 
 type IconSource = {
   evilIconName?: keyof typeof EvilIcons.glyphMap;
-  octiconsName?: keyof typeof Octicons.glyphMap;
   imageSource?: any;
 };
 
@@ -57,8 +56,6 @@ function exportEventDetailsRow({ key, iconSource, text }: EventDetailsRow) {
 
   if(iconSource.evilIconName) {
     icon = <EvilIcons name={iconSource.evilIconName} size={iconSize} color={iconColor}/>
-  } else if(iconSource.octiconsName) {
-    icon = <Octicons name={iconSource.octiconsName} size={iconSize} color={iconColor}/>
   } else if(iconSource.imageSource) {
     icon = <Image source={iconSource.imageSource} style={{ width: iconSize, height: iconSize }}/>
   }

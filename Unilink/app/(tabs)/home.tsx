@@ -6,7 +6,7 @@ import EventBox from "@/components/EventBox";
 import MedButton from "@/components/MedButton";
 
 const PlaceholderImage = require('@/assets/images/LitterBug.png');
-const EventTitle = "@SSTF";
+const EventTitle = "Litter Bug Battle";
 const EventDescription = "Join us for the Litter Bug Battle!";
 export const PlaceHolderEvent = <EventBox
   imageSource={PlaceholderImage}
@@ -18,6 +18,7 @@ export const PlaceHolderEvent = <EventBox
     ],
     title: EventTitle, description: EventDescription,
     details: [
+      { key: "organization", iconSource: {evilIconName: "user"}, text: "SSTF"},
       { key: "location", iconSource: {evilIconName: "location"}, text: "'87 Gym" },
       { key: "time", iconSource: {evilIconName: "clock"}, text: "Oct 27, 12-4" }
     ]
