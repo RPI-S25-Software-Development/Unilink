@@ -5,8 +5,55 @@ const router = express.Router();
 
 // GET all events
 router.get('/', async (req, res) => {
+    const query = `
+    WITH 
+    likes_count AS (
+        SELECT event_id, COUNT(*) AS likes_count
+        FROM unilink.likes
+        WHERE still_valid = true
+        GROUP BY event_id
+    ),
+    rsvps_count AS (
+        SELECT event_id, COUNT(*) AS rsvps_count
+        FROM unilink.rsvps
+        WHERE still_valid = true
+        GROUP BY event_id
+    )
+    SELECT 
+        e.event_id,
+        e.title,
+        e.event_description,
+        e.poster_path,
+        e.event_location,
+        e.event_time,
+        e.organization_id,
+        e.max_attendees,
+        e.expiration_date,
+        e.canceled,
+        COALESCE(lc.likes_count, 0) AS likes_count,
+        COALESCE(rc.rsvps_count, 0) AS rsvps_count,
+        ARRAY_REMOVE(ARRAY_AGG(
+            DISTINCT jsonb_build_object(
+                'tag_id', t.tag_id,
+                'tag_name', t.tag_name,
+                'classification', t.classification,
+                'color', t.color
+            )
+        ), NULL) AS event_tags
+    FROM unilink.events e
+    LEFT JOIN likes_count lc ON e.event_id = lc.event_id
+    LEFT JOIN rsvps_count rc ON e.event_id = rc.event_id
+    LEFT JOIN unilink.event_tags et ON e.event_id = et.event_id
+    LEFT JOIN unilink.tags t ON et.tag_id = t.tag_id
+    GROUP BY 
+        e.event_id, e.title, e.event_description, e.poster_path, 
+        e.event_location, e.event_time, e.organization_id, 
+        e.max_attendees, e.expiration_date, e.canceled,
+        lc.likes_count, rc.rsvps_count;
+    `;
+
     try {
-        const result = await pool.query("select * from unilink.events");
+        const result = await pool.query(query);
         res.json(result.rows);
     } catch (error) {
         console.error("Error fetching events:", error);
@@ -53,23 +100,62 @@ router.get('/tagId/:tagId', async (req, res) => {
     }
 });
 
+// GET all events with the same tag category
+
+
 // GET all events with a specific event id
-// Also returns the number of RSVPs and SAVEs associated with each
+// Also returns the number of RSVPs and SAVEs associated with each, as well as all tags
 router.get('/eventId/:eventId', async (req, res) => {
     const query = `
-    with likes_count as (select count(event_id) as likes_count
-        from unilink.likes where still_valid = true and event_id = '${req.params.eventId}'),
-    rsvps_count as (select count(event_id) as rsvps_count from unilink.rsvps
-        where still_valid = true and event_id = '${req.params.eventId}')
-    select e.event_id, e.title, e.event_description, e.poster_path, e.event_location, e.event_time,
-        e.organization_id, e.max_attendees, e.expiration_date, e.canceled, lc.likes_count, rc.rsvps_count
-        from unilink.events e, likes_count lc, rsvps_count rc
-        where e.event_id = '${req.params.eventId}'`;
+    WITH likes_count AS (
+        SELECT COUNT(*) AS likes_count
+        FROM unilink.likes 
+        WHERE still_valid = true AND event_id = $1
+    ),
+    rsvps_count AS (
+        SELECT COUNT(*) AS rsvps_count
+        FROM unilink.rsvps
+        WHERE still_valid = true AND event_id = $1
+    )
+    SELECT 
+        e.event_id,
+        e.title,
+        e.event_description,
+        e.poster_path,
+        e.event_location,
+        e.event_time,
+        e.organization_id,
+        e.max_attendees,
+        e.expiration_date,
+        e.canceled,
+        lc.likes_count,
+        rc.rsvps_count,
+        ARRAY_REMOVE(ARRAY_AGG(
+            DISTINCT jsonb_build_object(
+                'tag_id', t.tag_id,
+                'tag_name', t.tag_name,
+                'classification', t.classification,
+                'color', t.color
+            )
+        ), NULL) AS event_tags
+    FROM unilink.events e
+    LEFT JOIN unilink.event_tags et ON e.event_id = et.event_id
+    LEFT JOIN unilink.tags t ON et.tag_id = t.tag_id
+    CROSS JOIN likes_count lc
+    CROSS JOIN rsvps_count rc
+    WHERE e.event_id = $1
+    GROUP BY 
+        e.event_id, e.title, e.event_description, e.poster_path, 
+        e.event_location, e.event_time, e.organization_id, 
+        e.max_attendees, e.expiration_date, e.canceled, 
+        lc.likes_count, rc.rsvps_count;
+    `;
+
     try {
-        const result = await pool.query(query);
+        const result = await pool.query(query, [req.params.eventId]);
         res.json(result.rows);
     } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching event:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
