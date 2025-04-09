@@ -2,6 +2,7 @@ import { View, Alert } from "react-native";
 import { useState, useEffect } from "react";
 import { useRouter, Router, Redirect } from "expo-router";
 import { ScrollView } from "react-native-virtualized-view";
+import { getUserId } from "./_layout";
 
 import "@/global.css";
 
@@ -12,7 +13,6 @@ import HeaderText from "@/components/HeaderText";
 import MedButton from "@/components/MedButton";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 
 type TagData = {
@@ -136,16 +136,6 @@ selectedItemsState: DropdownSelectedItemsState) {
     itemsSelectedText={interestsText + " Interests"}/>
   );
 }
-
-async function getUserId(){
-  try {
-    const userID = await AsyncStorage.getItem("user_id");
-    console.log("User ID: " + userID);
-    return userID;
-  } catch (error) {
-    console.error("Error retrieving user ID:", error);
-  }
-};
 
 async function getTags(){
   try {
