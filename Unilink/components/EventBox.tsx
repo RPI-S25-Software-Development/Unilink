@@ -17,7 +17,7 @@ type EventDetailsRow = {
   text: string;
 };
 
-type EventTagProps = {
+export type EventTagProps = {
   backgroundColor: string;
   textColor?: string;
   name: string;
