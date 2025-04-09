@@ -76,7 +76,7 @@ router.post('/', async (req, res) => {
 });
 
 // BULK CREATE user_tags
-router.post('/bulk', async (req, res) => {
+router.put('/bulk', async (req, res) => {
     const { user_id, tag_ids } = req.body;
 
     if (!user_id || !Array.isArray(tag_ids)) {

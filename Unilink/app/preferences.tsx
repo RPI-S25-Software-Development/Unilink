@@ -209,7 +209,7 @@ selectCategoryTags: React.Dispatch<React.SetStateAction<string[] | undefined>>) 
   });
 }
 
-async function postUserTags(userId: string, allTagsData: {selected: string[], all: TagsData}[],
+async function saveUserTags(userId: string, allTagsData: {selected: string[], all: TagsData}[],
 router: Router) {
   var tagIdsCombined: string[] = [];
 
@@ -219,7 +219,7 @@ router: Router) {
   }
 
   try {
-    const response = await axios.post("http://localhost:3000/userTags/bulk", {
+    const response = await axios.put("http://localhost:3000/userTags/bulk", {
       user_id: userId,
       tag_ids: tagIdsCombined
     });
@@ -304,7 +304,7 @@ export default function PreferencesScreen() {
             })}
 
             <MedButton label="Save" backgroundColor="#B61601" textColor="white"
-            scale={1.5} onPress={() => postUserTags(userId,
+            scale={1.5} onPress={() => saveUserTags(userId,
             [{selected: selectedAcademicTags, all: academicTags},
             {selected: selectedSportsTags, all: sportsTags},
             {selected: selectedClubTags, all: clubTags},
