@@ -1,5 +1,8 @@
+import { useState, useEffect } from "react";
+import { getUserId } from "@/app/_layout";
 import EventBox from "@/components/EventBox";
-import { EventTagProps } from "@/components/EventBox";
+import { View } from "react-native";
+import LoadingSpinner from "./LoadingSpinner";
 
 type Props = {
   eventsApiRoute: string;
@@ -51,7 +54,7 @@ function eventAPIDataToComponent(eventsAPIData: any[]) {
   for(var eventAPIData of eventsAPIData) {
     result.push(
     <EventBox
-      imageSource={require("@/assets/images/" + eventAPIData.poster_path)}
+      imageSource={{uri: "@/assets/images/" + eventAPIData.poster_path}}
       eventText={{
         tags: convertEventTagsAPIData(eventAPIData.event_tags),
         title: eventAPIData.title, description: eventAPIData.event_description,
@@ -75,5 +78,23 @@ function eventAPIDataToComponent(eventsAPIData: any[]) {
 };
 
 export default function EventsList({ eventsApiRoute }: Props) {
+  const [userId, setUserId] = useState<string>();
 
+  var content: JSX.Element | null = null;
+
+  useEffect(() => {
+      getUserId().then((userIdResponse) => {
+        if(userIdResponse) {
+          setUserId(userIdResponse);
+        };
+      });
+  }, []);
+
+  content = <LoadingSpinner scale={2} margin={50}/>;
+
+  return (
+    <View>
+      {content}
+    </View>
+  );
 }

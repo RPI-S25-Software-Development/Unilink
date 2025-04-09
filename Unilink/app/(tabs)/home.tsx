@@ -2,8 +2,9 @@ import { View, ScrollView } from "react-native";
 
 import "@/global.css";
 
-import EventBox from "@/components/EventBox";
 import MedButton from "@/components/MedButton";
+import EventsList from "@/components/EventsList";
+import EventBox from "@/components/EventBox";
 
 const PlaceholderImage = require('@/assets/images/LitterBug.png');
 const EventTitle = "Litter Bug Battle";
@@ -37,11 +38,7 @@ export default function HomeScreen() {
           <MedButton label="Trending"/>
           <MedButton label="My Events"/>
         </View>
-        {PlaceHolderEvent}
-        {PlaceHolderEvent}
-        {PlaceHolderEvent}
-        {PlaceHolderEvent}
-        {PlaceHolderEvent}
+        <EventsList eventsApiRoute=""/>
       </View>
     </ScrollView>
   );

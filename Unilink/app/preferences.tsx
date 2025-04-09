@@ -2,7 +2,7 @@ import { View, Alert } from "react-native";
 import { useState, useEffect } from "react";
 import { useRouter, Router, Redirect } from "expo-router";
 import { ScrollView } from "react-native-virtualized-view";
-import { getUserId } from "./_layout";
+import { getUserId, getAPIData } from "./_layout";
 
 import "@/global.css";
 
@@ -135,59 +135,21 @@ selectedItemsState: DropdownSelectedItemsState) {
     noItemsSelectedText={"Choose your " + interestsText + " Interests"}
     itemsSelectedText={interestsText + " Interests"}/>
   );
-}
-
-async function getTags(){
-  try {
-    const response = await axios.get("http://localhost:3000/tags/");
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.error("Error retrieving tags:", error);
-  }
-};
-
-async function getTagsByCategory (category: string) {
-  try {
-    const response = await axios.get("http://localhost:3000/tags/classification/" + category);
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.error("Error retrieving tags:", error);
-  }
-};
-
-async function getUserTags(userId: string) {
-  try {
-    const response = await axios.get("http://localhost:3000/userTags/userId/" + userId);
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.error("Error retrieving tags:", error);
-  }
-};
-
-async function getUserTagsByCategory(userId: string, category: string) {
-  try {
-    const response = await axios.get("http://localhost:3000/userTags/userId/" + userId
-    + "/classification/" + category);
-
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.error("Error retrieving tags:", error);
-  }
 };
 
 function setCategoryTags(tagCategory: string, userId: string,
 setAllCategoryTags: React.Dispatch<React.SetStateAction<TagsData | undefined>>,
 selectCategoryTags: React.Dispatch<React.SetStateAction<string[] | undefined>>) {
-  getTagsByCategory(tagCategory).then((categoryTagsResponse) => {
+  const getTagsByCategory = "http://localhost:3000/tags/classification/" + tagCategory;
+  const getUserTagsByCategory = "http://localhost:3000/userTags/userId/" + userId
+  + "/classification/" + tagCategory
+
+  getAPIData(getTagsByCategory).then((categoryTagsResponse) => {
     if(categoryTagsResponse) {
       var academicTagsData = convertTagsAPIData(categoryTagsResponse);
       setAllCategoryTags(academicTagsData);
 
-      getUserTagsByCategory(userId, tagCategory).then((userCategoryTagsResponse) => {
+      getAPIData(getUserTagsByCategory).then((userCategoryTagsResponse) => {
         if(userCategoryTagsResponse) {
           var selectedTagIds = convertUserTagsAPIData(userCategoryTagsResponse);
           var selectedTagNames = getTagNamesByFieldValues(
