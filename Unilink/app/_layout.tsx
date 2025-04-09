@@ -5,10 +5,32 @@ import { useEffect } from 'react';
 import { View, Text } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { AntDesign } from '@expo/vector-icons';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 import Banner from "@/components/Banner";
 
 SplashScreen.preventAutoHideAsync();
+
+export async function getUserId(){
+  try {
+    const userID = await AsyncStorage.getItem("user_id");
+    console.log("User ID: " + userID);
+    return userID;
+  } catch (error) {
+    console.error("Error retrieving user ID:", error);
+  }
+};
+
+export async function getAPIData(apiRoute: string) {
+  try {
+    const response = await axios.get(apiRoute);
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.error("Error retrieving data:", error);
+  }
+};
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
