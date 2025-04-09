@@ -84,7 +84,7 @@ function exportEventText({ tags, title, description, details }: EventTextProps) 
           <View className="flex flex-row flex-wrap">
             {exportedTags}
           </View>
-          <Text className="m-1">{title}</Text>
+          <Text className="m-1 text-lg">{title}</Text>
           <Text className="m-1">{description}</Text>
           <View className="flex flex-col ml-1 mt-1">
               {exportedDetails}
