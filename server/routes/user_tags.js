@@ -40,7 +40,7 @@ router.get('/userId/:userId/classification/:classification', async (req, res) =>
     }
 });
 
-// CREATE a new rsvp
+// CREATE a user tag
 router.post('/', async (req, res) => {
     // Generate random UUID
     const user_tag_id = crypto.randomUUID();
@@ -72,6 +72,43 @@ router.post('/', async (req, res) => {
     } catch (error) {
         console.error("Error retrieving params:", error);
         res.status(417).json({ error: "Request body incorrect/missing expected parameters" });
+    }
+});
+
+// BULK CREATE user_tags
+router.post('/bulk', async (req, res) => {
+    const { user_id, tag_ids } = req.body;
+
+    if (!user_id || !Array.isArray(tag_ids)) {
+        return res.status(400).json({ error: "Request body must include 'user_id' and 'tag_ids' (array)" });
+    }
+
+    const created = [];
+    const existing = [];
+
+    try {
+        for (const tag_id of tag_ids) {
+            const checkQuery = `SELECT * FROM unilink.user_tags WHERE tag_id = $1 AND user_id = $2`;
+            const checkRes = await pool.query(checkQuery, [tag_id, user_id]);
+
+            if (checkRes.rows.length === 0) {
+                const user_tag_id = crypto.randomUUID();
+                const insertQuery = `INSERT INTO unilink.user_tags(user_tag_id, user_id, tag_id) VALUES ($1, $2, $3)`;
+                await pool.query(insertQuery, [user_tag_id, user_id, tag_id]);
+                created.push(tag_id);
+            } else {
+                existing.push(tag_id);
+            }
+        }
+
+        res.status(201).json({
+            message: "Bulk user_tags processed",
+            created,
+            existing
+        });
+    } catch (error) {
+        console.error("Error creating user tags in bulk:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 

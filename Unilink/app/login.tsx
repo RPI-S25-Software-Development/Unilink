@@ -8,13 +8,15 @@ import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Login() {
+    // const host = process.env.ENV === 'Prod' ? process.env.HOST : 'localhost';
+    const host = 'localhost';
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const handleLogin = async () => {
         try {
-            const response = await axios.post("http://localhost:3000/auth/login", {
+            const response = await axios.post(`http://${host}:3000/auth/login`, {
                 email,
                 password
             });
