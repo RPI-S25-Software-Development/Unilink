@@ -23,14 +23,7 @@ type TagData = {
 
 type TagsData = Map<string, TagData>;
 
-type TagDataAPI = {
-  tag_id: string;
-  tag_name: string;
-  classification: string;
-  color: string;
-};
-
-function getTagsField(tagsData: TagsData, field: keyof TagData) {
+function getTagsField(tagsData: TagsData | undefined, field: keyof TagData) {
   var result = [];
 
   if(tagsData) {
@@ -42,7 +35,8 @@ function getTagsField(tagsData: TagsData, field: keyof TagData) {
   return result;
 }
 
-function getTagNamesByField(tagsData: TagsData, field: keyof TagData, fieldValue: string) {
+function getTagNamesByFieldValue(tagsData: TagsData | undefined, field: keyof TagData,
+fieldValue: string) {
   var result = [];
   
   if(tagsData) {
@@ -54,7 +48,20 @@ function getTagNamesByField(tagsData: TagsData, field: keyof TagData, fieldValue
   return result;
 };
 
-function tagsAPIDataToMap(tagsAPIData: TagDataAPI[]) {
+function getTagNamesByFieldValues(tagsData: TagsData | undefined, field: keyof TagData,
+fieldValues: string[]) {
+  var result = [];
+  
+  if(tagsData) {
+    for(var [tagName, tagData] of tagsData) {
+      if(fieldValues.includes(tagData[field])) result.push(tagName);
+    }
+  }
+
+  return result;
+};
+
+function convertTagsAPIData(tagsAPIData: any[]) {
   var result: TagsData = new Map();
 
   for(var tagAPIData of tagsAPIData) {
@@ -70,12 +77,34 @@ function tagsAPIDataToMap(tagsAPIData: TagDataAPI[]) {
   return result;
 };
 
-function createTagComponents(tagNames: string[], tagsData: TagsData) {
+function convertUserTagsAPIData(userTagsAPIData: any[]) {
+  var result: string[] = [];
+
+  for(var userTagAPIData of userTagsAPIData) {
+    result.push(userTagAPIData.tag_id);
+  }
+
+  return result;
+}
+
+function getTagsDataByNames(tagNames: string[], allTagsData: TagsData | undefined) {
+  var result: TagsData = new Map();
+
+  if(allTagsData) {
+    for(var tagName of tagNames) {
+      var tagData = allTagsData.get(tagName);
+      if(tagData) result.set(tagName, tagData);
+    }
+  }
+
+  return result;
+};
+
+function createTagComponents(tagsData: TagsData | undefined) {
   var result = [];
   
   if(tagsData) {
-    for(var tagName of tagNames) {
-      var tagData = tagsData.get(tagName);
+    for(var [tagName, tagData] of tagsData) {
       if(tagData) {
         result.push(<EventTag key={tagData.id} name={tagName} backgroundColor={tagData.color}/>);
       }
@@ -95,7 +124,7 @@ function dropdownItemsFromKeys(keys: string[]) {
   return result;
 };
 
-function createTagsDropdown(tagsData: TagsData, interestsText: string,
+function createTagsDropdown(tagsData: TagsData | undefined, interestsText: string,
 selectedItemsState: DropdownSelectedItemsState) {
   return (
     <DropdownMultiSelect width={350}
@@ -109,78 +138,124 @@ selectedItemsState: DropdownSelectedItemsState) {
 }
 
 const getUserID = async () => {
-  const userID = await AsyncStorage.getItem("user_id");
-  console.log("User ID: " + userID);
-  return userID;
-}
+  try {
+    const userID = await AsyncStorage.getItem("user_id");
+    console.log("User ID: " + userID);
+    return userID;
+  } catch (error) {
+    console.error("Error retrieving user ID:", error);
+  }
+};
 
 const getTags = async() => {
-  const response = await axios.get("http://localhost:3000/tags/");
-  console.log(response);
-  return response.data;
+  try {
+    const response = await axios.get("http://localhost:3000/tags/");
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.error("Error retrieving tags:", error);
+  }
 };
 
 const getTagsByCategory = async(category: string) => {
-  const response = await axios.get("http://localhost:3000/tags/classification/" + category);
-  console.log(response);
-  return response.data;
+  try {
+    const response = await axios.get("http://localhost:3000/tags/classification/" + category);
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.error("Error retrieving tags:", error);
+  }
+};
+
+const getUserTags = async(userID: string) => {
+  try {
+    const response = await axios.get("http://localhost:3000/userTags/userId/" + userID);
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.error("Error retrieving tags:", error);
+  }
+};
+
+const getUserTagsByCategory = async(userID: string, category: string) => {
+  try {
+    const response = await axios.get("http://localhost:3000/userTags/userId/" + userID
+    + "/classification/" + category, {});
+
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.error("Error retrieving tags:", error);
+  }
+};
+
+function setCategoryTags(tagCategory: string, userID: string,
+setAllCategoryTags: React.Dispatch<React.SetStateAction<TagsData | undefined>>,
+selectCategoryTags: React.Dispatch<React.SetStateAction<string[] | undefined>>) {
+  getTagsByCategory(tagCategory).then((categoryTagsResponse) => {
+    if(categoryTagsResponse) {
+      var academicTagsData = convertTagsAPIData(categoryTagsResponse);
+      setAllCategoryTags(academicTagsData);
+
+      getUserTagsByCategory(userID, tagCategory).then((userCategoryTagsResponse) => {
+        if(userCategoryTagsResponse) {
+          var selectedTagIds = convertUserTagsAPIData(userCategoryTagsResponse);
+          var selectedTagNames = getTagNamesByFieldValues(
+            academicTagsData, "id", selectedTagIds);
+          selectCategoryTags(selectedTagNames);
+        }
+      });
+    }
+  });
 }
 
 export default function PreferencesScreen() {
   const router = useRouter();
 
-  const [userID, setUserID] = useState<string | null>(null);
+  const [userID, setUserID] = useState<string>();
 
-  const [allTags, setAllTags] = useState<boolean>(false);
+  const [academicTags, setAcademicTags] = useState<TagsData>();
+  const [sportsTags, setSportsTags] = useState<TagsData>();
+  const [clubTags, setClubTags] = useState<TagsData>();
+  const [careerTags, setCareerTags] = useState<TagsData>();
 
-  const [academicTags, setAcademicTags] = useState<TagsData>(new Map());
-  const [sportsTags, setSportsTags] = useState<TagsData>(new Map());
-  const [clubTags, setClubTags] = useState<TagsData>(new Map());
-  const [careerTags, setCareerTags] = useState<TagsData>(new Map());
-
-  const [selectedAcademicTags, selectAcademicTags] = useState<string[]>([]);
-  const [selectedSportsTags, selectSportsTags] = useState<string[]>([]);
-  const [selectedClubTags, selectClubTags] = useState<string[]>([]);
-  const [selectedCareerTags, selectCareerTags] = useState<string[]>([]);
+  const [selectedAcademicTags, selectAcademicTags] = useState<string[]>();
+  const [selectedSportsTags, selectSportsTags] = useState<string[]>();
+  const [selectedClubTags, selectClubTags] = useState<string[]>();
+  const [selectedCareerTags, selectCareerTags] = useState<string[]>();
 
   var content: JSX.Element | null = null;
 
   useEffect(() => {
-    if(!userID) {
-      getUserID().then((response) => {
-        setUserID(response);
-      });
-    } else if(!allTags) {
-      getTagsByCategory("academics").then((response) => {
-        setAcademicTags(tagsAPIDataToMap(response));
-      })
+    getUserID().then((userIDResponse) => {
+      if(userIDResponse) {
+        setUserID(userIDResponse);
 
-      getTagsByCategory("sports").then((response) => {
-        setSportsTags(tagsAPIDataToMap(response));
-      })
-
-      getTagsByCategory("clubs").then((response) => {
-        setClubTags(tagsAPIDataToMap(response));
-      })
-
-      getTagsByCategory("career").then((response) => {
-        setCareerTags(tagsAPIDataToMap(response));
-      })
-
-      setAllTags(true);
-    }
-  });
+        setCategoryTags("academics", userIDResponse, setAcademicTags, selectAcademicTags);
+        setCategoryTags("sports", userIDResponse, setSportsTags, selectSportsTags);
+        setCategoryTags("clubs", userIDResponse, setClubTags, selectClubTags);
+        setCategoryTags("career", userIDResponse, setCareerTags, selectCareerTags);
+      }
+    });
+  }, []);
 
   if(userID) {
-    if(allTags) {
+    if(academicTags
+    && sportsTags
+    && clubTags
+    && careerTags
+    && selectedAcademicTags
+    && selectedSportsTags
+    && selectedClubTags
+    && selectedCareerTags) {
       content =
         <View>
           <HeaderText fontSize={32}>Your Tags of Interest</HeaderText>
           <RoundedBox width="90%" height="auto" className="mx-auto my-5 flex flex-row flex-wrap justify-center">
-            {createTagComponents(selectedAcademicTags, academicTags)}
-            {createTagComponents(selectedSportsTags, sportsTags)}
-            {createTagComponents(selectedClubTags, clubTags)}
-            {createTagComponents(selectedCareerTags, careerTags)}
+            {createTagComponents(getTagsDataByNames(selectedAcademicTags, academicTags))}
+            {createTagComponents(getTagsDataByNames(selectedSportsTags, sportsTags))}
+            {createTagComponents(getTagsDataByNames(selectedClubTags, clubTags))}
+            {createTagComponents(getTagsDataByNames(selectedCareerTags, careerTags))}
           </RoundedBox>
           <View className="my-10 flex flex-col gap-10 items-center">
             {createTagsDropdown(academicTags, "Academic", {

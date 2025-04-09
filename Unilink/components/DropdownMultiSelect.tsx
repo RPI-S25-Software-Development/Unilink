@@ -4,7 +4,7 @@ import MultiSelect from "react-native-multiple-select";
 
 export type DropdownSelectedItemsState = {
   selectedItems: string[];
-  setSelectedItems: React.Dispatch<React.SetStateAction<string[]>>;
+  setSelectedItems: React.Dispatch<React.SetStateAction<string[] | undefined>>;
 };
 
 type Props = {

@@ -26,21 +26,13 @@ router.get('/userId/:userId', async (req, res) => {
 });
 
 // GET all tags matching a classification for a specific user
-router.get('/classification', async (req, res) => {
+router.get('/userId/:userId/classification/:classification', async (req, res) => {
     try {
-        if (!req.body) {
-            return res.status(400).json({ error: "Request body is missing" });
-        }
-        const { userId, classification } = req.body;
-        if (!userId || !classification) {
-            return res.status(400).json({ error: "userId and classification fields are required" });
-        }
-
         const return_data = "user_tag_id, user_id, t.tag_id, tag_name, classification, color"
         const tables = "unilink.user_tags ut, unilink.tags t"
-        const conditions = `ut.tag_id=t.tag_id and user_id=$1 and classification=$2`
+        const conditions = `ut.tag_id=t.tag_id and user_id='${req.params.userId}' and classification='${req.params.classification}'`
 
-        const result = await pool.query(`select ${return_data} from ${tables} where ${conditions}`, [userId, classification]);
+        const result = await pool.query(`select ${return_data} from ${tables} where ${conditions}`);
         res.json(result.rows);
     } catch (error) {
         console.error("Error fetching user tags:", error);
