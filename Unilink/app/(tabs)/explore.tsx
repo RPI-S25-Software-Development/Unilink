@@ -29,7 +29,7 @@ export default function ExploreScreen() {
               </View>
             </ScrollView>
           </View>
-          <EventsList eventsApiRoute="http://localhost:3000/events/"/>
+          <EventsList eventsAPIRoute="http://localhost:3000/events/"/>
         </View>
       </ScrollView>
     );

@@ -6,7 +6,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import { EventImagesMap } from "@/components/EventImages";
 
 type Props = {
-  eventsApiRoute: string;
+  eventsAPIRoute: string;
 }
 
 function convertEventTagsAPIData(eventTagsAPIData: any[]) {
@@ -84,7 +84,7 @@ function eventsAPIDataToComponent(eventsAPIData: any[]) {
   return result;
 };
 
-export default function EventsList({ eventsApiRoute }: Props) {
+export default function EventsList({ eventsAPIRoute }: Props) {
   const [userId, setUserId] = useState<string>();
   const [events, setEvents] = useState<any[]>();
 
@@ -95,7 +95,7 @@ export default function EventsList({ eventsApiRoute }: Props) {
         if(userIdResponse) {
           setUserId(userIdResponse);
 
-          getAPIData(eventsApiRoute).then((eventsResponse) => {
+          getAPIData(eventsAPIRoute).then((eventsResponse) => {
             if(eventsResponse) setEvents(eventsResponse);
           });
         };
