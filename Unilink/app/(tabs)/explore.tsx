@@ -14,9 +14,11 @@ function selectCategory(setSelectedCategory: React.Dispatch<React.SetStateAction
 
 export default function ExploreScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>();
+  const [searchText, setSearchText] = useState<string>();
 
   var eventsAPIRoute = "http://localhost:3000/events/";
   if(selectedCategory) eventsAPIRoute = eventsAPIRoute + "tagCategory/" + selectedCategory;
+  if(searchText) eventsAPIRoute = eventsAPIRoute + "title/" + searchText;
 
   return (
       <ScrollView className="flex-1">
