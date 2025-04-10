@@ -34,12 +34,12 @@ router.get('/', async (req, res) => {
         COALESCE(lc.likes_count, 0) AS likes_count,
         COALESCE(rc.rsvps_count, 0) AS rsvps_count,
         ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT jsonb_build_object(
+            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
                 'tag_id', t.tag_id,
                 'tag_name', t.tag_name,
                 'classification', t.classification,
                 'color', t.color
-            )
+            ))::text, '{}')::jsonb
         ), NULL) AS event_tags
     FROM unilink.events e
     LEFT JOIN likes_count lc ON e.event_id = lc.event_id

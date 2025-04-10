@@ -38,7 +38,7 @@ export default function HomeScreen() {
           <MedButton label="Trending"/>
           <MedButton label="My Events"/>
         </View>
-        <EventsList eventsApiRoute=""/>
+        <EventsList eventsApiRoute="http://localhost:3000/events/"/>
       </View>
     </ScrollView>
   );

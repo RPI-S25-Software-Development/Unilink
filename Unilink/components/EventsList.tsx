@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getUserId } from "@/app/_layout";
+import { getAPIData, getUserId } from "@/app/_layout";
 import EventBox from "@/components/EventBox";
 import { View } from "react-native";
 import LoadingSpinner from "./LoadingSpinner";
@@ -45,22 +45,28 @@ function convertEventTimeAPIData(eventTimeAPIData: string) {
   var [year, month, day] = date.split("-");
   var [hour, minute, seconds] = time.split(":");
 
-  return allMonths.get(+month) + " " + day + ", " + hour + ":" + minute;
+  var hourAdjusted = parseInt(hour);
+  var timePeriod = hourAdjusted < 12 ? "AM" : "PM";
+  hourAdjusted = (hourAdjusted == 0) ? 12 : hourAdjusted;
+  hourAdjusted = (hourAdjusted > 12) ? (hourAdjusted % 12) : hourAdjusted;
+
+  return allMonths.get(+month) + " " + day + ", " + hourAdjusted + ":" + minute + " " + timePeriod;
 }
 
-function eventAPIDataToComponent(eventsAPIData: any[]) {
+function eventsAPIDataToComponent(eventsAPIData: any[]) {
   var result = [];
 
   for(var eventAPIData of eventsAPIData) {
     result.push(
     <EventBox
+      key={eventAPIData.event_id}
       imageSource={{uri: "@/assets/images/" + eventAPIData.poster_path}}
       eventText={{
         tags: convertEventTagsAPIData(eventAPIData.event_tags),
         title: eventAPIData.title, description: eventAPIData.event_description,
         details: [
-          { key: "organization", iconSource: {evilIconName: "user"},
-          text: eventAPIData.organization_name },
+          // { key: "organization", iconSource: {evilIconName: "user"},
+          // text: "eventAPIData.organization_name" },
           { key: "location", iconSource: {evilIconName: "location"},
           text: eventAPIData.event_location },
           { key: "time", iconSource: {evilIconName: "clock"},
@@ -68,8 +74,8 @@ function eventAPIDataToComponent(eventsAPIData: any[]) {
         ]
       }}
       interactionCounts={{
-        likeCount: eventAPIData.event_likes,
-        rsvpCount: eventAPIData.event_rsvps
+        likeCount: parseInt(eventAPIData.likes_count),
+        rsvpCount: parseInt(eventAPIData.rsvps_count)
       }}
     />);
   }
@@ -79,18 +85,21 @@ function eventAPIDataToComponent(eventsAPIData: any[]) {
 
 export default function EventsList({ eventsApiRoute }: Props) {
   const [userId, setUserId] = useState<string>();
+  const [events, setEvents] = useState<any[]>();
 
-  var content: JSX.Element | null = null;
+  var content = events ? eventsAPIDataToComponent(events) : <LoadingSpinner scale={2} margin={50}/>;
 
   useEffect(() => {
       getUserId().then((userIdResponse) => {
         if(userIdResponse) {
           setUserId(userIdResponse);
+
+          getAPIData(eventsApiRoute).then((eventsResponse) => {
+            if(eventsResponse) setEvents(eventsResponse);
+          });
         };
       });
   }, []);
-
-  content = <LoadingSpinner scale={2} margin={50}/>;
 
   return (
     <View>
