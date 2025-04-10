@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { getAPIData, getUserId } from "@/app/_layout";
 import EventBox from "@/components/EventBox";
 import { View } from "react-native";
-import LoadingSpinner from "./LoadingSpinner";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { EventImagesMap } from "@/components/EventImages";
 
 type Props = {
   eventsApiRoute: string;
@@ -60,7 +61,7 @@ function eventsAPIDataToComponent(eventsAPIData: any[]) {
     result.push(
     <EventBox
       key={eventAPIData.event_id}
-      imageSource={{uri: "@/assets/images/" + eventAPIData.poster_path}}
+      imageSource={EventImagesMap.get(eventAPIData.poster_path)}
       eventText={{
         tags: convertEventTagsAPIData(eventAPIData.event_tags),
         title: eventAPIData.title, description: eventAPIData.event_description,
