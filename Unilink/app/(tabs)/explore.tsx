@@ -1,14 +1,16 @@
 import { ScrollView, View, TextInput } from "react-native";
 import "@/global.css";
 import { FontAwesome } from "@expo/vector-icons";
-
-import { PlaceHolderEvent } from "@/app/(tabs)/home";
+import { useState } from "react";
 
 import RoundedBox from "@/components/RoundedBox";
 import MedButton from "@/components/MedButton";
 import HeaderText from "@/components/HeaderText";
+import EventsList from "@/components/EventsList";
 
 export default function ExploreScreen() {
+  const [selectedCategory, selectCategory] = useState<string>();
+
   return (
       <ScrollView className="flex-1">
         <View className="items-center py-4">
@@ -27,11 +29,7 @@ export default function ExploreScreen() {
               </View>
             </ScrollView>
           </View>
-          {PlaceHolderEvent}
-          {PlaceHolderEvent}
-          {PlaceHolderEvent}
-          {PlaceHolderEvent}
-          {PlaceHolderEvent}
+          <EventsList eventsApiRoute="http://localhost:3000/events/"/>
         </View>
       </ScrollView>
     );
