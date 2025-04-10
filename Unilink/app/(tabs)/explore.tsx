@@ -14,14 +14,15 @@ export default function ExploreScreen() {
 
   var eventsAPIRoute = "http://localhost:3000/events/";
   if(selectedCategory) eventsAPIRoute = eventsAPIRoute + "tagCategory/" + selectedCategory;
-  if(searchText) eventsAPIRoute = eventsAPIRoute + "title/" + searchText;
+  if(searchText && searchText != "") eventsAPIRoute = eventsAPIRoute + "title/" + searchText;
 
   return (
       <ScrollView className="flex-1">
         <View className="items-center py-4">
           <RoundedBox width={350} height="auto" className="my-3 py-2 px-4 flex flex-row items-center">
             <FontAwesome name="search" size={16} color="black" className="mr-4"/>
-            <TextInput style={{width: "100%", padding: 0, fontSize:16, outline: "none"}}/>
+            <TextInput style={{width: "100%", padding: 0, fontSize:16, outline: "none"}}
+            onSubmitEditing={(data) => {setSearchText(data.nativeEvent.text)}}/>
           </RoundedBox>
           <View className="my-3">
             <HeaderText fontSize={24}>Explore by Category</HeaderText>
