@@ -25,7 +25,7 @@ router.get('/tagId/:tagId', async (req, res) => {
     }
 });
 
-// CREATE a new rsvp
+// CREATE a new event tag given the eventId and tagId
 router.post('/', async (req, res) => {
     // Generate random UUID
     const event_tag_id = crypto.randomUUID();
