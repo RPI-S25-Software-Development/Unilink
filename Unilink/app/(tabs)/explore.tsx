@@ -2,15 +2,11 @@ import { ScrollView, View, TextInput } from "react-native";
 import "@/global.css";
 import { FontAwesome } from "@expo/vector-icons";
 import { useState } from "react";
-
 import RoundedBox from "@/components/RoundedBox";
 import MedButton from "@/components/MedButton";
 import HeaderText from "@/components/HeaderText";
 import EventsList from "@/components/EventsList";
-
-function selectCategory(setSelectedCategory: React.Dispatch<React.SetStateAction<string | undefined>>, category: string) {
-  setSelectedCategory((previousCategory) => previousCategory === category ? undefined : category);
-}
+import { selectButtonsState } from "../_layout";
 
 export default function ExploreScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>();
@@ -32,16 +28,16 @@ export default function ExploreScreen() {
             <ScrollView horizontal style={{maxHeight: 75}}>
               <View className="flex flex-row px-5">
                 <MedButton label="Academic" scale={0.9} baseFontSize={16}
-                  onPress={() => selectCategory(setSelectedCategory, "academics")}
+                  onPress={() => selectButtonsState(setSelectedCategory, "academics")}
                   backgroundColor={selectedCategory === "academics" ? "lightgray" : "white"}/>
                 <MedButton label="Sports" scale={0.9} baseFontSize={16}
-                  onPress={() => selectCategory(setSelectedCategory, "sports")}
+                  onPress={() => selectButtonsState(setSelectedCategory, "sports")}
                   backgroundColor={selectedCategory === "sports" ? "lightgray" : "white"}/>
                 <MedButton label="Club" scale={0.9} baseFontSize={16}
-                  onPress={() => selectCategory(setSelectedCategory, "clubs")}
+                  onPress={() => selectButtonsState(setSelectedCategory, "clubs")}
                   backgroundColor={selectedCategory === "clubs" ? "lightgray" : "white"}/>
                 <MedButton label="Career" scale={0.9} baseFontSize={16}
-                onPress={() => selectCategory(setSelectedCategory, "career")}
+                onPress={() => selectButtonsState(setSelectedCategory, "career")}
                   backgroundColor={selectedCategory === "career" ? "lightgray" : "white"}/>
               </View>
             </ScrollView>

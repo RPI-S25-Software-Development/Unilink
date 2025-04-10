@@ -32,6 +32,12 @@ export async function getAPIData(apiRoute: string, logResponse?: boolean) {
   }
 };
 
+export function selectButtonsState(
+  setSelectedButton: React.Dispatch<React.SetStateAction<string | undefined>>,
+  selected: string) {
+  setSelectedButton((previousSelected) => previousSelected === selected ? undefined : selected);
+}
+
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     'Inter': require('@/assets/fonts/Inter-VariableFont_opsz,wght.ttf')

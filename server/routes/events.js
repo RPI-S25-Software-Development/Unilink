@@ -138,12 +138,12 @@ router.get('/tagCategory/:category', async (req, res) => {
         COALESCE(lc.likes_count, 0) AS likes_count,
         COALESCE(rc.rsvps_count, 0) AS rsvps_count,
         ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT jsonb_build_object(
+            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
                 'tag_id', t.tag_id,
                 'tag_name', t.tag_name,
                 'classification', t.classification,
                 'color', t.color
-            )
+            ))::text, '{}')::jsonb
         ), NULL) AS event_tags
     FROM filtered_events fe
     JOIN unilink.events e ON fe.event_id = e.event_id
@@ -195,12 +195,12 @@ router.get('/eventId/:eventId', async (req, res) => {
         lc.likes_count,
         rc.rsvps_count,
         ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT jsonb_build_object(
+            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
                 'tag_id', t.tag_id,
                 'tag_name', t.tag_name,
                 'classification', t.classification,
                 'color', t.color
-            )
+            ))::text, '{}')::jsonb
         ), NULL) AS event_tags
     FROM unilink.events e
     LEFT JOIN unilink.event_tags et ON e.event_id = et.event_id
@@ -263,12 +263,12 @@ router.get('/userId/:userId', async (req, res) => {
         COALESCE(lc.likes_count, 0) AS likes_count,
         COALESCE(rc.rsvps_count, 0) AS rsvps_count,
         ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT jsonb_build_object(
+            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
                 'tag_id', t.tag_id,
                 'tag_name', t.tag_name,
                 'classification', t.classification,
                 'color', t.color
-            )
+            ))::text, '{}')::jsonb
         ), NULL) AS event_tags
     FROM user_events ue
     JOIN unilink.events e ON ue.event_id = e.event_id
