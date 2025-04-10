@@ -2,6 +2,7 @@ import { View, Alert } from "react-native";
 import { useState, useEffect } from "react";
 import { useRouter, Router, Redirect } from "expo-router";
 import { ScrollView } from "react-native-virtualized-view";
+import { getUserId, getAPIData } from "./_layout";
 
 import "@/global.css";
 
@@ -12,7 +13,6 @@ import HeaderText from "@/components/HeaderText";
 import MedButton from "@/components/MedButton";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 
 type TagData = {
@@ -135,69 +135,21 @@ selectedItemsState: DropdownSelectedItemsState) {
     noItemsSelectedText={"Choose your " + interestsText + " Interests"}
     itemsSelectedText={interestsText + " Interests"}/>
   );
-}
-
-async function getUserId(){
-  try {
-    const userID = await AsyncStorage.getItem("user_id");
-    console.log("User ID: " + userID);
-    return userID;
-  } catch (error) {
-    console.error("Error retrieving user ID:", error);
-  }
-};
-
-async function getTags(){
-  try {
-    const response = await axios.get("http://localhost:3000/tags/");
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.error("Error retrieving tags:", error);
-  }
-};
-
-async function getTagsByCategory (category: string) {
-  try {
-    const response = await axios.get("http://localhost:3000/tags/classification/" + category);
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.error("Error retrieving tags:", error);
-  }
-};
-
-async function getUserTags(userId: string) {
-  try {
-    const response = await axios.get("http://localhost:3000/userTags/userId/" + userId);
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.error("Error retrieving tags:", error);
-  }
-};
-
-async function getUserTagsByCategory(userId: string, category: string) {
-  try {
-    const response = await axios.get("http://localhost:3000/userTags/userId/" + userId
-    + "/classification/" + category);
-
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.error("Error retrieving tags:", error);
-  }
 };
 
 function setCategoryTags(tagCategory: string, userId: string,
 setAllCategoryTags: React.Dispatch<React.SetStateAction<TagsData | undefined>>,
 selectCategoryTags: React.Dispatch<React.SetStateAction<string[] | undefined>>) {
-  getTagsByCategory(tagCategory).then((categoryTagsResponse) => {
+  const getTagsByCategory = "http://localhost:3000/tags/classification/" + tagCategory;
+  const getUserTagsByCategory = "http://localhost:3000/userTags/userId/" + userId
+  + "/classification/" + tagCategory
+
+  getAPIData(getTagsByCategory).then((categoryTagsResponse) => {
     if(categoryTagsResponse) {
       var academicTagsData = convertTagsAPIData(categoryTagsResponse);
       setAllCategoryTags(academicTagsData);
 
-      getUserTagsByCategory(userId, tagCategory).then((userCategoryTagsResponse) => {
+      getAPIData(getUserTagsByCategory).then((userCategoryTagsResponse) => {
         if(userCategoryTagsResponse) {
           var selectedTagIds = convertUserTagsAPIData(userCategoryTagsResponse);
           var selectedTagNames = getTagNamesByFieldValues(

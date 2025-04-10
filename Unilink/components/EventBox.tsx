@@ -17,7 +17,7 @@ type EventDetailsRow = {
   text: string;
 };
 
-type EventTagProps = {
+export type EventTagProps = {
   backgroundColor: string;
   textColor?: string;
   name: string;
@@ -55,9 +55,9 @@ function exportEventDetailsRow({ key, iconSource, text }: EventDetailsRow) {
   var icon = undefined;
 
   if(iconSource.evilIconName) {
-      icon = <EvilIcons name={iconSource.evilIconName} size={iconSize} color={iconColor}/>
+    icon = <EvilIcons name={iconSource.evilIconName} size={iconSize} color={iconColor}/>
   } else if(iconSource.imageSource) {
-      icon = <Image source={iconSource.imageSource} style={{ width: iconSize, height: iconSize }}/>
+    icon = <Image source={iconSource.imageSource} style={{ width: iconSize, height: iconSize }}/>
   }
 
   return (
@@ -84,7 +84,7 @@ function exportEventText({ tags, title, description, details }: EventTextProps) 
           <View className="flex flex-row flex-wrap">
             {exportedTags}
           </View>
-          <Text className="m-1">{title}</Text>
+          <Text className="m-1 text-lg">{title}</Text>
           <Text className="m-1">{description}</Text>
           <View className="flex flex-col ml-1 mt-1">
               {exportedDetails}

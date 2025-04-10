@@ -34,12 +34,12 @@ router.get('/', async (req, res) => {
         COALESCE(lc.likes_count, 0) AS likes_count,
         COALESCE(rc.rsvps_count, 0) AS rsvps_count,
         ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT jsonb_build_object(
+            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
                 'tag_id', t.tag_id,
                 'tag_name', t.tag_name,
                 'classification', t.classification,
                 'color', t.color
-            )
+            ))::text, '{}')::jsonb
         ), NULL) AS event_tags
     FROM unilink.events e
     LEFT JOIN likes_count lc ON e.event_id = lc.event_id
@@ -138,12 +138,12 @@ router.get('/tagCategory/:category', async (req, res) => {
         COALESCE(lc.likes_count, 0) AS likes_count,
         COALESCE(rc.rsvps_count, 0) AS rsvps_count,
         ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT jsonb_build_object(
+            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
                 'tag_id', t.tag_id,
                 'tag_name', t.tag_name,
                 'classification', t.classification,
                 'color', t.color
-            )
+            ))::text, '{}')::jsonb
         ), NULL) AS event_tags
     FROM filtered_events fe
     JOIN unilink.events e ON fe.event_id = e.event_id
@@ -195,12 +195,12 @@ router.get('/eventId/:eventId', async (req, res) => {
         lc.likes_count,
         rc.rsvps_count,
         ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT jsonb_build_object(
+            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
                 'tag_id', t.tag_id,
                 'tag_name', t.tag_name,
                 'classification', t.classification,
                 'color', t.color
-            )
+            ))::text, '{}')::jsonb
         ), NULL) AS event_tags
     FROM unilink.events e
     LEFT JOIN unilink.event_tags et ON e.event_id = et.event_id
@@ -263,12 +263,12 @@ router.get('/userId/:userId', async (req, res) => {
         COALESCE(lc.likes_count, 0) AS likes_count,
         COALESCE(rc.rsvps_count, 0) AS rsvps_count,
         ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT jsonb_build_object(
+            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
                 'tag_id', t.tag_id,
                 'tag_name', t.tag_name,
                 'classification', t.classification,
                 'color', t.color
-            )
+            ))::text, '{}')::jsonb
         ), NULL) AS event_tags
     FROM user_events ue
     JOIN unilink.events e ON ue.event_id = e.event_id
@@ -292,27 +292,66 @@ router.get('/userId/:userId', async (req, res) => {
     }
 });
 
-// GET all events with a specific title
-// Also returns the number of RSVPs and SAVEs associated with each
-// WARNING: IF THERE ARE MULTIPLE EVENTS WITH THE SAME NAME, MULTIPLE RESULTS WILL BE RETURNED
-// EACH WITH THEIR RESPECTIVE LIKES AND RSVPS COUNT
-router.get('/title/:title', async (req, res) => {
+// GET all events with title partially matching given search text
+router.get('/searchTitle/:searchTitle', async (req, res) => {
     const query = `
-    with likes_count as (select l.event_id, count(l.event_id) as likes_count
-        from unilink.likes l, unilink.events e where still_valid = true and l.event_id =
-        e.event_id and e.title = '${req.params.title}' group by l.event_id),
-    rsvps_count as (select r.event_id, count(r.event_id) as rsvps_count from unilink.rsvps r,
-        unilink.events e where still_valid = true and r.event_id = e.event_id and e.title =
-        '${req.params.title}' group by r.event_id)
-    select e.event_id, e.title, e.event_description, e.poster_path, e.event_location, e.event_time,
-        e.organization_id, e.max_attendees, e.expiration_date, e.canceled, lc.likes_count, rc.rsvps_count
-    from unilink.events e, likes_count lc, rsvps_count rc
-    where e.title = '${req.params.title}' and lc.event_id = rc.event_id and e.event_id = lc.event_id`;
+    WITH 
+    likes_count AS (
+        SELECT event_id, COUNT(*) AS likes_count
+        FROM unilink.likes
+        WHERE still_valid = true
+        GROUP BY event_id
+    ),
+    rsvps_count AS (
+        SELECT event_id, COUNT(*) AS rsvps_count
+        FROM unilink.rsvps
+        WHERE still_valid = true
+        GROUP BY event_id
+    ),
+    filtered_events AS (
+        SELECT DISTINCT e.event_id
+        FROM unilink.events e
+        WHERE LOWER(e.title) LIKE '%'||LOWER($1)||'%'
+    )
+    SELECT 
+        e.event_id,
+        e.title,
+        e.event_description,
+        e.poster_path,
+        e.event_location,
+        e.event_time,
+        e.organization_id,
+        e.max_attendees,
+        e.expiration_date,
+        e.canceled,
+        COALESCE(lc.likes_count, 0) AS likes_count,
+        COALESCE(rc.rsvps_count, 0) AS rsvps_count,
+        ARRAY_REMOVE(ARRAY_AGG(
+            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
+                'tag_id', t.tag_id,
+                'tag_name', t.tag_name,
+                'classification', t.classification,
+                'color', t.color
+            ))::text, '{}')::jsonb
+        ), NULL) AS event_tags
+    FROM filtered_events fe
+    JOIN unilink.events e ON fe.event_id = e.event_id
+    LEFT JOIN likes_count lc ON e.event_id = lc.event_id
+    LEFT JOIN rsvps_count rc ON e.event_id = rc.event_id
+    LEFT JOIN unilink.event_tags et ON e.event_id = et.event_id
+    LEFT JOIN unilink.tags t ON et.tag_id = t.tag_id
+    GROUP BY 
+        e.event_id, e.title, e.event_description, e.poster_path, 
+        e.event_location, e.event_time, e.organization_id, 
+        e.max_attendees, e.expiration_date, e.canceled,
+        lc.likes_count, rc.rsvps_count;
+    `;
+
     try {
-        const result = await pool.query(query);
+        const result = await pool.query(query, [req.params.searchTitle]);
         res.json(result.rows);
     } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching events by tag category:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });

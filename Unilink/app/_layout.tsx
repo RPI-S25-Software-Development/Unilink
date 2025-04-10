@@ -12,25 +12,31 @@ import Banner from "@/components/Banner";
 
 SplashScreen.preventAutoHideAsync();
 
-export async function getUserId(){
+export async function getUserId(logResponse?: boolean){
   try {
     const userID = await AsyncStorage.getItem("user_id");
-    console.log("User ID: " + userID);
+    if(logResponse) console.log("User ID: " + userID);
     return userID;
   } catch (error) {
     console.error("Error retrieving user ID:", error);
   }
 };
 
-export async function getAPIData(apiRoute: string) {
+export async function getAPIData(apiRoute: string, logResponse?: boolean) {
   try {
     const response = await axios.get(apiRoute);
-    console.log(response);
+    if(logResponse) console.log(response);
     return response.data;
   } catch (error) {
     console.error("Error retrieving data:", error);
   }
 };
+
+export function selectButtonsState(
+  setSelectedButton: React.Dispatch<React.SetStateAction<string | undefined>>,
+  selected: string) {
+  setSelectedButton((previousSelected) => previousSelected === selected ? undefined : selected);
+}
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
