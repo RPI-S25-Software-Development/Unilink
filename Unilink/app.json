@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/Unilink_Logo.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.anonymous.Unilink"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +38,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "06f843bb-bf2f-452d-928f-6db6bc640ec3"
+      }
+    },
+    "platforms": ["ios", "android", "web"]
   }
 }

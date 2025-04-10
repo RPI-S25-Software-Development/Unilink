@@ -6,8 +6,8 @@ const cors = require('cors');
 const app = express();
 
 console.log(process.env.ENV);
-// const host = process.env.ENV === 'Prod' ? process.env.HOST : 'localhost';
-const host = 'localhost';
+const host = process.env.ENV === 'Prod' ? process.env.HOST : 'localhost';
+// const host = 'localhost';
 const port = process.env.API_PORT;
 
 app.use(cors({
