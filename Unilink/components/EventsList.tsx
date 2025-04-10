@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getAPIData, getUserId } from "@/app/_layout";
+import { getAPIData } from "@/app/_layout";
 import EventBox from "@/components/EventBox";
 import { View } from "react-native";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -85,22 +85,15 @@ function eventsAPIDataToComponent(eventsAPIData: any[]) {
 };
 
 export default function EventsList({ eventsAPIRoute }: Props) {
-  const [userId, setUserId] = useState<string>();
   const [events, setEvents] = useState<any[]>();
 
   var content = events ? eventsAPIDataToComponent(events) : <LoadingSpinner scale={2} margin={50}/>;
 
   useEffect(() => {
-      getUserId().then((userIdResponse) => {
-        if(userIdResponse) {
-          setUserId(userIdResponse);
-
-          getAPIData(eventsAPIRoute).then((eventsResponse) => {
-            if(eventsResponse) setEvents(eventsResponse);
-          });
-        };
-      });
-  }, []);
+    getAPIData(eventsAPIRoute).then((eventsResponse) => {
+      if(eventsResponse) setEvents(eventsResponse);
+    });
+  }, [eventsAPIRoute]);
 
   return (
     <View>

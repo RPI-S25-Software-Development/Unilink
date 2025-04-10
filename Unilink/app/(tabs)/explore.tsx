@@ -11,6 +11,9 @@ import EventsList from "@/components/EventsList";
 export default function ExploreScreen() {
   const [selectedCategory, selectCategory] = useState<string>();
 
+  var eventsAPIRoute = "http://localhost:3000/events/";
+  if(selectedCategory) eventsAPIRoute = eventsAPIRoute + "tagCategory/" + selectedCategory;
+
   return (
       <ScrollView className="flex-1">
         <View className="items-center py-4">
@@ -22,14 +25,14 @@ export default function ExploreScreen() {
             <HeaderText fontSize={24}>Explore by Category</HeaderText>
             <ScrollView horizontal style={{maxHeight: 75}}>
               <View className="flex flex-row px-5">
-                <MedButton label="Academic" scale={0.9} baseFontSize={16}/>
-                <MedButton label="Sports" scale={0.9}baseFontSize={16}/>
-                <MedButton label="Club" scale={0.9} baseFontSize={16}/>
-                <MedButton label="Career" scale={0.9}baseFontSize={16}/>
+                <MedButton label="Academic" scale={0.9} baseFontSize={16} onPress={() => selectCategory("academics")}/>
+                <MedButton label="Sports" scale={0.9}baseFontSize={16} onPress={() => selectCategory("sports")}/>
+                <MedButton label="Club" scale={0.9} baseFontSize={16} onPress={() => selectCategory("clubs")}/>
+                <MedButton label="Career" scale={0.9}baseFontSize={16}onPress={() => selectCategory("career")}/>
               </View>
             </ScrollView>
           </View>
-          <EventsList eventsAPIRoute="http://localhost:3000/events/"/>
+          <EventsList eventsAPIRoute={eventsAPIRoute}/>
         </View>
       </ScrollView>
     );
