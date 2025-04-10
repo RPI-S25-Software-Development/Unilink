@@ -17,7 +17,7 @@ On EC2 console:
 To refresh/start client:
 docker rmi ecarson2021/unilink_frontend
 docker pull ecarson2021/unilink_frontend
-docker run -d --rm -p 8081:3000 ecarson2021/unilink_frontend
+docker run -d --rm -p 8081:8081 ecarson2021/unilink_frontend
 
 To refresh/start server:
 docker rmi ecarson2021/unilink_backend
