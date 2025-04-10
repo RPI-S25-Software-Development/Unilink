@@ -1,9 +1,6 @@
 FROM node
 WORKDIR /app
-# Copy only package.json and package-lock.json first
-COPY package*.json ./
-# Install dependencies inside Docker (important!)
-RUN npm install
-# Now copy the rest of the files
-COPY . .
-CMD ["npx", "serve", "dist"]
+# Copy only prebuilt web package
+COPY dist/ .
+RUN npm install -g serve
+CMD ["serve", "-s", ".", "-l", "3000"]
