@@ -14,7 +14,7 @@ export default function ExploreScreen() {
 
   var eventsAPIRoute = "http://localhost:3000/events/";
   if(selectedCategory) eventsAPIRoute = eventsAPIRoute + "tagCategory/" + selectedCategory;
-  if(searchText && searchText != "") eventsAPIRoute = eventsAPIRoute + "title/" + searchText;
+  if(searchText && searchText != "") eventsAPIRoute = eventsAPIRoute + "searchTitle/" + searchText;
 
   return (
       <ScrollView className="flex-1">
