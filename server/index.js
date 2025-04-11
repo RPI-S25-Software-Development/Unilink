@@ -11,7 +11,7 @@ const host = process.env.ENV === 'Prod' ? process.env.HOST : 'localhost';
 const port = process.env.API_PORT;
 
 app.use(cors({
-  origin: [`http://${host}:8081`, 'http://localhost:8081'],
+  origin: [`http://${process.env.HOST}:8081`, 'http://localhost:8081'],
   credentials: true
 }));
 
