@@ -356,6 +356,73 @@ router.get('/searchTitle/:searchTitle', async (req, res) => {
     }
 });
 
+// GET all events with the same tag category
+// and with title partially matching given search text
+router.get('/tagCategory/:category/searchTitle/:searchTitle', async (req, res) => {
+    const query = `
+    WITH 
+    likes_count AS (
+        SELECT event_id, COUNT(*) AS likes_count
+        FROM unilink.likes
+        WHERE still_valid = true
+        GROUP BY event_id
+    ),
+    rsvps_count AS (
+        SELECT event_id, COUNT(*) AS rsvps_count
+        FROM unilink.rsvps
+        WHERE still_valid = true
+        GROUP BY event_id
+    ),
+    filtered_events AS (
+        SELECT DISTINCT e.event_id
+        FROM unilink.events e
+        JOIN unilink.event_tags et ON e.event_id = et.event_id
+        JOIN unilink.tags t ON et.tag_id = t.tag_id
+        WHERE t.classification = $1 AND LOWER(e.title) LIKE '%'||LOWER($2)||'%'
+    )
+    SELECT 
+        e.event_id,
+        e.title,
+        e.event_description,
+        e.poster_path,
+        e.event_location,
+        e.event_time,
+        e.organization_id,
+        e.max_attendees,
+        e.expiration_date,
+        e.canceled,
+        COALESCE(lc.likes_count, 0) AS likes_count,
+        COALESCE(rc.rsvps_count, 0) AS rsvps_count,
+        ARRAY_REMOVE(ARRAY_AGG(
+            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
+                'tag_id', t.tag_id,
+                'tag_name', t.tag_name,
+                'classification', t.classification,
+                'color', t.color
+            ))::text, '{}')::jsonb
+        ), NULL) AS event_tags
+    FROM filtered_events fe
+    JOIN unilink.events e ON fe.event_id = e.event_id
+    LEFT JOIN likes_count lc ON e.event_id = lc.event_id
+    LEFT JOIN rsvps_count rc ON e.event_id = rc.event_id
+    LEFT JOIN unilink.event_tags et ON e.event_id = et.event_id
+    LEFT JOIN unilink.tags t ON et.tag_id = t.tag_id
+    GROUP BY 
+        e.event_id, e.title, e.event_description, e.poster_path, 
+        e.event_location, e.event_time, e.organization_id, 
+        e.max_attendees, e.expiration_date, e.canceled,
+        lc.likes_count, rc.rsvps_count;
+    `;
+
+    try {
+        const result = await pool.query(query, [req.params.category, req.params.searchTitle]);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error fetching events by tag category:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 // GET all events with a specific organization name
 router.get('/orgName/:orgName', async (req, res) => {
     const query = `select * from unilink.events e, unilink.organizations o
