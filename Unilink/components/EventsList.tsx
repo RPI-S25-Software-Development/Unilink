@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getAPIData } from "@/app/_layout";
+import { getAPI } from "@/app/_layout";
 import EventBox from "@/components/EventBox";
 import { View } from "react-native";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -90,9 +90,12 @@ export default function EventsList({ eventsAPIRoute }: Props) {
   var content = events ? eventsAPIDataToComponent(events) : <LoadingSpinner scale={2} margin={50}/>;
 
   useEffect(() => {
-    getAPIData(eventsAPIRoute).then((eventsResponse) => {
-      if(eventsResponse) setEvents(eventsResponse);
-    });
+    const getEvents = async () => {
+      const eventsResponse = await getAPI(eventsAPIRoute);
+      if(eventsResponse) setEvents(eventsResponse.data);
+    }
+
+    getEvents();
   }, [eventsAPIRoute]);
 
   return (

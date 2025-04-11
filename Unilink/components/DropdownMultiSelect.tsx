@@ -3,7 +3,7 @@ import { View, DimensionValue } from "react-native";
 import MultiSelect from "react-native-multiple-select";
 
 export type DropdownSelectedItemsState = {
-  selectedItems: string[];
+  selectedItems: string[] | undefined;
   setSelectedItems: React.Dispatch<React.SetStateAction<string[] | undefined>>;
 };
 
@@ -20,7 +20,8 @@ export default function DropdownMultiSelect({dropdownItems, selectedItemsState, 
 itemsSelectedText, className = ""}: Props) {
   var componentRef: MultiSelect | null = null;
 
-  const [localSelectedItems, setLocalSelectedItems] = useState<string[]>(selectedItemsState ?
+  const [localSelectedItems, setLocalSelectedItems] = useState<string[]>(
+    selectedItemsState && selectedItemsState.selectedItems ?
     selectedItemsState.selectedItems : []);
 
   var onSelectedItemsChange = (dropdownSelectedItems: string[]) => {

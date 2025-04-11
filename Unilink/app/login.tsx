@@ -1,11 +1,39 @@
 import { View, Text, Alert } from "react-native";
 import { useState } from "react";
-import { Link, useRouter } from "expo-router";
+import { Link, useRouter, Router } from "expo-router";
 import MedButton from "@/components/MedButton";
 import TextField from "@/components/TextField";
 import HeaderText from "@/components/HeaderText";
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { postAPI } from "./_layout";
+import { saveToStorage } from "./_layout";
+
+async function handleLogin(email: string, password: string, router: Router) {
+    try {
+        const loginResponse = await postAPI("/auth/login", {
+            email,
+            password
+        });
+
+        if(loginResponse) {
+            const { access_token, user_id } = loginResponse.data;
+
+            console.log(email);
+
+            // Store token in AsyncStorage
+            const savedToken = await saveToStorage("access_token", access_token, true);
+            const userId = await saveToStorage("user_id", user_id, true);
+
+            console.log("Saved token:", savedToken);
+            console.log("User ID:", userId)
+            if(savedToken && userId) router.navigate("/home"); // Navigate on successful signup
+        }
+    } catch (error) {
+        console.error("Login error:", error);
+        // Alert.alert("Error", error.response?.data?.error || "Signup failed. Please try again.");
+    }
+}
 
 export default function Login() {
     // const host = process.env.ENV === 'Prod' ? process.env.HOST : 'localhost';
@@ -13,29 +41,8 @@ export default function Login() {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
-    const handleLogin = async () => {
-        try {
-            const response = await axios.post(`http://${host}:3000/auth/login`, {
-                email,
-                password
-            });
-            const { access_token, user_id } = response.data;
-            console.log(email)
-
-            // Store token in AsyncStorage
-            await AsyncStorage.setItem('access_token', access_token);
-            await AsyncStorage.setItem('user_id', user_id);
-            const savedToken = await AsyncStorage.getItem("access_token");
-            const userID = await AsyncStorage.getItem("user_id");
-            console.log("Saved token:", savedToken);
-            console.log("User id:", userID)
-            router.navigate("/home"); // Navigate on successful signup
-        } catch (error) {
-            console.error("Login error:", error);
-            // Alert.alert("Error", error.response?.data?.error || "Signup failed. Please try again.");
-        }
-    };
+    const [savedToken, setSavedToken] = useState<string>();
+    const [userId, setUserId] = useState<string>();
 
     return (
         <View className="flex-1 items-center justify-center">
@@ -57,7 +64,8 @@ export default function Login() {
                     value={password} 
                 />
             </View>
-            <MedButton label="Login" backgroundColor="#B61601" textColor="white"scale={1} onPress={handleLogin}/>
+            <MedButton label="Login" backgroundColor="#B61601" textColor="white"scale={1}
+            onPress={() => {handleLogin(email, password, router)}}/>
             <Link className='underline' href='/signup'>New user? Click here to sign up.</Link>
             <Link className='underline' href='/login'>Forgot password? Click here to reset.</Link>
             </View>

@@ -12,23 +12,75 @@ import Banner from "@/components/Banner";
 
 SplashScreen.preventAutoHideAsync();
 
-export async function getUserId(logResponse?: boolean){
+function fullAPIRoute(APIRoute: string) {
+  var host = process.env.EXPO_PUBLIC_API_HOST
+  if(host === "PROD") host = process.env.EXPO_PUBLIC_ENV;
+  if(host === "DEV") host = "localhost";
+
+  return "http://" + host + ":" + process.env.EXPO_PUBLIC_API_PORT + APIRoute;
+};
+
+export async function getFromStorage(item: string, logResponse = false) {
   try {
-    const userID = await AsyncStorage.getItem("user_id");
-    if(logResponse) console.log("User ID: " + userID);
-    return userID;
+    const itemValue = await AsyncStorage.getItem(item);
+    if(logResponse) console.log("Item retrieved from storage: " + itemValue);
+    return itemValue;
   } catch (error) {
-    console.error("Error retrieving user ID:", error);
+    console.error("Error retrieving from storage:", error);
   }
 };
 
-export async function getAPIData(apiRoute: string, logResponse?: boolean) {
+export async function saveToStorage(item: string, itemValue: string,
+getItemFromStorage = false, logResponse = false) {
   try {
-    const response = await axios.get(apiRoute);
-    if(logResponse) console.log(response);
-    return response.data;
+    const response = await AsyncStorage.setItem(item, itemValue);
+    if(logResponse) console.log("Item set in storage. Response: " + response);
+    if(getItemFromStorage) {
+      const itemFromStorage = await AsyncStorage.getItem(item);
+      return itemFromStorage;
+    }
   } catch (error) {
-    console.error("Error retrieving data:", error);
+    console.error("Error setting item in storage:", error);
+  }
+}
+
+export async function getAPI(APIRoute: string, logResponse = false) {
+  try {
+    const response = await axios.get(fullAPIRoute(APIRoute));
+    if(logResponse) console.log(response);
+    return response;
+  } catch (error) {
+    console.error("Error with GET API call:", error);
+  }
+};
+
+export async function postAPI(APIRoute: string, requestBody?: {}, logResponse = false) {
+  try {
+    const response = await axios.post(fullAPIRoute(APIRoute), requestBody);
+    if(logResponse) console.log(response);
+    return response;
+  } catch (error) {
+    console.error("Error with POST API call:", error);
+  }
+};
+
+export async function putAPI(APIRoute: string, requestBody?: {}, logResponse = false) {
+  try {
+    const response = axios.put(fullAPIRoute(APIRoute), requestBody);
+    if(logResponse) console.log(response);
+    return response;
+  } catch (error) {
+    console.error("Error with PUT API call:", error);
+  }
+};
+
+export async function deleteAPI(APIRoute: string, logResponse = false) {
+  try {
+    const response = axios.delete(fullAPIRoute(APIRoute));
+    if(logResponse) console.log(response);
+    return response;
+  } catch (error) {
+    console.error("Error with DELETE API call:", error);
   }
 };
 

@@ -2,7 +2,7 @@ import { View, Alert } from "react-native";
 import { useState, useEffect } from "react";
 import { useRouter, Router, Redirect } from "expo-router";
 import { ScrollView } from "react-native-virtualized-view";
-import { getUserId, getAPIData } from "./_layout";
+import { getFromStorage, getAPI, putAPI } from "./_layout";
 
 import "@/global.css";
 
@@ -87,10 +87,10 @@ function convertUserTagsAPIData(userTagsAPIData: any[]) {
   return result;
 }
 
-function getTagsDataByNames(tagNames: string[], allTagsData: TagsData | undefined) {
+function getTagsDataByNames(tagNames: string[] | undefined, allTagsData: TagsData | undefined) {
   var result: TagsData = new Map();
 
-  if(allTagsData) {
+  if(tagNames && allTagsData) {
     for(var tagName of tagNames) {
       var tagData = allTagsData.get(tagName);
       if(tagData) result.set(tagName, tagData);
@@ -137,31 +137,30 @@ selectedItemsState: DropdownSelectedItemsState) {
   );
 };
 
-function setCategoryTags(tagCategory: string, userId: string,
+async function setCategoryTags(tagCategory: string, userId: string,
 setAllCategoryTags: React.Dispatch<React.SetStateAction<TagsData | undefined>>,
 selectCategoryTags: React.Dispatch<React.SetStateAction<string[] | undefined>>) {
-  const getTagsByCategory = "http://localhost:3000/tags/classification/" + tagCategory;
-  const getUserTagsByCategory = "http://localhost:3000/userTags/userId/" + userId
-  + "/classification/" + tagCategory
+  const tagsByCategoryRoute = "/tags/classification/" + tagCategory;
+  const userTagsByCategoryRoute = "/userTags/userId/" + userId + "/classification/" + tagCategory;
 
-  getAPIData(getTagsByCategory).then((categoryTagsResponse) => {
-    if(categoryTagsResponse) {
-      var academicTagsData = convertTagsAPIData(categoryTagsResponse);
-      setAllCategoryTags(academicTagsData);
+  const categoryTagsResponse = await getAPI(tagsByCategoryRoute);
+  if(categoryTagsResponse) {
+    var categoryTags = convertTagsAPIData(categoryTagsResponse.data);
+    setAllCategoryTags(categoryTags);
 
-      getAPIData(getUserTagsByCategory).then((userCategoryTagsResponse) => {
-        if(userCategoryTagsResponse) {
-          var selectedTagIds = convertUserTagsAPIData(userCategoryTagsResponse);
-          var selectedTagNames = getTagNamesByFieldValues(
-            academicTagsData, "id", selectedTagIds);
-          selectCategoryTags(selectedTagNames);
-        }
-      });
+    const userCategoryTagsResponse = await getAPI(userTagsByCategoryRoute);
+    if(userCategoryTagsResponse) {
+      var selectedTagIds = convertUserTagsAPIData(userCategoryTagsResponse.data);
+      var selectedTagNames = getTagNamesByFieldValues(categoryTags, "id", selectedTagIds);
+      selectCategoryTags(selectedTagNames);
     }
-  });
+  };
 }
 
-async function saveUserTags(userId: string, allTagsData: {selected: string[], all: TagsData}[],
+async function saveUserTags(userId: string, allTagsData: {
+  selected: string[] | undefined,
+  all: TagsData | undefined
+}[],
 router: Router) {
   var tagIdsCombined: string[] = [];
 
@@ -171,12 +170,15 @@ router: Router) {
   }
 
   try {
-    const response = await axios.put("http://localhost:3000/userTags/userId/" + userId, {
+    const response = await putAPI("/userTags/userId/" + userId, {
       tag_ids: tagIdsCombined
     });
 
-    console.log(response);
-    router.navigate("/home");
+    if(response) {
+      router.navigate("/home");
+    } else {
+      throw "No response from server";
+    }
 
     return;
   } catch (error) {
@@ -203,27 +205,25 @@ export default function PreferencesScreen() {
   var content: JSX.Element | null = null;
 
   useEffect(() => {
-    getUserId().then((userIdResponse) => {
-      if(userIdResponse) {
-        setUserId(userIdResponse);
+    const getUserId = async () => {
+      const userIdResponse = await getFromStorage("user_id");
+      if(userIdResponse) setUserId(userIdResponse);
+    };
 
-        setCategoryTags("academics", userIdResponse, setAcademicTags, selectAcademicTags);
-        setCategoryTags("sports", userIdResponse, setSportsTags, selectSportsTags);
-        setCategoryTags("clubs", userIdResponse, setClubTags, selectClubTags);
-        setCategoryTags("career", userIdResponse, setCareerTags, selectCareerTags);
-      }
-    });
+    getUserId();
   }, []);
 
+  useEffect(() => {
+    if(userId) {
+      setCategoryTags("academics", userId, setAcademicTags, selectAcademicTags);
+      setCategoryTags("sports", userId, setSportsTags, selectSportsTags);
+      setCategoryTags("clubs", userId, setClubTags, selectClubTags);
+      setCategoryTags("career", userId, setCareerTags, selectCareerTags);
+    };
+  }, [userId]);
+
   if(userId) {
-    if(academicTags
-    && sportsTags
-    && clubTags
-    && careerTags
-    && selectedAcademicTags
-    && selectedSportsTags
-    && selectedClubTags
-    && selectedCareerTags) {
+    if(selectedAcademicTags) {
       content =
         <View>
           <HeaderText fontSize={32}>Your Tags of Interest</HeaderText>

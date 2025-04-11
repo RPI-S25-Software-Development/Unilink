@@ -1,28 +1,31 @@
 import { View, ScrollView } from "react-native";
 import MedButton from "@/components/MedButton";
 import EventsList from "@/components/EventsList";
-import { getUserId, selectButtonsState } from "../_layout";
+import { getFromStorage, selectButtonsState } from "../_layout";
 import { useState, useEffect } from "react";
 
 export default function HomeScreen() {
   const [userId, setUserId] = useState<string>();
   const [eventView, setEventView] = useState<string>();
 
-  var eventsAPIRoute = "http://localhost:3000/events/";
+  var eventsAPIRoute = "/events/";
 
   switch(eventView) {
     case "trending":
-      eventsAPIRoute = "http://localhost:3000/events/";
+      eventsAPIRoute = "/events/";
       break;
     case "user":
-      eventsAPIRoute = "http://localhost:3000/events/userId/" + userId;
+      eventsAPIRoute = "/events/userId/" + userId;
       break;
   }
 
   useEffect(() => {
-    getUserId().then((userIdResponse) => {
+    const getUserId = async () => {
+      const userIdResponse = await getFromStorage("user_id");
       if(userIdResponse) setUserId(userIdResponse);
-    });
+    };
+
+    getUserId();
   }, []);
 
   return (
