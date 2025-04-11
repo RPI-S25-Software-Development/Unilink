@@ -1,5 +1,4 @@
-import { Text, View, Image } from "react-native";
-import { EvilIcons } from "@expo/vector-icons";
+import { Text, View } from "react-native";
 import ImageViewer from "@/components/ImageViewer";
 import RoundedBox from "@/components/RoundedBox";
 import IconButton from "@/components/IconButton";
