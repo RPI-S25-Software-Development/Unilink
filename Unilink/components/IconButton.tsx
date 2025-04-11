@@ -7,7 +7,7 @@ type Props = {
   onPress?: () => void;
 };
 
-export default function SmallButton({ iconSource, iconColor, onPress }: Props) {
+export default function IconButton({ iconSource, iconColor, onPress }: Props) {
   return (
     <View className="items-center">
       <Pressable 
