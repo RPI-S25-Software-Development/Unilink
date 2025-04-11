@@ -13,8 +13,6 @@ import HeaderText from "@/components/HeaderText";
 import MedButton from "@/components/MedButton";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
-import axios from "axios";
-
 type TagData = {
   id: string;
   category: string;
