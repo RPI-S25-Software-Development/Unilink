@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Unilink",
-    "slug": "Unilink",
+    "slug": "unilink",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/Unilink_Logo.png",
@@ -44,9 +44,14 @@
         "origin": false
       },
       "eas": {
-        "projectId": "06f843bb-bf2f-452d-928f-6db6bc640ec3"
+        "projectId": "8bd9fb82-6801-437b-becd-03e401677447"
       }
     },
-    "platforms": ["ios", "android", "web"]
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "owner": "bajajb"
   }
 }
