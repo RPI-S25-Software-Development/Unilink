@@ -13,8 +13,6 @@ import HeaderText from "@/components/HeaderText";
 import MedButton from "@/components/MedButton";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
-import axios from "axios";
-
 type TagData = {
   id: string;
   category: string;
@@ -222,7 +220,9 @@ export default function PreferencesScreen() {
     };
   }, [userId]);
 
-  if(userId) {
+  if(userId === null) {
+    return <Redirect href="/login"/>;
+  } else {
     if(selectedAcademicTags) {
       content =
         <View>
@@ -255,19 +255,17 @@ export default function PreferencesScreen() {
             })}
 
             <MedButton label="Save" backgroundColor="#B61601" textColor="white"
-            scale={1.5} onPress={() => saveUserTags(userId,
+            scale={1.5} onPress={() => {if(userId) saveUserTags(userId,
             [{selected: selectedAcademicTags, all: academicTags},
             {selected: selectedSportsTags, all: sportsTags},
             {selected: selectedClubTags, all: clubTags},
             {selected: selectedCareerTags, all: careerTags}],
-            router)}/>
+            router)}}/>
           </View>
         </View>;
     } else {
       content = <LoadingSpinner scale={2} margin="5%"/>;
     }
-  } else {
-    return <Redirect href="/login"/>;
   };
 
   return <ScrollView>
