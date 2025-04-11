@@ -11,37 +11,37 @@ type EventDetailsRow = {
   text: string;
 };
 
-export type EventTagProps = {
+export type EventTagData = {
   backgroundColor: string;
   textColor?: string;
   name: string;
 }
 
 type EventTextProps = {
-  tags: EventTagProps[];
+  tags: EventTagData[];
   title: string;
   description: string;
   details: EventDetailsRow[];
 };
 
-export type InteractionCounts = {
-  likeCount: number;
-  rsvpCount: number;
+type EventInteractionData = {
+  count: number;
+  selected: boolean;
+  setSelected: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export type InteractionStates = {
-  likeState: React.Dispatch<React.SetStateAction<boolean>>;
-  rsvpState: React.Dispatch<React.SetStateAction<boolean>>;
+export type EventInteractionsData = {
+  like: EventInteractionData;
+  rsvp: EventInteractionData;
 }
 
 type Props = {
   imageSource: any;
   eventText: EventTextProps;
-  interactionCounts: InteractionCounts;
-  interactionStates: InteractionStates;
+  interactionData: EventInteractionsData;
 };
 
-function exportEventTag({ backgroundColor, textColor = "white", name }: EventTagProps) {
+function exportEventTag({ backgroundColor, textColor = "white", name }: EventTagData) {
   return (
     <EventTag key={name} backgroundColor={backgroundColor} textColor={textColor} name={name}
     compact={true}/>
@@ -91,7 +91,7 @@ function toggleInteractionState(setInteractionState: React.Dispatch<React.SetSta
   setInteractionState((previousState) => !previousState);
 }
 
-export default function EventBox({ imageSource, eventText, interactionCounts, interactionStates }: Props) {
+export default function EventBox({ imageSource, eventText, interactionData }: Props) {
   const contentWidth = 300;
   
   return (
@@ -104,13 +104,13 @@ export default function EventBox({ imageSource, eventText, interactionCounts, in
         <View className="flex flex-row justify-end">
           <View className="flex flex-col items-center">
             <IconButton iconSource={{fontAwesome: "heart"}} iconColor="red"
-            onPress={() => toggleInteractionState(interactionStates.likeState)}/>
-            <Text className="text-lg font-bold">{interactionCounts.likeCount}</Text>
+            onPress={() => toggleInteractionState(interactionData.like.setSelected)}/>
+            <Text className="text-lg font-bold">{interactionData.like.count}</Text>
           </View>
           <View className="flex flex-col items-center">
             <IconButton iconSource={{fontAwesome: "star"}} iconColor="gold"
-            onPress={() => toggleInteractionState(interactionStates.rsvpState)}/>
-            <Text className="text-lg font-bold">{interactionCounts.rsvpCount}</Text>
+            onPress={() => toggleInteractionState(interactionData.rsvp.setSelected)}/>
+            <Text className="text-lg font-bold">{interactionData.rsvp.count}</Text>
           </View>
         </View>
       </View>
