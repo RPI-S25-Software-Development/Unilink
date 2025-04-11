@@ -12,7 +12,7 @@ export default function ExploreScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>();
   const [searchText, setSearchText] = useState<string>();
 
-  var eventsAPIRoute = "http://localhost:3000/events/";
+  var eventsAPIRoute = "/events/";
   if(selectedCategory) eventsAPIRoute = eventsAPIRoute + "tagCategory/" + selectedCategory;
   if(searchText && searchText != "") eventsAPIRoute = eventsAPIRoute + "searchTitle/" + searchText;
 
