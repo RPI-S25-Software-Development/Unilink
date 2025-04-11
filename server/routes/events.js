@@ -3,59 +3,78 @@ const crypto = require("crypto");
 const pool = require('../db');
 const router = express.Router();
 
+/* `select * from unilink.events e, unilink.organizations o
+    where e.organization_id = o.organization_id and o.organization_id = '${req.params.orgId}'`
+*/
+
+function eventsQuery(filterQuery = "") {
+    var fromTable = "FROM unilink.events e";
+    if(filterQuery != "") fromTable = `FROM filtered_events fe
+    JOIN unilink.events e ON fe.event_id = e.event_id`;
+
+    var filteredEventsTable = "";
+    if(filterQuery != "") filteredEventsTable = `,filtered_events AS (${filterQuery})`
+
+    return `WITH 
+        likes_count AS (
+            SELECT event_id, COUNT(*) AS likes_count
+            FROM unilink.likes
+            WHERE still_valid = true
+            GROUP BY event_id
+        ),
+        rsvps_count AS (
+            SELECT event_id, COUNT(*) AS rsvps_count
+            FROM unilink.rsvps
+            WHERE still_valid = true
+            GROUP BY event_id
+        )
+        ${filteredEventsTable}
+        SELECT 
+            e.event_id,
+            e.title,
+            e.event_description,
+            e.poster_path,
+            e.event_location,
+            e.event_time,
+            nullif(jsonb_strip_nulls(jsonb_build_object(
+                'organization_id', e.organization_id,
+                'organization_name', o.organization_name
+            ))::text, '{}')::jsonb AS organization_data,
+            e.max_attendees,
+            e.expiration_date,
+            e.canceled,
+            COALESCE(lc.likes_count, 0) AS likes_count,
+            COALESCE(rc.rsvps_count, 0) AS rsvps_count,
+            ARRAY_REMOVE(ARRAY_AGG(
+                DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
+                    'tag_id', t.tag_id,
+                    'tag_name', t.tag_name,
+                    'classification', t.classification,
+                    'color', t.color
+                ))::text, '{}')::jsonb
+            ), NULL) AS event_tags
+        ${fromTable}
+        LEFT JOIN likes_count lc ON e.event_id = lc.event_id
+        LEFT JOIN rsvps_count rc ON e.event_id = rc.event_id
+        LEFT JOIN unilink.event_tags et ON e.event_id = et.event_id
+        LEFT JOIN unilink.tags t ON et.tag_id = t.tag_id
+        LEFT JOIN unilink.organizations o on e.organization_id = o.organization_id
+        GROUP BY 
+            e.event_id, e.title, e.event_description, e.poster_path, 
+            e.event_location, e.event_time, e.organization_id, 
+            e.max_attendees, e.expiration_date, e.canceled,
+            lc.likes_count, rc.rsvps_count, o.organization_name;
+        `;
+}
+
 // GET all events
-// returns number of likes, rsvps and event tags
 router.get('/', async (req, res) => {
-    const query = `
-    WITH 
-    likes_count AS (
-        SELECT event_id, COUNT(*) AS likes_count
-        FROM unilink.likes
-        WHERE still_valid = true
-        GROUP BY event_id
-    ),
-    rsvps_count AS (
-        SELECT event_id, COUNT(*) AS rsvps_count
-        FROM unilink.rsvps
-        WHERE still_valid = true
-        GROUP BY event_id
-    )
-    SELECT 
-        e.event_id,
-        e.title,
-        e.event_description,
-        e.poster_path,
-        e.event_location,
-        e.event_time,
-        e.organization_id,
-        e.max_attendees,
-        e.expiration_date,
-        e.canceled,
-        COALESCE(lc.likes_count, 0) AS likes_count,
-        COALESCE(rc.rsvps_count, 0) AS rsvps_count,
-        ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
-                'tag_id', t.tag_id,
-                'tag_name', t.tag_name,
-                'classification', t.classification,
-                'color', t.color
-            ))::text, '{}')::jsonb
-        ), NULL) AS event_tags
-    FROM unilink.events e
-    LEFT JOIN likes_count lc ON e.event_id = lc.event_id
-    LEFT JOIN rsvps_count rc ON e.event_id = rc.event_id
-    LEFT JOIN unilink.event_tags et ON e.event_id = et.event_id
-    LEFT JOIN unilink.tags t ON et.tag_id = t.tag_id
-    GROUP BY 
-        e.event_id, e.title, e.event_description, e.poster_path, 
-        e.event_location, e.event_time, e.organization_id, 
-        e.max_attendees, e.expiration_date, e.canceled,
-        lc.likes_count, rc.rsvps_count;
-    `;
+    const query = eventsQuery();
 
     try {
         const result = await pool.query(query);
         res.json(result.rows);
+        //console.log(`Rows returned: ${result.rows.length}`);
     } catch (error) {
         console.error("Error fetching events:", error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -75,11 +94,18 @@ router.get('/lastDay', async (req, res) => {
 
 // GET all events with a specific tag name
 router.get('/tagName/:tagName', async (req, res) => {
-    const query = `select e.event_id, e.title, e.event_description, e.poster_path, e.event_location, e.event_time, e.organization_id, e.max_attendees, e.expiration_date, e.canceled, t.tag_id, t.tag_name
-    from unilink.tags t, unilink.event_tags et, unilink.events e
-    where t.tag_id = et.tag_id and e.event_id = et.event_id and t.tag_name = '${req.params.tagName}'`;
+    const filterQuery = `
+        SELECT DISTINCT e.event_id
+        FROM unilink.events e
+        JOIN unilink.event_tags et ON e.event_id = et.event_id
+        JOIN unilink.tags t ON et.tag_id = t.tag_id
+        WHERE t.tag_name = $1
+    `
+
+    const query = eventsQuery(filterQuery);
+
     try {
-        const result = await pool.query(query);
+        const result = await pool.query(query, [req.params.tagName]);
         res.json(result.rows);
     } catch (error) {
         console.error("Error fetching events:", error);
@@ -89,11 +115,18 @@ router.get('/tagName/:tagName', async (req, res) => {
 
 // GET all events with a specific tag id
 router.get('/tagId/:tagId', async (req, res) => {
-    const query = `select e.event_id, e.title, e.event_description, e.poster_path, e.event_location, e.event_time, e.organization_id, e.max_attendees, e.expiration_date, e.canceled, t.tag_id, t.tag_name
-    from unilink.tags t, unilink.event_tags et, unilink.events e
-    where t.tag_id = et.tag_id and e.event_id = et.event_id and t.tag_id = '${req.params.tagId}'`;
+    const filterQuery = `
+        SELECT DISTINCT e.event_id
+        FROM unilink.events e
+        JOIN unilink.event_tags et ON e.event_id = et.event_id
+        JOIN unilink.tags t ON et.tag_id = t.tag_id
+        WHERE t.tag_id = $1
+    `
+
+    const query = eventsQuery(filterQuery);
+
     try {
-        const result = await pool.query(query);
+        const result = await pool.query(query, [req.params.tagId]);
         res.json(result.rows);
     } catch (error) {
         console.error("Error fetching events:", error);
@@ -101,62 +134,17 @@ router.get('/tagId/:tagId', async (req, res) => {
     }
 });
 
-// GET all events with the same tag category
+// GET all events with a specific tag category
 router.get('/tagCategory/:category', async (req, res) => {
-    const query = `
-    WITH 
-    likes_count AS (
-        SELECT event_id, COUNT(*) AS likes_count
-        FROM unilink.likes
-        WHERE still_valid = true
-        GROUP BY event_id
-    ),
-    rsvps_count AS (
-        SELECT event_id, COUNT(*) AS rsvps_count
-        FROM unilink.rsvps
-        WHERE still_valid = true
-        GROUP BY event_id
-    ),
-    filtered_events AS (
+    const filterQuery = `
         SELECT DISTINCT e.event_id
         FROM unilink.events e
         JOIN unilink.event_tags et ON e.event_id = et.event_id
         JOIN unilink.tags t ON et.tag_id = t.tag_id
         WHERE t.classification = $1
-    )
-    SELECT 
-        e.event_id,
-        e.title,
-        e.event_description,
-        e.poster_path,
-        e.event_location,
-        e.event_time,
-        e.organization_id,
-        e.max_attendees,
-        e.expiration_date,
-        e.canceled,
-        COALESCE(lc.likes_count, 0) AS likes_count,
-        COALESCE(rc.rsvps_count, 0) AS rsvps_count,
-        ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
-                'tag_id', t.tag_id,
-                'tag_name', t.tag_name,
-                'classification', t.classification,
-                'color', t.color
-            ))::text, '{}')::jsonb
-        ), NULL) AS event_tags
-    FROM filtered_events fe
-    JOIN unilink.events e ON fe.event_id = e.event_id
-    LEFT JOIN likes_count lc ON e.event_id = lc.event_id
-    LEFT JOIN rsvps_count rc ON e.event_id = rc.event_id
-    LEFT JOIN unilink.event_tags et ON e.event_id = et.event_id
-    LEFT JOIN unilink.tags t ON et.tag_id = t.tag_id
-    GROUP BY 
-        e.event_id, e.title, e.event_description, e.poster_path, 
-        e.event_location, e.event_time, e.organization_id, 
-        e.max_attendees, e.expiration_date, e.canceled,
-        lc.likes_count, rc.rsvps_count;
-    `;
+    `
+
+    const query = eventsQuery(filterQuery);
 
     try {
         const result = await pool.query(query, [req.params.category]);
@@ -168,52 +156,14 @@ router.get('/tagCategory/:category', async (req, res) => {
 });
 
 // GET all events with a specific event id
-// Also returns the number of RSVPs and SAVEs associated with each, as well as all tags
 router.get('/eventId/:eventId', async (req, res) => {
-    const query = `
-    WITH likes_count AS (
-        SELECT COUNT(*) AS likes_count
-        FROM unilink.likes 
-        WHERE still_valid = true AND event_id = $1
-    ),
-    rsvps_count AS (
-        SELECT COUNT(*) AS rsvps_count
-        FROM unilink.rsvps
-        WHERE still_valid = true AND event_id = $1
-    )
-    SELECT 
-        e.event_id,
-        e.title,
-        e.event_description,
-        e.poster_path,
-        e.event_location,
-        e.event_time,
-        e.organization_id,
-        e.max_attendees,
-        e.expiration_date,
-        e.canceled,
-        lc.likes_count,
-        rc.rsvps_count,
-        ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
-                'tag_id', t.tag_id,
-                'tag_name', t.tag_name,
-                'classification', t.classification,
-                'color', t.color
-            ))::text, '{}')::jsonb
-        ), NULL) AS event_tags
-    FROM unilink.events e
-    LEFT JOIN unilink.event_tags et ON e.event_id = et.event_id
-    LEFT JOIN unilink.tags t ON et.tag_id = t.tag_id
-    CROSS JOIN likes_count lc
-    CROSS JOIN rsvps_count rc
-    WHERE e.event_id = $1
-    GROUP BY 
-        e.event_id, e.title, e.event_description, e.poster_path, 
-        e.event_location, e.event_time, e.organization_id, 
-        e.max_attendees, e.expiration_date, e.canceled, 
-        lc.likes_count, rc.rsvps_count;
-    `;
+    const filterQuery = `
+        SELECT DISTINCT e.event_id
+        FROM unilink.events e
+        WHERE e.event_id = $1
+    `
+
+    const query = eventsQuery(filterQuery);
 
     try {
         const result = await pool.query(query, [req.params.eventId]);
@@ -224,23 +174,9 @@ router.get('/eventId/:eventId', async (req, res) => {
     }
 });
 
-// GET all events given a user_id based on the users likes and RSVPs
+// GET all events that has a like or RSVP from a specific user id
 router.get('/userId/:userId', async (req, res) => {
-    const query = `
-    WITH 
-    likes_count AS (
-        SELECT event_id, COUNT(*) AS likes_count
-        FROM unilink.likes
-        WHERE still_valid = true
-        GROUP BY event_id
-    ),
-    rsvps_count AS (
-        SELECT event_id, COUNT(*) AS rsvps_count
-        FROM unilink.rsvps
-        WHERE still_valid = true
-        GROUP BY event_id
-    ),
-    user_events AS (
+    const filterQuery = `
         SELECT DISTINCT event_id
         FROM unilink.likes
         WHERE user_id = $1 AND still_valid = true
@@ -248,40 +184,9 @@ router.get('/userId/:userId', async (req, res) => {
         SELECT DISTINCT event_id
         FROM unilink.rsvps
         WHERE user_id = $1 AND still_valid = true
-    )
-    SELECT 
-        e.event_id,
-        e.title,
-        e.event_description,
-        e.poster_path,
-        e.event_location,
-        e.event_time,
-        e.organization_id,
-        e.max_attendees,
-        e.expiration_date,
-        e.canceled,
-        COALESCE(lc.likes_count, 0) AS likes_count,
-        COALESCE(rc.rsvps_count, 0) AS rsvps_count,
-        ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
-                'tag_id', t.tag_id,
-                'tag_name', t.tag_name,
-                'classification', t.classification,
-                'color', t.color
-            ))::text, '{}')::jsonb
-        ), NULL) AS event_tags
-    FROM user_events ue
-    JOIN unilink.events e ON ue.event_id = e.event_id
-    LEFT JOIN likes_count lc ON e.event_id = lc.event_id
-    LEFT JOIN rsvps_count rc ON e.event_id = rc.event_id
-    LEFT JOIN unilink.event_tags et ON e.event_id = et.event_id
-    LEFT JOIN unilink.tags t ON et.tag_id = t.tag_id
-    GROUP BY 
-        e.event_id, e.title, e.event_description, e.poster_path, 
-        e.event_location, e.event_time, e.organization_id, 
-        e.max_attendees, e.expiration_date, e.canceled,
-        lc.likes_count, rc.rsvps_count;
-    `;
+    `
+
+    const query = eventsQuery(filterQuery);
 
     try {
         const result = await pool.query(query, [req.params.userId]);
@@ -292,60 +197,15 @@ router.get('/userId/:userId', async (req, res) => {
     }
 });
 
-// GET all events with title partially matching given search text
+// GET all events with title partially matching a given search text
 router.get('/searchTitle/:searchTitle', async (req, res) => {
-    const query = `
-    WITH 
-    likes_count AS (
-        SELECT event_id, COUNT(*) AS likes_count
-        FROM unilink.likes
-        WHERE still_valid = true
-        GROUP BY event_id
-    ),
-    rsvps_count AS (
-        SELECT event_id, COUNT(*) AS rsvps_count
-        FROM unilink.rsvps
-        WHERE still_valid = true
-        GROUP BY event_id
-    ),
-    filtered_events AS (
+    const filterQuery = `
         SELECT DISTINCT e.event_id
         FROM unilink.events e
         WHERE LOWER(e.title) LIKE '%'||LOWER($1)||'%'
-    )
-    SELECT 
-        e.event_id,
-        e.title,
-        e.event_description,
-        e.poster_path,
-        e.event_location,
-        e.event_time,
-        e.organization_id,
-        e.max_attendees,
-        e.expiration_date,
-        e.canceled,
-        COALESCE(lc.likes_count, 0) AS likes_count,
-        COALESCE(rc.rsvps_count, 0) AS rsvps_count,
-        ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
-                'tag_id', t.tag_id,
-                'tag_name', t.tag_name,
-                'classification', t.classification,
-                'color', t.color
-            ))::text, '{}')::jsonb
-        ), NULL) AS event_tags
-    FROM filtered_events fe
-    JOIN unilink.events e ON fe.event_id = e.event_id
-    LEFT JOIN likes_count lc ON e.event_id = lc.event_id
-    LEFT JOIN rsvps_count rc ON e.event_id = rc.event_id
-    LEFT JOIN unilink.event_tags et ON e.event_id = et.event_id
-    LEFT JOIN unilink.tags t ON et.tag_id = t.tag_id
-    GROUP BY 
-        e.event_id, e.title, e.event_description, e.poster_path, 
-        e.event_location, e.event_time, e.organization_id, 
-        e.max_attendees, e.expiration_date, e.canceled,
-        lc.likes_count, rc.rsvps_count;
-    `;
+    `
+
+    const query = eventsQuery(filterQuery);
 
     try {
         const result = await pool.query(query, [req.params.searchTitle]);
@@ -356,63 +216,18 @@ router.get('/searchTitle/:searchTitle', async (req, res) => {
     }
 });
 
-// GET all events with the same tag category
+// GET all events with a specific tag category
 // and with title partially matching given search text
 router.get('/tagCategory/:category/searchTitle/:searchTitle', async (req, res) => {
-    const query = `
-    WITH 
-    likes_count AS (
-        SELECT event_id, COUNT(*) AS likes_count
-        FROM unilink.likes
-        WHERE still_valid = true
-        GROUP BY event_id
-    ),
-    rsvps_count AS (
-        SELECT event_id, COUNT(*) AS rsvps_count
-        FROM unilink.rsvps
-        WHERE still_valid = true
-        GROUP BY event_id
-    ),
-    filtered_events AS (
+    const filterQuery = `
         SELECT DISTINCT e.event_id
         FROM unilink.events e
         JOIN unilink.event_tags et ON e.event_id = et.event_id
         JOIN unilink.tags t ON et.tag_id = t.tag_id
         WHERE t.classification = $1 AND LOWER(e.title) LIKE '%'||LOWER($2)||'%'
-    )
-    SELECT 
-        e.event_id,
-        e.title,
-        e.event_description,
-        e.poster_path,
-        e.event_location,
-        e.event_time,
-        e.organization_id,
-        e.max_attendees,
-        e.expiration_date,
-        e.canceled,
-        COALESCE(lc.likes_count, 0) AS likes_count,
-        COALESCE(rc.rsvps_count, 0) AS rsvps_count,
-        ARRAY_REMOVE(ARRAY_AGG(
-            DISTINCT nullif(jsonb_strip_nulls(jsonb_build_object(
-                'tag_id', t.tag_id,
-                'tag_name', t.tag_name,
-                'classification', t.classification,
-                'color', t.color
-            ))::text, '{}')::jsonb
-        ), NULL) AS event_tags
-    FROM filtered_events fe
-    JOIN unilink.events e ON fe.event_id = e.event_id
-    LEFT JOIN likes_count lc ON e.event_id = lc.event_id
-    LEFT JOIN rsvps_count rc ON e.event_id = rc.event_id
-    LEFT JOIN unilink.event_tags et ON e.event_id = et.event_id
-    LEFT JOIN unilink.tags t ON et.tag_id = t.tag_id
-    GROUP BY 
-        e.event_id, e.title, e.event_description, e.poster_path, 
-        e.event_location, e.event_time, e.organization_id, 
-        e.max_attendees, e.expiration_date, e.canceled,
-        lc.likes_count, rc.rsvps_count;
-    `;
+    `
+
+    const query = eventsQuery(filterQuery);
 
     try {
         const result = await pool.query(query, [req.params.category, req.params.searchTitle]);
@@ -496,7 +311,7 @@ router.put('/eventId/:eventId', async (req, res) => {
         const expiration_date = new Date(req.body['expiration_date']);
 
         const query = `update unilink.events set title=$1, event_description=$2, poster_path=$3,
-            event_location=$4, event_time=$5, organization_id=$6, max_attendees=$7, expiration_date=$8,
+            event_location=$4, event_time=$5, organization_id=$6, max_attendees=$7, expiration_date=$8
             where event_id=$9`;
         try {
             const result = await pool.query(query, [title, event_description, poster_path, event_location, event_time,
