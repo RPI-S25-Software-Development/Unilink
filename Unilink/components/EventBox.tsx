@@ -29,10 +29,16 @@ export type InteractionCounts = {
   rsvpCount: number;
 }
 
+export type InteractionStates = {
+  likeState: React.Dispatch<React.SetStateAction<boolean>>;
+  rsvpState: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
 type Props = {
   imageSource: any;
   eventText: EventTextProps;
   interactionCounts: InteractionCounts;
+  interactionStates: InteractionStates;
 };
 
 function exportEventTag({ backgroundColor, textColor = "white", name }: EventTagProps) {
@@ -81,7 +87,11 @@ function exportEventText({ tags, title, description, details }: EventTextProps) 
   );
 };
 
-export default function EventBox({ imageSource, eventText, interactionCounts }: Props) {
+function toggleInteractionState(setInteractionState: React.Dispatch<React.SetStateAction<boolean>>) {
+  setInteractionState((previousState) => !previousState);
+}
+
+export default function EventBox({ imageSource, eventText, interactionCounts, interactionStates }: Props) {
   const contentWidth = 300;
   
   return (
@@ -93,11 +103,13 @@ export default function EventBox({ imageSource, eventText, interactionCounts }: 
         </View>
         <View className="flex flex-row justify-end">
           <View className="flex flex-col items-center">
-            <IconButton iconSource={{fontAwesome: "heart"}} iconColor="red"/>
+            <IconButton iconSource={{fontAwesome: "heart"}} iconColor="red"
+            onPress={() => toggleInteractionState(interactionStates.likeState)}/>
             <Text className="text-lg font-bold">{interactionCounts.likeCount}</Text>
           </View>
           <View className="flex flex-col items-center">
-            <IconButton iconSource={{fontAwesome: "star"}} iconColor="gold"/>
+            <IconButton iconSource={{fontAwesome: "star"}} iconColor="gold"
+            onPress={() => toggleInteractionState(interactionStates.rsvpState)}/>
             <Text className="text-lg font-bold">{interactionCounts.rsvpCount}</Text>
           </View>
         </View>
