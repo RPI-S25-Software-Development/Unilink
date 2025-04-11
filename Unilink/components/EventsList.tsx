@@ -5,6 +5,20 @@ import { View } from "react-native";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { EventImagesMap } from "@/components/EventImages";
 
+type EventData = {
+  imagePath: string;
+  title: string;
+  description: string;
+  location: string;
+  time: string;
+  likeCount: number;
+  rsvpCount: number;
+  likeSelected: boolean;
+  rsvpSelected: boolean;
+};
+
+type EventsData = Map<string, EventData>;
+
 type Props = {
   eventsAPIRoute: string;
 }
@@ -68,9 +82,9 @@ function eventsAPIDataToComponent(eventsAPIData: any[]) {
         details: [
           // { key: "organization", iconSource: {evilIconName: "user"},
           // text: "eventAPIData.organization_name" },
-          { key: "location", iconSource: {evilIconName: "location"},
+          { key: "location", iconSource: {evilIcon: "location"},
           text: eventAPIData.event_location },
-          { key: "time", iconSource: {evilIconName: "clock"},
+          { key: "time", iconSource: {evilIcon: "clock"},
           text: convertEventTimeAPIData(eventAPIData.event_time) }
         ]
       }}

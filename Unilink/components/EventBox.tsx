@@ -1,15 +1,10 @@
 import { Text, View, Image } from "react-native";
 import { EvilIcons } from "@expo/vector-icons";
-
 import ImageViewer from "@/components/ImageViewer";
 import RoundedBox from "@/components/RoundedBox";
-import SmallButton from "@/components/SmallButton";
+import IconButton from "@/components/IconButton";
 import EventTag from "@/components/EventTag";
-
-type IconSource = {
-  evilIconName?: keyof typeof EvilIcons.glyphMap;
-  imageSource?: any;
-};
+import Icon, { IconSource } from "./Icon";
 
 type EventDetailsRow = {
   key: string;
@@ -52,13 +47,7 @@ function exportEventDetailsRow({ key, iconSource, text }: EventDetailsRow) {
   const iconSize = 26;
   const iconColor = "black";
   
-  var icon = undefined;
-
-  if(iconSource.evilIconName) {
-    icon = <EvilIcons name={iconSource.evilIconName} size={iconSize} color={iconColor}/>
-  } else if(iconSource.imageSource) {
-    icon = <Image source={iconSource.imageSource} style={{ width: iconSize, height: iconSize }}/>
-  }
+  var icon = <Icon iconSource={iconSource} iconSize={iconSize} iconColor={iconColor}/>
 
   return (
       <View key={key} className="flex flex-row items-center">
@@ -105,11 +94,11 @@ export default function EventBox({ imageSource, eventText, interactionCounts }: 
         </View>
         <View className="flex flex-row justify-end">
           <View className="flex flex-col items-center">
-            <SmallButton icon="heart"/>
+            <IconButton iconSource={{fontAwesome: "heart"}} iconColor="red"/>
             <Text className="text-lg font-bold">{interactionCounts.likeCount}</Text>
           </View>
           <View className="flex flex-col items-center">
-            <SmallButton icon="star"/>
+            <IconButton iconSource={{fontAwesome: "star"}} iconColor="gold"/>
             <Text className="text-lg font-bold">{interactionCounts.rsvpCount}</Text>
           </View>
         </View>
