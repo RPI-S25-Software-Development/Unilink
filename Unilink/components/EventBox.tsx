@@ -36,6 +36,7 @@ export type EventInteractionsData = {
 }
 
 type Props = {
+  key: string;
   imageSource: any;
   eventText: EventTextProps;
   interactionData: EventInteractionsData;
