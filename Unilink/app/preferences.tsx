@@ -3,38 +3,29 @@ import { useState, useEffect } from "react";
 import { useRouter, Router, Redirect } from "expo-router";
 import { ScrollView } from "react-native-virtualized-view";
 import { getFromStorage, getAPI, putAPI } from "./_layout";
-
-import "@/global.css";
-
 import DropdownMultiSelect, { DropdownSelectedItemsState } from "@/components/DropdownMultiSelect";
 import EventTag from "@/components/EventTag";
 import RoundedBox from "@/components/RoundedBox";
 import HeaderText from "@/components/HeaderText";
 import MedButton from "@/components/MedButton";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { EventTagData } from "@/components/EventBox";
 
-type TagData = {
-  id: string;
-  category: string;
-  color: string;
-}
+type TagsData = Map<string, EventTagData>;
 
-type TagsData = Map<string, TagData>;
-
-function getTagsField(tagsData: TagsData | undefined, field: keyof TagData) {
+function getTagsField(tagsData: TagsData | undefined, field: keyof EventTagData) {
   var result = [];
 
   if(tagsData) {
     for(var [tagName, tagData] of tagsData) {
-      result.push(tagData[field]);
+      if(tagData[field]) result.push(tagData[field]);
     }
   }
 
   return result;
 }
 
-function getTagNamesByFieldValue(tagsData: TagsData | undefined, field: keyof TagData,
-fieldValue: string) {
+function getTagNamesByFieldValue(tagsData: TagsData | undefined, field: keyof EventTagData, fieldValue: string) {
   var result = [];
   
   if(tagsData) {
@@ -46,13 +37,12 @@ fieldValue: string) {
   return result;
 };
 
-function getTagNamesByFieldValues(tagsData: TagsData | undefined, field: keyof TagData,
-fieldValues: string[]) {
+function getTagNamesByFieldValues(tagsData: TagsData | undefined, field: keyof EventTagData, fieldValues: string[]) {
   var result = [];
   
   if(tagsData) {
     for(var [tagName, tagData] of tagsData) {
-      if(fieldValues.includes(tagData[field])) result.push(tagName);
+      if(tagData[field] && fieldValues.includes(tagData[field])) result.push(tagName);
     }
   }
 
@@ -66,8 +56,9 @@ function convertTagsAPIData(tagsAPIData: any[]) {
     if(!result.has(tagAPIData.tag_id)) {
       result.set(tagAPIData.tag_name, {
         id: tagAPIData.tag_id,
+        name: tagAPIData.tag_name,
         category: tagAPIData.classification,
-        color: tagAPIData.color
+        backgroundColor: tagAPIData.color
       });
     }
   };
@@ -104,7 +95,7 @@ function createTagComponents(tagsData: TagsData | undefined) {
   if(tagsData) {
     for(var [tagName, tagData] of tagsData) {
       if(tagData) {
-        result.push(<EventTag key={tagData.id} name={tagName} backgroundColor={tagData.color}/>);
+        result.push(<EventTag key={tagData.id} name={tagName} backgroundColor={tagData.backgroundColor}/>);
       }
     }
   }
@@ -127,7 +118,7 @@ selectedItemsState: DropdownSelectedItemsState) {
   return (
     <DropdownMultiSelect width={350}
     dropdownItems={
-      dropdownItemsFromKeys(tagsData ? Array.from(tagsData?.keys()) : [])
+      dropdownItemsFromKeys(tagsData ? [...tagsData.keys()] : [])
     }
     selectedItemsState={selectedItemsState}
     noItemsSelectedText={"Choose your " + interestsText + " Interests"}

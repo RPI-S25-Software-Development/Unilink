@@ -5,7 +5,7 @@ import { View } from "react-native";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { EventImagesMap } from "@/components/EventImages";
 
-type EventData = {
+export type EventData = {
   imageSource: any;
   title: string;
   description: string;
@@ -17,19 +17,27 @@ type EventData = {
 
 type EventsData = Map<string, EventData>;
 
+export type EventsListFilterOptions = {
+  tagCategory?: string;
+  searchTitle?: string;
+};
+
 type Props = {
   eventsAPIRoute: string;
   likeEventsAPIRoute?: string;
   rsvpEventsAPIRoute?: string;
+  filterOptions?: EventsListFilterOptions
 }
 
 function convertEventTagsAPIData(eventTagsAPIData: any[]) {
-  var result = [];
+  var result: EventTagData[] = [];
 
   for(var eventTagAPIData of eventTagsAPIData) {
     result.push({
+      id: eventTagAPIData.tag_id,
+      name: eventTagAPIData.tag_name,
+      category: eventTagAPIData.classification,
       backgroundColor: eventTagAPIData.color,
-      name: eventTagAPIData.tag_name
     });
   }
 
@@ -72,11 +80,11 @@ function convertEventTimeAPIData(eventTimeAPIData: string) {
 function convertEventsAPIData(eventsData: EventsData, eventsAPIData: any[],
 setEventInteractions?: { like?: boolean, rsvp?: boolean } ) {
   for(var eventAPIData of eventsAPIData) {
-    const [likeSelected, setLikeSelected] = useState<boolean>(
-      (setEventInteractions && setEventInteractions.like) ? setEventInteractions.like : false);
+    // const [likeSelected, setLikeSelected] = useState<boolean>(
+    //   (setEventInteractions && setEventInteractions.like) ? setEventInteractions.like : false);
     
-    const [rsvpSelected, setRsvpSelected] = useState<boolean>(
-      (setEventInteractions && setEventInteractions.rsvp) ? setEventInteractions.rsvp : false);
+    // const [rsvpSelected, setRsvpSelected] = useState<boolean>(
+    //   (setEventInteractions && setEventInteractions.rsvp) ? setEventInteractions.rsvp : false);
 
     var eventData: EventData = {
       imageSource: EventImagesMap.get(eventAPIData.poster_path),
@@ -88,13 +96,13 @@ setEventInteractions?: { like?: boolean, rsvp?: boolean } ) {
       interactionData: {
         like: {
           count: parseInt(eventAPIData.likes_count),
-          selected: likeSelected,
-          setSelected: setLikeSelected
+          selected: (setEventInteractions && setEventInteractions.like) ? setEventInteractions.like : false,
+          //setSelected: setLikeSelected
         },
         rsvp: {
           count: parseInt(eventAPIData.rsvps_count),
-          selected: rsvpSelected,
-          setSelected: setRsvpSelected
+          selected: (setEventInteractions && setEventInteractions.rsvp) ? setEventInteractions.rsvp : false,
+          //setSelected: setRsvpSelected
         }
       }
     };
@@ -131,10 +139,33 @@ function generateEventBoxes(eventsData: EventsData) {
   return result;
 };
 
-export default function EventsList({ eventsAPIRoute, likeEventsAPIRoute, rsvpEventsAPIRoute }: Props) {
-  const [events, setEvents] = useState<EventsData>();
+function filterEventsByTagCategory(eventsData: EventsData, tagCategory: string) {
+  var result = new Map();
 
-  var content = events ? generateEventBoxes(events) : <LoadingSpinner scale={2} margin={50}/>;
+  for(var [eventId, eventData] of eventsData) {
+    for(var tagData of eventData.tags) {
+      if(tagData.category === tagCategory) {
+        result.set(eventId, eventData);
+        break;
+      }
+    }
+  }
+
+  return result;
+}
+
+function filterEventsBySearchTitle(eventsData: EventsData, searchTitle: string) {
+  var result = new Map();
+
+  for(var [eventId, eventData] of eventsData) {
+    if(eventData.title.toLowerCase().includes(searchTitle.toLowerCase())) result.set(eventId, eventData);
+  }
+
+  return result;
+}
+
+export default function EventsList({ eventsAPIRoute, likeEventsAPIRoute, rsvpEventsAPIRoute, filterOptions }: Props) {
+  const [events, setEvents] = useState<EventsData>();
 
   useEffect(() => {
     const getEvents = async () => {
@@ -146,12 +177,12 @@ export default function EventsList({ eventsAPIRoute, likeEventsAPIRoute, rsvpEve
       
       if(likeEventsAPIRoute) {
         const likeEventsResponse = await getAPI(likeEventsAPIRoute, logAPIResponse);
-        if(likeEventsResponse) convertEventsAPIData(eventsData, likeEventsResponse.data);
+        if(likeEventsResponse) convertEventsAPIData(eventsData, likeEventsResponse.data, {like: true});
       }
       
       if(rsvpEventsAPIRoute) {
         const rsvpEventsResponse = await getAPI(rsvpEventsAPIRoute, logAPIResponse);
-        if(rsvpEventsResponse) convertEventsAPIData(eventsData, rsvpEventsResponse.data);
+        if(rsvpEventsResponse) convertEventsAPIData(eventsData, rsvpEventsResponse.data, {rsvp: true});
       }
 
       setEvents(eventsData);
@@ -159,6 +190,24 @@ export default function EventsList({ eventsAPIRoute, likeEventsAPIRoute, rsvpEve
 
     getEvents();
   }, [eventsAPIRoute, likeEventsAPIRoute, rsvpEventsAPIRoute]);
+
+  var content: JSX.Element | JSX.Element[] = <LoadingSpinner scale={2} margin={50}/>;
+
+  if(events) {
+    if(filterOptions) {
+      var filteredEvents = events;
+
+      if(filterOptions.tagCategory) {
+        filteredEvents = filterEventsByTagCategory(filteredEvents, filterOptions.tagCategory);
+      }
+
+      if(filterOptions.searchTitle && filterOptions.searchTitle != "") {
+        filteredEvents = filterEventsBySearchTitle(filteredEvents, filterOptions.searchTitle);
+      }
+
+      content = generateEventBoxes(filteredEvents);
+    } else content = generateEventBoxes(events);
+  }
 
   return (
     <View>

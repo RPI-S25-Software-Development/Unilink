@@ -88,7 +88,7 @@ export function selectButtonsState(
   setSelectedButton: React.Dispatch<React.SetStateAction<string | undefined>>,
   selected: string) {
   setSelectedButton((previousSelected) => previousSelected === selected ? undefined : selected);
-}
+};
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({

@@ -12,10 +12,6 @@ export default function ExploreScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>();
   const [searchText, setSearchText] = useState<string>();
 
-  var eventsAPIRoute = "/events";
-  if(selectedCategory) eventsAPIRoute = eventsAPIRoute + "/tagCategory/" + selectedCategory;
-  if(searchText && searchText != "") eventsAPIRoute = eventsAPIRoute + "/searchTitle/" + searchText;
-
   return (
       <ScrollView className="flex-1">
         <View className="items-center py-4">
@@ -43,7 +39,7 @@ export default function ExploreScreen() {
               </View>
             </ScrollView>
           </View>
-          <EventsList eventsAPIRoute={eventsAPIRoute}/>
+          <EventsList eventsAPIRoute={"/events"} filterOptions={{tagCategory: selectedCategory, searchTitle: searchText}}/>
         </View>
       </ScrollView>
     );
