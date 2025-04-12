@@ -7,10 +7,12 @@ type Props = {
   iconSource: IconSource;
   iconColor: string;
   buttonSelected?: boolean
+  buttonSelectedColor?: string;
   onPress?: () => void;
 };
 
-export default function IconButton({ iconSource, iconColor, buttonSelected = false, onPress }: Props) {
+export default function IconButton({ iconSource, iconColor, buttonSelected = false,
+buttonSelectedColor = "white", onPress }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
 
   return (
@@ -27,7 +29,7 @@ export default function IconButton({ iconSource, iconColor, buttonSelected = fal
             }
           }}
           className="w-12 h-12 rounded-full flex items-center justify-center shadow-md m-1"
-          style={{backgroundColor: buttonSelected ? "#dcdcfc" : "white"}}
+          style={{backgroundColor: buttonSelected ? buttonSelectedColor : "white"}}
         >
           <Icon iconSource={iconSource} iconSize={24} iconColor={iconColor} />
         </Pressable>

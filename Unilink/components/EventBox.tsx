@@ -102,12 +102,12 @@ export default function EventBox({ imageSource, eventText, interactionData }: Pr
         </View>
         <View className="flex flex-row justify-end">
           <View className="flex flex-col items-center">
-            <IconButton iconSource={{fontAwesome: "heart"}} iconColor="red"
+            <IconButton iconSource={{fontAwesome: "heart"}} iconColor="red" buttonSelectedColor="lightpink"
             onPress={interactionData.like.buttonOnPress} buttonSelected={interactionData.like.selected}/>
             <Text className="text-lg font-bold">{interactionData.like.count}</Text>
           </View>
           <View className="flex flex-col items-center">
-            <IconButton iconSource={{fontAwesome: "star"}} iconColor="gold"
+            <IconButton iconSource={{fontAwesome: "star"}} iconColor="gold" buttonSelectedColor="papayawhip"
             onPress={interactionData.rsvp.buttonOnPress} buttonSelected={interactionData.rsvp.selected}/>
             <Text className="text-lg font-bold">{interactionData.rsvp.count}</Text>
           </View>
