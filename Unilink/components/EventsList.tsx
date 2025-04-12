@@ -21,6 +21,7 @@ type EventsData = Map<string, EventData>;
 export type EventsListFilterOptions = {
   tagCategory?: string;
   searchTitle?: string;
+  userSaved?: boolean;
 };
 
 type Props = {
@@ -146,7 +147,7 @@ function filterEventsByTagCategory(eventsData: EventsData, tagCategory: string) 
         break;
       }
     }
-  }
+  };
 
   return result;
 };
@@ -156,10 +157,26 @@ function filterEventsBySearchTitle(eventsData: EventsData, searchTitle: string) 
 
   for(var [eventId, eventData] of eventsData) {
     if(eventData.title.toLowerCase().includes(searchTitle.toLowerCase())) result.set(eventId, eventData);
-  }
+  };
 
   return result;
 };
+
+function filterEventsByUserSaved(eventsData: EventsData) {
+  var result = new Map();
+
+  for(var [eventId, eventData] of eventsData) {
+    let interaction: keyof typeof eventData.interactionsData;
+    for(interaction in eventData.interactionsData) {
+      if(eventData.interactionsData[interaction].selected) {
+        result.set(eventId, eventData);
+        break;
+      }
+    }
+  };
+
+  return result;
+}
 
 function toggleEventInteractionState(eventId: string, interaction: keyof EventInteractionsData,
   setEventsData: React.Dispatch<React.SetStateAction<EventsData | undefined>>) {
@@ -229,6 +246,10 @@ export default function EventsList({ eventsAPIRoute, userId, filterOptions }: Pr
 
     if(filterOptions.searchTitle && filterOptions.searchTitle != "") {
       filteredEvents = filterEventsBySearchTitle(filteredEvents, filterOptions.searchTitle);
+    }
+
+    if(filterOptions.userSaved) {
+      filteredEvents = filterEventsByUserSaved(filteredEvents);
     }
 
     content = generateEventBoxes(filteredEvents);

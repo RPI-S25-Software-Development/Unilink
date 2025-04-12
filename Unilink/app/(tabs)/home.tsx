@@ -21,6 +21,9 @@ export default function HomeScreen() {
     getUserId();
   }, []);
 
+  var filterOptions = {};
+  if(eventView === "user") filterOptions = {userSaved: true};
+
   if(userId) {
     if(userId === null) return <Redirect href="/login"/>;
     content =
@@ -33,7 +36,7 @@ export default function HomeScreen() {
         onPress={() => {selectButtonsState(setEventView, "user")}}
         backgroundColor={eventView === "user" ? "lightgray" : "white"}/>
       </View>
-      <EventsList eventsAPIRoute={"/events/userId/" + userId} userId={userId}/>
+      <EventsList eventsAPIRoute={"/events/userId/" + userId} userId={userId} filterOptions={filterOptions}/>
     </View>
   };
 
