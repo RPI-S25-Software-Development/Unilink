@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getAPI } from "@/app/_layout";
+import { getAPI, postAPI, getFromStorage } from "@/app/_layout";
 import EventBox, { EventTagData, EventInteractionsData, EventInteractionData } from "@/components/EventBox";
 import { View } from "react-native";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -29,6 +29,11 @@ type Props = {
   rsvpEventsAPIRoute?: string;
   filterOptions?: EventsListFilterOptions
 }
+
+export enum EventInteractionAPIRoutes {
+  like = "/likes/",
+  rsvp = "/rsvps/"
+};
 
 function convertEventTagsAPIData(eventTagsAPIData: any[]) {
   var result: EventTagData[] = [];
@@ -180,13 +185,19 @@ function toggleEventInteractionState(eventId: string, interaction: keyof EventIn
     });
   }
 
-function setEventInteractionCallables(eventsData: EventsData,
+function setEventInteractionCallables(eventsData: EventsData, userId: string,
 setEventsData: React.Dispatch<React.SetStateAction<EventsData | undefined>>) {
   eventsData.entries().forEach(([eventId, eventData]) => {
       (Object.keys(eventData.interactionsData) as Array<keyof typeof eventData.interactionsData>).forEach(
         (interaction) => {
           eventData.interactionsData[interaction].buttonOnPress =
-            (() => toggleEventInteractionState(eventId, interaction, setEventsData));
+            (async () => {
+              toggleEventInteractionState(eventId, interaction, setEventsData);
+
+              if(eventData.interactionsData[interaction].selected) {
+                await postAPI(EventInteractionAPIRoutes[interaction], {user_id: userId, event_id: eventId})
+              }
+            });
           }
       );
     }
@@ -195,6 +206,18 @@ setEventsData: React.Dispatch<React.SetStateAction<EventsData | undefined>>) {
 
 export default function EventsList({ eventsAPIRoute, likeEventsAPIRoute, rsvpEventsAPIRoute, filterOptions }: Props) {
   const [allEvents, setAllEvents] = useState<EventsData>();
+  const [userId, setUserId] = useState<string>();
+
+  useEffect(() => {
+    const getUserId = async () => {
+      const logStorageResponse = false;
+
+      const userIdResponse = await getFromStorage("user_id", logStorageResponse);
+      if(userIdResponse) setUserId(userIdResponse);
+    };
+
+    getUserId();
+  }, []);
 
   useEffect(() => {
     const getEvents = async () => {
@@ -214,13 +237,13 @@ export default function EventsList({ eventsAPIRoute, likeEventsAPIRoute, rsvpEve
         if(rsvpEventsResponse) convertEventsAPIData(eventsData, rsvpEventsResponse.data, {rsvp: true});
       };
       
-      setEventInteractionCallables(eventsData, setAllEvents);
+      if(userId) setEventInteractionCallables(eventsData, userId, setAllEvents);
 
       setAllEvents(eventsData);
     }
 
     getEvents();
-  }, [eventsAPIRoute, likeEventsAPIRoute, rsvpEventsAPIRoute]);
+  }, [userId, eventsAPIRoute, likeEventsAPIRoute, rsvpEventsAPIRoute, allEvents]);
 
   var content = allEvents ? generateEventBoxes(allEvents) : <LoadingSpinner scale={2} margin={50}/>;
 
