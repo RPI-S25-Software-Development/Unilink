@@ -25,8 +25,7 @@ export type EventsListFilterOptions = {
 
 type Props = {
   eventsAPIRoute: string;
-  likeEventsAPIRoute?: string;
-  rsvpEventsAPIRoute?: string;
+  userId: string;
   filterOptions?: EventsListFilterOptions
 }
 
@@ -83,12 +82,8 @@ function convertEventTimeAPIData(eventTimeAPIData: string) {
   return allMonths.get(+month) + " " + day + ", " + hourAdjusted + ":" + minute + " " + timePeriod;
 };
 
-function convertEventsAPIData(eventsData: EventsData, eventsAPIData: any[],
-setEventInteractions?: { like?: boolean, rsvp?: boolean }) {
+function convertEventsAPIData(eventsData: EventsData, eventsAPIData: any[]) {
   for(var eventAPIData of eventsAPIData) {
-    const likeSelected = (setEventInteractions && setEventInteractions.like) ? setEventInteractions.like : false;
-    const rsvpSelected = (setEventInteractions && setEventInteractions.rsvp) ? setEventInteractions.rsvp : false;
-
     var eventData: EventData = {
       id: eventAPIData.event_id,
       imageSource: EventImagesMap.get(eventAPIData.poster_path),
@@ -100,11 +95,11 @@ setEventInteractions?: { like?: boolean, rsvp?: boolean }) {
       interactionsData: {
         like: {
           count: parseInt(eventAPIData.likes_count),
-          selected: likeSelected
+          selected: eventAPIData.like_selected
         },
         rsvp: {
           count: parseInt(eventAPIData.rsvps_count),
-          selected: rsvpSelected
+          selected: eventAPIData.rsvp_selected
         }
       }
     };
@@ -204,20 +199,8 @@ setEventsData: React.Dispatch<React.SetStateAction<EventsData | undefined>>) {
   );
 }
 
-export default function EventsList({ eventsAPIRoute, likeEventsAPIRoute, rsvpEventsAPIRoute, filterOptions }: Props) {
+export default function EventsList({ eventsAPIRoute, userId, filterOptions }: Props) {
   const [allEvents, setAllEvents] = useState<EventsData>();
-  const [userId, setUserId] = useState<string>();
-
-  useEffect(() => {
-    const getUserId = async () => {
-      const logStorageResponse = false;
-
-      const userIdResponse = await getFromStorage("user_id", logStorageResponse);
-      if(userIdResponse) setUserId(userIdResponse);
-    };
-
-    getUserId();
-  }, []);
 
   useEffect(() => {
     const getEvents = async () => {
@@ -225,25 +208,15 @@ export default function EventsList({ eventsAPIRoute, likeEventsAPIRoute, rsvpEve
 
       var eventsData: EventsData = new Map();
       const eventsResponse = await getAPI(eventsAPIRoute, logAPIResponse);
-      if(eventsResponse) convertEventsAPIData(eventsData, eventsResponse.data, {});
+      if(eventsResponse) convertEventsAPIData(eventsData, eventsResponse.data);
       
-      if(likeEventsAPIRoute) {
-        const likeEventsResponse = await getAPI(likeEventsAPIRoute, logAPIResponse);
-        if(likeEventsResponse) convertEventsAPIData(eventsData, likeEventsResponse.data, {like: true});
-      };
-      
-      if(rsvpEventsAPIRoute) {
-        const rsvpEventsResponse = await getAPI(rsvpEventsAPIRoute, logAPIResponse);
-        if(rsvpEventsResponse) convertEventsAPIData(eventsData, rsvpEventsResponse.data, {rsvp: true});
-      };
-      
-      if(userId) setEventInteractionCallables(eventsData, userId, setAllEvents);
+      setEventInteractionCallables(eventsData, userId, setAllEvents);
 
       setAllEvents(eventsData);
     }
 
     getEvents();
-  }, [userId, eventsAPIRoute, likeEventsAPIRoute, rsvpEventsAPIRoute, allEvents]);
+  }, [eventsAPIRoute, allEvents]);
 
   var content = allEvents ? generateEventBoxes(allEvents) : <LoadingSpinner scale={2} margin={50}/>;
 
