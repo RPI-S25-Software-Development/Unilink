@@ -179,7 +179,8 @@ function filterEventsByUserSaved(eventsData: EventsData) {
 }
 
 function toggleEventInteractionState(eventId: string, interaction: keyof EventInteractionsData,
-  setEventsData: React.Dispatch<React.SetStateAction<EventsData | undefined>>) {
+setEventsData: React.Dispatch<React.SetStateAction<EventsData | undefined>>,
+setRerender: React.Dispatch<React.SetStateAction<boolean>>) {
     setEventsData((eventsData) => {
       var newEventsData = new Map(eventsData);
       var eventData = newEventsData.get(eventId);
@@ -198,42 +199,46 @@ function toggleEventInteractionState(eventId: string, interaction: keyof EventIn
   }
 
 function setEventInteractionCallables(eventsData: EventsData, userId: string,
-setEventsData: React.Dispatch<React.SetStateAction<EventsData | undefined>>) {
+setEventsData: React.Dispatch<React.SetStateAction<EventsData | undefined>>,
+setRerender: React.Dispatch<React.SetStateAction<boolean>>) {
   eventsData.entries().forEach(([eventId, eventData]) => {
       (Object.keys(eventData.interactionsData) as Array<keyof typeof eventData.interactionsData>).forEach(
         (interaction) => {
           eventData.interactionsData[interaction].buttonOnPress =
             (async () => {
-              toggleEventInteractionState(eventId, interaction, setEventsData);
+              toggleEventInteractionState(eventId, interaction, setEventsData, setRerender);
 
               if(eventData.interactionsData[interaction].selected) {
                 await postAPI(EventInteractionAPIRoutes[interaction], {user_id: userId, event_id: eventId})
-              }
+              };
+
+              setRerender((previousValue) => !previousValue);
             });
           }
       );
     }
   );
-}
+};
 
 export default function EventsList({ eventsAPIRoute, userId, filterOptions }: Props) {
   const [allEvents, setAllEvents] = useState<EventsData>();
+  const [rerender, setRerender] = useState<boolean>(false);
 
   useEffect(() => {
     const getEvents = async () => {
-      const logAPIResponse = false;
+      const logAPIResponse = true;
 
       var eventsData: EventsData = new Map();
       const eventsResponse = await getAPI(eventsAPIRoute, logAPIResponse);
       if(eventsResponse) convertEventsAPIData(eventsData, eventsResponse.data);
       
-      setEventInteractionCallables(eventsData, userId, setAllEvents);
+      setEventInteractionCallables(eventsData, userId, setAllEvents, setRerender);
 
       setAllEvents(eventsData);
-    }
+    };
 
     getEvents();
-  }, [eventsAPIRoute, allEvents]);
+  }, [rerender]);
 
   var content = allEvents ? generateEventBoxes(allEvents) : <LoadingSpinner scale={2} margin={50}/>;
 
