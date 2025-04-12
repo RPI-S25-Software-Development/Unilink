@@ -7,7 +7,7 @@ const router = express.Router();
     where e.organization_id = o.organization_id and o.organization_id = '${req.params.orgId}'`
 */
 
-function eventsQuery(filterQuery = "") {
+function eventsQuery(filterQuery = "", userId = "") {
     var fromTable = "FROM unilink.events e";
     if(filterQuery != "") fromTable = `FROM filtered_events fe
     JOIN unilink.events e ON fe.event_id = e.event_id`;
@@ -15,7 +15,24 @@ function eventsQuery(filterQuery = "") {
     var filteredEventsTable = "";
     if(filterQuery != "") filteredEventsTable = `,filtered_events AS (${filterQuery})`
 
-    return `WITH 
+    var interactionsSelected = "";
+    if(userId != "") {
+        interactionsSelected = `
+            ,
+            CASE WHEN EXISTS (
+                SELECT DISTINCT e.event_id
+                FROM unilink.likes l WHERE e.event_id = l.event_id AND user_id = '${userId}' AND still_valid = true
+            ) THEN TRUE ELSE FALSE END AS like_selected,
+            CASE WHEN EXISTS (
+                SELECT DISTINCT e.event_id    
+                FROM unilink.rsvps r WHERE e.event_id = r.event_id AND user_id = '${userId}' AND still_valid = true
+            ) THEN TRUE ELSE FALSE END AS rsvp_selected
+        `
+    };
+
+    console.log(`User ID: ${userId}`);
+
+    return `WITH
         likes_count AS (
             SELECT event_id, COUNT(*) AS likes_count
             FROM unilink.likes
@@ -53,6 +70,7 @@ function eventsQuery(filterQuery = "") {
                     'color', t.color
                 ))::text, '{}')::jsonb
             ), NULL) AS event_tags
+            ${interactionsSelected}
         ${fromTable}
         LEFT JOIN likes_count lc ON e.event_id = lc.event_id
         LEFT JOIN rsvps_count rc ON e.event_id = rc.event_id
@@ -70,6 +88,20 @@ function eventsQuery(filterQuery = "") {
 // GET all events
 router.get('/', async (req, res) => {
     const query = eventsQuery();
+
+    try {
+        const result = await pool.query(query);
+        res.json(result.rows);
+        //console.log(`Rows returned: ${result.rows.length}`);
+    } catch (error) {
+        console.error("Error fetching events:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// GET all events, with interactions data from a specific user id
+router.get('/userId/:userId', async (req, res) => {
+    const query = eventsQuery(filterQuery = "", userId=req.params.userId);
 
     try {
         const result = await pool.query(query);
@@ -174,28 +206,29 @@ router.get('/eventId/:eventId', async (req, res) => {
     }
 });
 
+// OLD USER ID ENDPOINT
 // GET all events that has a like or RSVP from a specific user id
-router.get('/userId/:userId', async (req, res) => {
-    const filterQuery = `
-        SELECT DISTINCT event_id
-        FROM unilink.likes
-        WHERE user_id = $1 AND still_valid = true
-        UNION
-        SELECT DISTINCT event_id
-        FROM unilink.rsvps
-        WHERE user_id = $1 AND still_valid = true
-    `
+// router.get('/userId/:userId', async (req, res) => {
+//     const filterQuery = `
+//         SELECT DISTINCT event_id
+//         FROM unilink.likes
+//         WHERE user_id = $1 AND still_valid = true
+//         UNION
+//         SELECT DISTINCT event_id
+//         FROM unilink.rsvps
+//         WHERE user_id = $1 AND still_valid = true
+//     `
 
-    const query = eventsQuery(filterQuery);
+//     const query = eventsQuery(filterQuery);
 
-    try {
-        const result = await pool.query(query, [req.params.userId]);
-        res.json(result.rows);
-    } catch (error) {
-        console.error("Error fetching user activity events:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
+//     try {
+//         const result = await pool.query(query, [req.params.userId]);
+//         res.json(result.rows);
+//     } catch (error) {
+//         console.error("Error fetching user activity events:", error);
+//         res.status(500).json({ error: "Internal Server Error" });
+//     }
+// });
 
 // GET all events with title partially matching a given search text
 router.get('/searchTitle/:searchTitle', async (req, res) => {
