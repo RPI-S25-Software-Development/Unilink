@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { getAPI } from "@/app/_layout";
-import EventBox, { EventTagData, EventInteractionData, EventInteractionsData } from "@/components/EventBox";
+import EventBox, { EventTagData, EventInteractionsData, EventInteractionData } from "@/components/EventBox";
 import { View } from "react-native";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { EventImagesMap } from "@/components/EventImages";
 
 export type EventData = {
+  id: string;
   imageSource: any;
   title: string;
   description: string;
@@ -78,12 +79,13 @@ function convertEventTimeAPIData(eventTimeAPIData: string) {
 };
 
 function convertEventsAPIData(eventsData: EventsData, eventsAPIData: any[],
-setEventInteractions?: { like?: boolean, rsvp?: boolean } ) {
+setEventInteractions?: { like?: boolean, rsvp?: boolean }) {
   for(var eventAPIData of eventsAPIData) {
     const likeSelected = (setEventInteractions && setEventInteractions.like) ? setEventInteractions.like : false;
     const rsvpSelected = (setEventInteractions && setEventInteractions.rsvp) ? setEventInteractions.rsvp : false;
 
     var eventData: EventData = {
+      id: eventAPIData.event_id,
       imageSource: EventImagesMap.get(eventAPIData.poster_path),
       title: eventAPIData.title,
       description: eventAPIData.event_description,
@@ -108,7 +110,7 @@ setEventInteractions?: { like?: boolean, rsvp?: boolean } ) {
   return eventsData;
 };
 
-function generateEventBoxes(eventsData: EventsData, setEventsData?: React.Dispatch<React.SetStateAction<EventsData>>) {
+function generateEventBoxes(eventsData: EventsData) {
   var result = [];
 
   for(var [eventId, eventData] of eventsData) {
@@ -147,7 +149,7 @@ function filterEventsByTagCategory(eventsData: EventsData, tagCategory: string) 
   }
 
   return result;
-}
+};
 
 function filterEventsBySearchTitle(eventsData: EventsData, searchTitle: string) {
   var result = new Map();
@@ -157,6 +159,38 @@ function filterEventsBySearchTitle(eventsData: EventsData, searchTitle: string) 
   }
 
   return result;
+};
+
+function toggleEventInteractionState(eventId: string, interaction: keyof EventInteractionsData,
+  setEventsData: React.Dispatch<React.SetStateAction<EventsData | undefined>>) {
+    setEventsData((eventsData) => {
+      var newEventsData = new Map(eventsData);
+      var eventData = newEventsData.get(eventId);
+  
+      if(eventData) {
+        var interactionSelected = eventData.interactionsData[interaction].selected
+
+        eventData.interactionsData[interaction].count += interactionSelected ? -1 : 1;
+        
+        eventData.interactionsData[interaction].selected = !interactionSelected;
+        newEventsData.set(eventId, eventData);
+      }
+      
+      return newEventsData;
+    });
+  }
+
+function setEventInteractionCallables(eventsData: EventsData,
+setEventsData: React.Dispatch<React.SetStateAction<EventsData | undefined>>) {
+  eventsData.entries().forEach(([eventId, eventData]) => {
+      (Object.keys(eventData.interactionsData) as Array<keyof typeof eventData.interactionsData>).forEach(
+        (interaction) => {
+          eventData.interactionsData[interaction].buttonOnPress =
+            (() => toggleEventInteractionState(eventId, interaction, setEventsData));
+          }
+      );
+    }
+  );
 }
 
 export default function EventsList({ eventsAPIRoute, likeEventsAPIRoute, rsvpEventsAPIRoute, filterOptions }: Props) {
@@ -164,21 +198,23 @@ export default function EventsList({ eventsAPIRoute, likeEventsAPIRoute, rsvpEve
 
   useEffect(() => {
     const getEvents = async () => {
-      const logAPIResponse = true;
+      const logAPIResponse = false;
 
       var eventsData: EventsData = new Map();
       const eventsResponse = await getAPI(eventsAPIRoute, logAPIResponse);
-      if(eventsResponse) convertEventsAPIData(eventsData, eventsResponse.data);
+      if(eventsResponse) convertEventsAPIData(eventsData, eventsResponse.data, {});
       
       if(likeEventsAPIRoute) {
         const likeEventsResponse = await getAPI(likeEventsAPIRoute, logAPIResponse);
         if(likeEventsResponse) convertEventsAPIData(eventsData, likeEventsResponse.data, {like: true});
-      }
+      };
       
       if(rsvpEventsAPIRoute) {
         const rsvpEventsResponse = await getAPI(rsvpEventsAPIRoute, logAPIResponse);
         if(rsvpEventsResponse) convertEventsAPIData(eventsData, rsvpEventsResponse.data, {rsvp: true});
-      }
+      };
+      
+      setEventInteractionCallables(eventsData, setAllEvents);
 
       setAllEvents(eventsData);
     }
