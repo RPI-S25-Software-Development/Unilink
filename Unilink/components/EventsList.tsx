@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getAPI } from "@/app/_layout";
-import EventBox, { EventTagData, EventInteractionsData } from "@/components/EventBox";
+import EventBox, { EventTagData, EventInteractionData, EventInteractionsData } from "@/components/EventBox";
 import { View } from "react-native";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { EventImagesMap } from "@/components/EventImages";
@@ -12,7 +12,7 @@ export type EventData = {
   tags: EventTagData[];
   location: string;
   time: string;
-  interactionData: EventInteractionsData;
+  interactionsData: EventInteractionsData;
 };
 
 type EventsData = Map<string, EventData>;
@@ -75,16 +75,13 @@ function convertEventTimeAPIData(eventTimeAPIData: string) {
   hourAdjusted = (hourAdjusted > 12) ? (hourAdjusted % 12) : hourAdjusted;
 
   return allMonths.get(+month) + " " + day + ", " + hourAdjusted + ":" + minute + " " + timePeriod;
-}
+};
 
 function convertEventsAPIData(eventsData: EventsData, eventsAPIData: any[],
 setEventInteractions?: { like?: boolean, rsvp?: boolean } ) {
   for(var eventAPIData of eventsAPIData) {
-    // const [likeSelected, setLikeSelected] = useState<boolean>(
-    //   (setEventInteractions && setEventInteractions.like) ? setEventInteractions.like : false);
-    
-    // const [rsvpSelected, setRsvpSelected] = useState<boolean>(
-    //   (setEventInteractions && setEventInteractions.rsvp) ? setEventInteractions.rsvp : false);
+    const likeSelected = (setEventInteractions && setEventInteractions.like) ? setEventInteractions.like : false;
+    const rsvpSelected = (setEventInteractions && setEventInteractions.rsvp) ? setEventInteractions.rsvp : false;
 
     var eventData: EventData = {
       imageSource: EventImagesMap.get(eventAPIData.poster_path),
@@ -93,16 +90,14 @@ setEventInteractions?: { like?: boolean, rsvp?: boolean } ) {
       tags: convertEventTagsAPIData(eventAPIData.event_tags),
       location: eventAPIData.event_location,
       time: convertEventTimeAPIData(eventAPIData.event_time),
-      interactionData: {
+      interactionsData: {
         like: {
           count: parseInt(eventAPIData.likes_count),
-          selected: (setEventInteractions && setEventInteractions.like) ? setEventInteractions.like : false,
-          //setSelected: setLikeSelected
+          selected: likeSelected
         },
         rsvp: {
           count: parseInt(eventAPIData.rsvps_count),
-          selected: (setEventInteractions && setEventInteractions.rsvp) ? setEventInteractions.rsvp : false,
-          //setSelected: setRsvpSelected
+          selected: rsvpSelected
         }
       }
     };
@@ -111,9 +106,9 @@ setEventInteractions?: { like?: boolean, rsvp?: boolean } ) {
   };
 
   return eventsData;
-}
+};
 
-function generateEventBoxes(eventsData: EventsData) {
+function generateEventBoxes(eventsData: EventsData, setEventsData?: React.Dispatch<React.SetStateAction<EventsData>>) {
   var result = [];
 
   for(var [eventId, eventData] of eventsData) {
@@ -131,7 +126,7 @@ function generateEventBoxes(eventsData: EventsData) {
             { key: "time", iconSource: {evilIcon: "clock"}, text: eventData.time }
           ]
         }}
-        interactionData={eventData.interactionData}
+        interactionData={eventData.interactionsData}
       />
     );
   }
@@ -165,7 +160,7 @@ function filterEventsBySearchTitle(eventsData: EventsData, searchTitle: string) 
 }
 
 export default function EventsList({ eventsAPIRoute, likeEventsAPIRoute, rsvpEventsAPIRoute, filterOptions }: Props) {
-  const [events, setEvents] = useState<EventsData>();
+  const [allEvents, setAllEvents] = useState<EventsData>();
 
   useEffect(() => {
     const getEvents = async () => {
@@ -185,28 +180,26 @@ export default function EventsList({ eventsAPIRoute, likeEventsAPIRoute, rsvpEve
         if(rsvpEventsResponse) convertEventsAPIData(eventsData, rsvpEventsResponse.data, {rsvp: true});
       }
 
-      setEvents(eventsData);
+      setAllEvents(eventsData);
     }
 
     getEvents();
   }, [eventsAPIRoute, likeEventsAPIRoute, rsvpEventsAPIRoute]);
 
-  var content: JSX.Element | JSX.Element[] = <LoadingSpinner scale={2} margin={50}/>;
+  var content = allEvents ? generateEventBoxes(allEvents) : <LoadingSpinner scale={2} margin={50}/>;
 
-  if(events) {
-    if(filterOptions) {
-      var filteredEvents = events;
+  if(allEvents && filterOptions) {
+    var filteredEvents = allEvents;
 
-      if(filterOptions.tagCategory) {
-        filteredEvents = filterEventsByTagCategory(filteredEvents, filterOptions.tagCategory);
-      }
+    if(filterOptions.tagCategory) {
+      filteredEvents = filterEventsByTagCategory(filteredEvents, filterOptions.tagCategory);
+    }
 
-      if(filterOptions.searchTitle && filterOptions.searchTitle != "") {
-        filteredEvents = filterEventsBySearchTitle(filteredEvents, filterOptions.searchTitle);
-      }
+    if(filterOptions.searchTitle && filterOptions.searchTitle != "") {
+      filteredEvents = filterEventsBySearchTitle(filteredEvents, filterOptions.searchTitle);
+    }
 
-      content = generateEventBoxes(filteredEvents);
-    } else content = generateEventBoxes(events);
+    content = generateEventBoxes(filteredEvents);
   }
 
   return (

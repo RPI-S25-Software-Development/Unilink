@@ -26,10 +26,10 @@ type EventTextProps = {
   details: EventDetailsRow[];
 };
 
-type EventInteractionData = {
+export type EventInteractionData = {
   count: number;
   selected: boolean;
-  //setSelected: React.Dispatch<React.SetStateAction<boolean>>;
+  buttonOnPress?: () => void;
 }
 
 export type EventInteractionsData = {
@@ -90,10 +90,6 @@ function exportEventText({ tags, title, description, details }: EventTextProps) 
   );
 };
 
-function toggleInteractionState(setInteractionState: React.Dispatch<React.SetStateAction<boolean>>) {
-  setInteractionState((previousState) => !previousState);
-}
-
 export default function EventBox({ imageSource, eventText, interactionData }: Props) {
   const contentWidth = 300;
   
@@ -107,14 +103,12 @@ export default function EventBox({ imageSource, eventText, interactionData }: Pr
         <View className="flex flex-row justify-end">
           <View className="flex flex-col items-center">
             <IconButton iconSource={{fontAwesome: "heart"}} iconColor="red"
-            //onPress={() => toggleInteractionState(interactionData.like.setSelected)}
-            />
+            onPress={interactionData.like.buttonOnPress}/>
             <Text className="text-lg font-bold">{interactionData.like.count}</Text>
           </View>
           <View className="flex flex-col items-center">
             <IconButton iconSource={{fontAwesome: "star"}} iconColor="gold"
-            //onPress={() => toggleInteractionState(interactionData.rsvp.setSelected)}
-            />
+            onPress={interactionData.rsvp.buttonOnPress}/>
             <Text className="text-lg font-bold">{interactionData.rsvp.count}</Text>
           </View>
         </View>
