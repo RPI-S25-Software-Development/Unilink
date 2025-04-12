@@ -30,8 +30,6 @@ function eventsQuery(filterQuery = "", userId = "") {
         `
     };
 
-    console.log(`User ID: ${userId}`);
-
     return `WITH
         likes_count AS (
             SELECT event_id, COUNT(*) AS likes_count
