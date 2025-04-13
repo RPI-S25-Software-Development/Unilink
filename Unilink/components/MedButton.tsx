@@ -1,5 +1,4 @@
 import { Text, View, Pressable } from 'react-native';
-import { useState } from 'react';
 
 type Props = {
   label: string;
