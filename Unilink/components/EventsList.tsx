@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getAPI, postAPI, getFromStorage } from "@/app/_layout";
+import { getAPI, postAPI, deleteAPI } from "@/app/_layout";
 import EventBox, { EventTagData, EventInteractionsData, EventInteractionData } from "@/components/EventBox";
 import { View } from "react-native";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -31,8 +31,12 @@ type Props = {
 }
 
 export enum EventInteractionAPIRoutes {
-  like = "/likes/",
-  rsvp = "/rsvps/"
+  like = "/likes",
+  rsvp = "/rsvps",
+};
+
+function EventInteractionDeleteAPIRoutes(interaction: keyof EventInteractionsData, eventId: string, userId: string) {
+  return EventInteractionAPIRoutes[interaction] + "/eventId/" + eventId + "/userId/" + userId;
 };
 
 function convertEventTagsAPIData(eventTagsAPIData: any[]) {
@@ -209,7 +213,9 @@ setRerender: React.Dispatch<React.SetStateAction<boolean>>) {
               toggleEventInteractionState(eventId, interaction, setEventsData, setRerender);
 
               if(eventData.interactionsData[interaction].selected) {
-                await postAPI(EventInteractionAPIRoutes[interaction], {user_id: userId, event_id: eventId})
+                await postAPI(EventInteractionAPIRoutes[interaction], {user_id: userId, event_id: eventId});
+              } else {
+                await deleteAPI(EventInteractionDeleteAPIRoutes(interaction, eventId, userId));
               };
 
               setRerender((previousValue) => !previousValue);
@@ -226,7 +232,7 @@ export default function EventsList({ eventsAPIRoute, userId, filterOptions }: Pr
 
   useEffect(() => {
     const getEvents = async () => {
-      const logAPIResponse = true;
+      const logAPIResponse = false;
 
       var eventsData: EventsData = new Map();
       const eventsResponse = await getAPI(eventsAPIRoute, logAPIResponse);
