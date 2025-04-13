@@ -5,6 +5,7 @@ Docker command to create the PSQL container: docker run --name postgresql -e POS
 
 On local PC:
 Client container:
+prebuild app: npx expo export --platform web
 npx expo export --platform web
 docker build -t ecarson2021/unilink_frontend .
 docker push ecarson2021/unilink_frontend:latest
