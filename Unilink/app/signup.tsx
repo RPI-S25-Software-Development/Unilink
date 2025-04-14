@@ -5,6 +5,7 @@ import axios from "axios";
 import MedButton from "@/components/MedButton";
 import TextField from "@/components/TextField";
 import HeaderText from "@/components/HeaderText";
+import { postAPI } from "./_layout";
 
 export default function SignUp() {
     const host = process.env.ENV === 'Prod' ? process.env.HOST : 'localhost';
@@ -14,13 +15,13 @@ export default function SignUp() {
 
     const handleSignup = async () => {
         try {
-            const response = await axios.post(`http://${host}:3000/auth/usersignup`, {
+            const response = await postAPI("/auth/usersignup", {
                 email,
                 password
             });
 
             Alert.alert("Success", "Account created successfully!");
-            router.navigate("/preferences"); // Navigate on successful signup
+            router.navigate("/login"); // Navigate on successful signup
         } catch (error) {
             console.error("Signup error:", error);
             // Alert.alert("Error", error.response?.data?.error || "Signup failed. Please try again.");
