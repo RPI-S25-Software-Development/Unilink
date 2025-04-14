@@ -133,7 +133,7 @@ function generateEventBoxes(eventsData: EventsData) {
             { key: "time", iconSource: {evilIcon: "clock"}, text: eventData.time }
           ]
         }}
-        interactionData={eventData.interactionsData}
+        interactionsData={eventData.interactionsData}
       />
     );
   }
