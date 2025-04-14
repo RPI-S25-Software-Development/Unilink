@@ -51,7 +51,7 @@ function exportEventTag({ backgroundColor, textColor = "white", name }: EventTag
   );
 }
 
-function exportEventDetailsRow({ key, iconSource, text }: EventDetailsRow) {
+export function exportEventDetailsRow({ key, iconSource, text }: EventDetailsRow) {
   const iconSize = 26;
   const iconColor = "black";
   

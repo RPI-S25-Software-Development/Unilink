@@ -9,7 +9,7 @@ const PlaceholderEventId = "a1f1e90b-0001-4b00-b001-000000000001.png";
 const PlaceholderEventImage = EventImagesMap.get(PlaceholderEventId);
 const PlaceholderEventText: EventTextProps = {
   tags: [],
-  title: "Test Event Title is in 24 hours! Hurry up!",
+  title: "Test Event Title is in 24 hours!",
   description: "Event Description",
   details: [
     // { key: "organization", iconSource: {evilIcon: "user"}, text: eventData.organization },
@@ -18,10 +18,18 @@ const PlaceholderEventText: EventTextProps = {
   ]
 };
 
-export default function NotificaionsScreen() {
+export default function NotificationsScreen() {
   return (
     <ScrollView className="flex flex-col items-center">
       <HeaderText fontSize={32} className="m-5">Your Notifications</HeaderText>
+      <EventNotificationBox key={PlaceholderEventId} imageSource={PlaceholderEventImage}
+      eventText={PlaceholderEventText}/>
+      <EventNotificationBox key={PlaceholderEventId} imageSource={PlaceholderEventImage}
+      eventText={PlaceholderEventText}/>
+      <EventNotificationBox key={PlaceholderEventId} imageSource={PlaceholderEventImage}
+      eventText={PlaceholderEventText}/>
+      <EventNotificationBox key={PlaceholderEventId} imageSource={PlaceholderEventImage}
+      eventText={PlaceholderEventText}/>
       <EventNotificationBox key={PlaceholderEventId} imageSource={PlaceholderEventImage}
       eventText={PlaceholderEventText}/>
     </ScrollView>
