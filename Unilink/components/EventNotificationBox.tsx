@@ -1,21 +1,17 @@
 import { Text, View, Image } from "react-native";
 import { EvilIcons } from "@expo/vector-icons";
-
 import ImageViewer from "@/components/ImageViewer";
 import RoundedBox from "@/components/RoundedBox";
-
-import { EventDetailsItem } from "@/components/EventBox";
-
-type EventText = {
-  title: string;
-  description: string;
-  details: EventDetailsItem[];
-}
+import { EventTextProps } from "./EventBox";
 
 type Props = {
+  key: string;
   imageSource: any;
-  eventText: EventText;
+  eventText: EventTextProps;
 }
 
-export default function EventBox({ imageSource, eventText }: Props) {
+export default function EventNotificationBox({ imageSource, eventText }: Props) {
+  return (
+    <RoundedBox width={500} height={100}/>
+  )
 }
