@@ -9,7 +9,7 @@ const PlaceholderEventId = "a1f1e90b-0001-4b00-b001-000000000001.png";
 const PlaceholderEventImage = EventImagesMap.get(PlaceholderEventId);
 const PlaceholderEventText: EventTextProps = {
   tags: [],
-  title: "Test Event Notification",
+  title: "Test Event Title is in 24 hours! Hurry up!",
   description: "Event Description",
   details: [
     // { key: "organization", iconSource: {evilIcon: "user"}, text: eventData.organization },
