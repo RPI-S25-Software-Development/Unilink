@@ -97,7 +97,7 @@ export default function EventBox({ imageSource, eventText, interactionsData }: P
     <RoundedBox width="auto" height="auto" className="p-3">
       <View style={{width: contentWidth}}>
         <View style={{marginHorizontal: "auto"}}>
-          <ImageViewer imgSource={imageSource}/>
+          <ImageViewer imgSource={imageSource} width={300} height={300}/>
           {exportEventText(eventText)}
         </View>
         <View className="flex flex-row justify-end">

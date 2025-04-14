@@ -10,8 +10,14 @@ type Props = {
   eventText: EventTextProps;
 }
 
-export default function EventNotificationBox({ imageSource, eventText }: Props) {
+export default function EventNotificationBox({ key, imageSource, eventText }: Props) {
+  const [contentWidth, contentHeight] = [500, 100];
+  
   return (
-    <RoundedBox width={500} height={100}/>
+    <RoundedBox width="auto" height="auto" className="p-3">
+      <View className="flex flex-row" style={{width: contentWidth, height: contentHeight}}>
+        <ImageViewer imgSource={imageSource}/>
+      </View>
+    </RoundedBox>
   )
 }
