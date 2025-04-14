@@ -1,64 +1,61 @@
-import { Text, View, Image } from "react-native";
-import { EvilIcons } from "@expo/vector-icons";
-
+import { Text, View } from "react-native";
 import ImageViewer from "@/components/ImageViewer";
 import RoundedBox from "@/components/RoundedBox";
-import SmallButton from "@/components/SmallButton";
+import IconButton from "@/components/IconButton";
 import EventTag from "@/components/EventTag";
+import Icon, { IconSource } from "./Icon";
 
-type IconSource = {
-  evilIconName?: keyof typeof EvilIcons.glyphMap;
-  imageSource?: any;
-};
-
-export type EventDetailsItem = {
+type EventDetailsRow = {
   key: string;
   iconSource: IconSource;
   text: string;
 };
 
-type EventTagProps = {
+export type EventTagData = {
+  id: string;
+  name: string;
+  category: string;
   backgroundColor: string;
   textColor?: string;
-  name: string;
 }
 
 type EventTextProps = {
-  tags: EventTagProps[];
+  tags: EventTagData[];
   title: string;
   description: string;
-  details: EventDetailsItem[];
+  details: EventDetailsRow[];
 };
 
-export type InteractionCounts = {
-  likeCount: number;
-  rsvpCount: number;
+export type EventInteractionData = {
+  count: number;
+  selected: boolean;
+  buttonOnPress?: () => void;
+}
+
+export type EventInteractionsData = {
+  like: EventInteractionData;
+  rsvp: EventInteractionData;
 }
 
 type Props = {
+  key: string;
   imageSource: any;
   eventText: EventTextProps;
-  interactionCounts: InteractionCounts;
+  interactionData: EventInteractionsData;
 };
 
-function exportEventTag({ backgroundColor, textColor = "white", name }: EventTagProps) {
+function exportEventTag({ backgroundColor, textColor = "white", name }: EventTagData) {
   return (
     <EventTag key={name} backgroundColor={backgroundColor} textColor={textColor} name={name}
     compact={true}/>
   );
 }
 
-function exportEventDetailsRow({ key, iconSource, text }: EventDetailsItem) {
+function exportEventDetailsRow({ key, iconSource, text }: EventDetailsRow) {
   const iconSize = 26;
   const iconColor = "black";
   
-  var icon = undefined;
-
-  if(iconSource.evilIconName) {
-      icon = <EvilIcons name={iconSource.evilIconName} size={iconSize} color={iconColor}/>
-  } else if(iconSource.imageSource) {
-      icon = <Image source={iconSource.imageSource} style={{ width: iconSize, height: iconSize }}/>
-  }
+  var icon = <Icon iconSource={iconSource} iconSize={iconSize} iconColor={iconColor}/>
 
   return (
       <View key={key} className="flex flex-row items-center">
@@ -84,7 +81,7 @@ function exportEventText({ tags, title, description, details }: EventTextProps) 
           <View className="flex flex-row flex-wrap">
             {exportedTags}
           </View>
-          <Text className="m-1">{title}</Text>
+          <Text className="m-1 text-lg">{title}</Text>
           <Text className="m-1">{description}</Text>
           <View className="flex flex-col ml-1 mt-1">
               {exportedDetails}
@@ -93,7 +90,7 @@ function exportEventText({ tags, title, description, details }: EventTextProps) 
   );
 };
 
-export default function EventBox({ imageSource, eventText, interactionCounts }: Props) {
+export default function EventBox({ imageSource, eventText, interactionData }: Props) {
   const contentWidth = 300;
   
   return (
@@ -105,12 +102,14 @@ export default function EventBox({ imageSource, eventText, interactionCounts }: 
         </View>
         <View className="flex flex-row justify-end">
           <View className="flex flex-col items-center">
-            <SmallButton icon="heart"/>
-            <Text className="text-lg font-bold">{interactionCounts.likeCount}</Text>
+            <IconButton iconSource={{fontAwesome: "heart"}} iconColor="red" buttonSelectedColor="lightpink"
+            onPress={interactionData.like.buttonOnPress} buttonSelected={interactionData.like.selected}/>
+            <Text className="text-lg font-bold">{interactionData.like.count}</Text>
           </View>
           <View className="flex flex-col items-center">
-            <SmallButton icon="star"/>
-            <Text className="text-lg font-bold">{interactionCounts.rsvpCount}</Text>
+            <IconButton iconSource={{fontAwesome: "star"}} iconColor="gold" buttonSelectedColor="papayawhip"
+            onPress={interactionData.rsvp.buttonOnPress} buttonSelected={interactionData.rsvp.selected}/>
+            <Text className="text-lg font-bold">{interactionData.rsvp.count}</Text>
           </View>
         </View>
       </View>

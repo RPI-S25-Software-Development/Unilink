@@ -62,6 +62,18 @@ router.post('/', async (req, res) => {
     }
 });
 
+// DELETE AN RSVP FROM THE DB, given an event id and user id
+router.delete('/eventId/:eventId/userId/:userId', async (req, res) => {
+    const query = `DELETE FROM unilink.rsvps WHERE event_id=$1 AND user_id=$2`;
+    try {
+        const result = await pool.query(query, [req.params.eventId, req.params.userId]);
+        res.json(result.rows[0]);
+    } catch(error) {
+        console.error("Error fetching rsvps:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 // MARK A rsvp AS INVALID BUT LEAVES THE EVENT IN THE DB
 router.delete('/rsvpId/:rsvpId', async (req, res) => {
     // cancel event

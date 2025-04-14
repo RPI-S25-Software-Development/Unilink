@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Unilink",
-    "slug": "Unilink",
+    "slug": "unilink",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/Unilink_Logo.png",
@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/Unilink_Logo.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.anonymous.Unilink"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +38,20 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "8bd9fb82-6801-437b-becd-03e401677447"
+      }
+    },
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "owner": "bajajb"
   }
 }

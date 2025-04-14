@@ -9,8 +9,8 @@ type Props = {
   onPress?: () => void;
 };
 
-export default function MedButton({ label, backgroundColor = "white", textColor = "black",
-scale = 1, baseFontSize = 14, onPress }: Props) {
+export default function MedButton({ label, backgroundColor = "white", textColor = "black", scale = 1, baseFontSize = 14,
+onPress }: Props) {
   const height = 50 * scale;
   const width = 150 * scale;
   const fontSize = baseFontSize * scale;
@@ -20,10 +20,11 @@ scale = 1, baseFontSize = 14, onPress }: Props) {
     <View className="items-center">
       <Pressable className="rounded-lg flex items-center justify-center
       shadow-md shadow-gray my-3 p-3 border-2 border-gray-300"
-      style={{backgroundColor: backgroundColor, height: height, width: width,
-      marginHorizontal: marginHorizontal}}
+      style={{backgroundColor: backgroundColor, height: height, width: width, marginHorizontal: marginHorizontal}}
       onPress={onPress}>
-        <Text style={{color: textColor, fontSize: fontSize, textAlign: "center"}}>{label}</Text>
+        <Text style={{color: textColor, fontSize: fontSize, textAlign: "center"}}>
+          {label}
+        </Text>
       </Pressable>
     </View>
   );
