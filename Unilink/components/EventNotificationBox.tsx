@@ -32,7 +32,7 @@ export default function EventNotificationBox({ imageSource, eventText, notificat
   return (
     <RoundedBox width="auto" height="auto" className="p-3">
       <View className="flex flex-row">
-        <View className="m-auto">
+        <View className="my-auto">
           <ImageViewer imgSource={imageSource} width={100} height={100}/>
         </View>
         <View className="flex flex-col ml-4">
