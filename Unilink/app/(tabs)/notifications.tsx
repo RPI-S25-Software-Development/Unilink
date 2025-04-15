@@ -2,14 +2,14 @@ import { ScrollView } from "react-native";
 import HeaderText from "@/components/HeaderText";
 import RoundedBox from "@/components/RoundedBox";
 import { EventImagesMap } from "@/components/EventImages";
-import EventNotificationBox from "@/components/EventNotificationBox";
+import EventNotificationBox, { EventNotificationType } from "@/components/EventNotificationBox";
 import { EventTextProps } from "@/components/EventBox";
 
 const PlaceholderEventId = "a1f1e90b-0001-4b00-b001-000000000001.png";
 const PlaceholderEventImage = EventImagesMap.get(PlaceholderEventId);
 const PlaceholderEventText: EventTextProps = {
   tags: [],
-  title: "Test Event Title is in 24 hours!",
+  title: "Event",
   description: "Event Description",
   details: [
     // { key: "organization", iconSource: {evilIcon: "user"}, text: eventData.organization },
@@ -23,15 +23,15 @@ export default function NotificationsScreen() {
     <ScrollView className="flex flex-col items-center">
       <HeaderText fontSize={32} className="m-5">Your Notifications</HeaderText>
       <EventNotificationBox key={PlaceholderEventId} imageSource={PlaceholderEventImage}
-      eventText={PlaceholderEventText}/>
+      eventText={PlaceholderEventText} notificationType={EventNotificationType.reminder24H}/>
       <EventNotificationBox key={PlaceholderEventId} imageSource={PlaceholderEventImage}
-      eventText={PlaceholderEventText}/>
+      eventText={PlaceholderEventText} notificationType={EventNotificationType.reminder24H}/>
       <EventNotificationBox key={PlaceholderEventId} imageSource={PlaceholderEventImage}
-      eventText={PlaceholderEventText}/>
+      eventText={PlaceholderEventText} notificationType={EventNotificationType.reminder24H}/>
       <EventNotificationBox key={PlaceholderEventId} imageSource={PlaceholderEventImage}
-      eventText={PlaceholderEventText}/>
+      eventText={PlaceholderEventText} notificationType={EventNotificationType.reminder24H}/>
       <EventNotificationBox key={PlaceholderEventId} imageSource={PlaceholderEventImage}
-      eventText={PlaceholderEventText}/>
+      eventText={PlaceholderEventText} notificationType={EventNotificationType.reminder24H}/>
     </ScrollView>
   );
 }

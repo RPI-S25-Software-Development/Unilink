@@ -5,13 +5,25 @@ import RoundedBox from "@/components/RoundedBox";
 import { EventTextProps, exportEventDetailsRow } from "./EventBox";
 import HeaderText from "./HeaderText";
 
+export enum EventNotificationType {
+  reminder24H = 'reminder24H'
+};
+
 type Props = {
   key: string;
   imageSource: any;
   eventText: EventTextProps;
+  notificationType: EventNotificationType
 }
 
-export default function EventNotificationBox({ imageSource, eventText }: Props) {
+function getNotificationTitle(eventTitle: string, notificationType: EventNotificationType) {
+  switch(notificationType) {
+    case EventNotificationType.reminder24H: return eventTitle + " is in 24 hours!"
+    default: return eventTitle;
+  }
+}
+
+export default function EventNotificationBox({ imageSource, eventText, notificationType }: Props) {
   var exportedDetails = [];
   for(var detailRow of eventText.details) {
       exportedDetails.push(exportEventDetailsRow(detailRow));
@@ -24,7 +36,7 @@ export default function EventNotificationBox({ imageSource, eventText }: Props) 
           <ImageViewer imgSource={imageSource} width={100} height={100}/>
         </View>
         <View className="flex flex-col ml-4">
-          <Text className="m-1 text-xl font-bold">{eventText.title}</Text>
+          <Text className="m-1 text-xl font-bold">{getNotificationTitle(eventText.title, notificationType)}</Text>
           <Text className="m-1">{eventText.description}</Text>
           {exportedDetails}
         </View>
