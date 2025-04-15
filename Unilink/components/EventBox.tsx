@@ -19,7 +19,7 @@ export type EventTagData = {
   textColor?: string;
 }
 
-type EventTextProps = {
+export type EventTextProps = {
   tags: EventTagData[];
   title: string;
   description: string;
@@ -41,7 +41,7 @@ type Props = {
   key: string;
   imageSource: any;
   eventText: EventTextProps;
-  interactionData: EventInteractionsData;
+  interactionsData: EventInteractionsData;
 };
 
 function exportEventTag({ backgroundColor, textColor = "white", name }: EventTagData) {
@@ -51,7 +51,7 @@ function exportEventTag({ backgroundColor, textColor = "white", name }: EventTag
   );
 }
 
-function exportEventDetailsRow({ key, iconSource, text }: EventDetailsRow) {
+export function exportEventDetailsRow({ key, iconSource, text }: EventDetailsRow) {
   const iconSize = 26;
   const iconColor = "black";
   
@@ -90,26 +90,26 @@ function exportEventText({ tags, title, description, details }: EventTextProps) 
   );
 };
 
-export default function EventBox({ imageSource, eventText, interactionData }: Props) {
+export default function EventBox({ imageSource, eventText, interactionsData }: Props) {
   const contentWidth = 300;
   
   return (
     <RoundedBox width="auto" height="auto" className="p-3">
       <View style={{width: contentWidth}}>
         <View style={{marginHorizontal: "auto"}}>
-          <ImageViewer imgSource={imageSource}/>
+          <ImageViewer imgSource={imageSource} width={300} height={300}/>
           {exportEventText(eventText)}
         </View>
         <View className="flex flex-row justify-end">
           <View className="flex flex-col items-center">
             <IconButton iconSource={{fontAwesome: "heart"}} iconColor="red" buttonSelectedColor="lightpink"
-            onPress={interactionData.like.buttonOnPress} buttonSelected={interactionData.like.selected}/>
-            <Text className="text-lg font-bold">{interactionData.like.count}</Text>
+            onPress={interactionsData.like.buttonOnPress} buttonSelected={interactionsData.like.selected}/>
+            <Text className="text-lg font-bold">{interactionsData.like.count}</Text>
           </View>
           <View className="flex flex-col items-center">
             <IconButton iconSource={{fontAwesome: "star"}} iconColor="gold" buttonSelectedColor="papayawhip"
-            onPress={interactionData.rsvp.buttonOnPress} buttonSelected={interactionData.rsvp.selected}/>
-            <Text className="text-lg font-bold">{interactionData.rsvp.count}</Text>
+            onPress={interactionsData.rsvp.buttonOnPress} buttonSelected={interactionsData.rsvp.selected}/>
+            <Text className="text-lg font-bold">{interactionsData.rsvp.count}</Text>
           </View>
         </View>
       </View>

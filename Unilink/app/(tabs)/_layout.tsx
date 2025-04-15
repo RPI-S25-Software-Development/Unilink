@@ -1,9 +1,5 @@
 import { Tabs } from "expo-router";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import Entypo from '@expo/vector-icons/Entypo';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-
-import Banner from "@/components/Banner";
+import { AntDesign, Entypo, FontAwesome, Feather } from "@expo/vector-icons";
 
 export default function Layout() {
   return (
@@ -23,9 +19,9 @@ export default function Layout() {
         title: "Explore",
         tabBarIcon: ({color}) => <Entypo name="magnifying-glass" size={24} color={color} />
       }}/>
-      <Tabs.Screen name="map" options={{
-        title: "Map",
-        tabBarIcon: ({color}) => <FontAwesome name="map-marker" size={24} color={color} />
+      <Tabs.Screen name="notifications" options={{
+        title: "Notifications",
+        tabBarIcon: ({color}) => <Feather name="bell" size={24} color={color} />
       }}/>
       <Tabs.Screen name="calendar" options={{
         title: "Calendar",

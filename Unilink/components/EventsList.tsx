@@ -54,7 +54,7 @@ function convertEventTagsAPIData(eventTagsAPIData: any[]) {
   return result;
 };
 
-function convertEventTimeAPIData(eventTimeAPIData: string) {
+export function convertEventTimeAPIData(eventTimeAPIData: string) {
   // example time returned by API: "2025-02-06T17:00:00.000Z"
   // transform to -> "Feb 6, 5 PM"
 
@@ -133,7 +133,7 @@ function generateEventBoxes(eventsData: EventsData) {
             { key: "time", iconSource: {evilIcon: "clock"}, text: eventData.time }
           ]
         }}
-        interactionData={eventData.interactionsData}
+        interactionsData={eventData.interactionsData}
       />
     );
   }
