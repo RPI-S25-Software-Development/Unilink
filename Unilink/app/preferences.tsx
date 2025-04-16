@@ -1,8 +1,8 @@
 import { View, Alert } from "react-native";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useRouter, Router, Redirect } from "expo-router";
 import { ScrollView } from "react-native-virtualized-view";
-import { getFromStorage, getAPI, putAPI } from "./_layout";
+import { getFromStorage, getAPI, putAPI, loginContext } from "./_layout";
 import DropdownMultiSelect, { DropdownSelectedItemsState } from "@/components/DropdownMultiSelect";
 import EventTag from "@/components/EventTag";
 import RoundedBox from "@/components/RoundedBox";
@@ -191,9 +191,13 @@ export default function PreferencesScreen() {
   const [selectedClubTags, selectClubTags] = useState<string[]>();
   const [selectedCareerTags, selectCareerTags] = useState<string[]>();
 
+  const setLoginNavigateTo = useContext(loginContext).setValue
+
   var content: JSX.Element | null = null;
 
   useEffect(() => {
+    if(setLoginNavigateTo) setLoginNavigateTo("/home");
+
     const getUserId = async () => {
       const userIdResponse = await getFromStorage("user_id");
       if(userIdResponse) setUserId(userIdResponse);

@@ -1,16 +1,19 @@
-import { Stack, Link } from "expo-router";
+import { Stack, Link, Href } from "expo-router";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from 'react';
+import { useEffect, createContext, useState } from 'react';
 import { View, Text } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { AntDesign } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-
 import Banner from "@/components/Banner";
 
 SplashScreen.preventAutoHideAsync();
+
+export const loginContext = createContext<{value: Href, setValue?: React.Dispatch<React.SetStateAction<Href>>}>({
+  value: "/home"
+});
 
 function fullAPIRoute(APIRoute: string) {
   var host = process.env.EXPO_PUBLIC_API_HOST
@@ -103,7 +106,9 @@ export default function RootLayout() {
 
   if (!loaded && !error) {
     return null;
-  }
+  };
+
+  const [loginNavigateTo, setLoginNavigateTo] = useState<Href>("/home");
 
   return (
     <View style={{flex: 1}}>
@@ -125,13 +130,15 @@ export default function RootLayout() {
           </Link>
         </View>
       </Banner>
-      <Stack screenOptions={{headerShown: false, contentStyle: {backgroundColor: "white"}}}>
-        <Stack.Screen  name="(tabs)" options={{headerShown: false}}/>
-        <Stack.Screen name="preferences" options={{headerShown: false}}/>
-        <Stack.Screen name="login" options={{headerShown: false}}/>
-        <Stack.Screen name="signup" options={{headerShown: false}}/>
-        <Stack.Screen name="+not-found" options={{headerShown: false}}/>
-      </Stack>
+      <loginContext.Provider value={{value: loginNavigateTo, setValue: setLoginNavigateTo}}>
+        <Stack screenOptions={{headerShown: false, contentStyle: {backgroundColor: "white"}}}>
+          <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
+          <Stack.Screen name="preferences" options={{headerShown: false}}/>
+          <Stack.Screen name="login" options={{headerShown: false}}/>
+          <Stack.Screen name="signup" options={{headerShown: false}}/>
+          <Stack.Screen name="+not-found" options={{headerShown: false}}/>
+        </Stack>
+      </loginContext.Provider>
       <StatusBar/>
     </View>
   );
