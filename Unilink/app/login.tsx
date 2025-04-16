@@ -1,11 +1,9 @@
-import { View, Text, Alert } from "react-native";
+import { View } from "react-native";
 import { useState } from "react";
 import { Link, useRouter, Router } from "expo-router";
 import MedButton from "@/components/MedButton";
 import TextField from "@/components/TextField";
 import HeaderText from "@/components/HeaderText";
-import axios from "axios";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { postAPI } from "./_layout";
 import { saveToStorage } from "./_layout";
 

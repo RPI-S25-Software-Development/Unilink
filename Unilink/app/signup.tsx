@@ -1,7 +1,6 @@
 import { View, Alert } from "react-native";
 import { useState } from "react";
 import { Link, useRouter } from "expo-router";
-import axios from "axios";
 import MedButton from "@/components/MedButton";
 import TextField from "@/components/TextField";
 import HeaderText from "@/components/HeaderText";
