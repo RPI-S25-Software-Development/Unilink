@@ -58,33 +58,40 @@ export function convertEventTimeAPIData(eventTimeAPIData: string) {
   // example time returned by API: "2025-02-06T17:00:00.000Z"
   // transform to -> "Feb 6, 5 PM"
 
-  var [date, time] = eventTimeAPIData.split("T");
-  time = time.split(".")[0];
+  var date = new Date(eventTimeAPIData);
 
   const allMonths = new Map([
-    [1, "Jan"],
-    [2, "Feb"],
-    [3, "Mar"],
-    [4, "Apr"],
-    [5, "May"],
-    [6, "Jun"],
-    [7, "Jul"],
-    [8, "Aug"],
-    [9, "Sep"],
-    [10, "Oct"],
-    [11, "Nov"],
-    [12, "Feb"]
+    [0, "Jan"],
+    [1, "Feb"],
+    [2, "Mar"],
+    [3, "Apr"],
+    [4, "May"],
+    [5, "Jun"],
+    [6, "Jul"],
+    [7, "Aug"],
+    [8, "Sep"],
+    [9, "Oct"],
+    [10, "Nov"],
+    [11, "Feb"]
   ]);
 
-  var [year, month, day] = date.split("-");
-  var [hour, minute, seconds] = time.split(":");
+  var [year, month, day, hour, minute, seconds] = [
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    date.getHours(),
+    date.getMinutes(),
+    date.getSeconds()
+  ];
 
-  var hourAdjusted = parseInt(hour);
+  var hourAdjusted = hour;
   var timePeriod = hourAdjusted < 12 ? "AM" : "PM";
   hourAdjusted = (hourAdjusted == 0) ? 12 : hourAdjusted;
   hourAdjusted = (hourAdjusted > 12) ? (hourAdjusted % 12) : hourAdjusted;
 
-  return allMonths.get(+month) + " " + day + ", " + hourAdjusted + ":" + minute + " " + timePeriod;
+  var minuteString = minute < 10 ? "0" + minute.toString() : minute.toString();
+
+  return allMonths.get(+month) + " " + day + ", " + hourAdjusted + ":" + minuteString + " " + timePeriod;
 };
 
 function convertEventsAPIData(eventsData: EventsData, eventsAPIData: any[]) {
