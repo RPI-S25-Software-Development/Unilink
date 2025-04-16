@@ -4,13 +4,16 @@ import { Link, useRouter } from "expo-router";
 import MedButton from "@/components/MedButton";
 import TextField from "@/components/TextField";
 import HeaderText from "@/components/HeaderText";
-import { postAPI } from "./_layout";
+import { postAPI, loginContext } from "./_layout";
+import { useContext } from "react";
 
 export default function SignUp() {
     const host = process.env.ENV === 'Prod' ? process.env.HOST : 'localhost';
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    const setLoginNavigateTo = useContext(loginContext).setValue
 
     const handleSignup = async () => {
         try {
@@ -20,6 +23,7 @@ export default function SignUp() {
             });
 
             Alert.alert("Success", "Account created successfully!");
+            if(setLoginNavigateTo) setLoginNavigateTo("/preferences");
             router.navigate("/login"); // Navigate on successful signup
         } catch (error) {
             console.error("Signup error:", error);

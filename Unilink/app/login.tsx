@@ -1,13 +1,13 @@
 import { View } from "react-native";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Link, useRouter, Router } from "expo-router";
 import MedButton from "@/components/MedButton";
 import TextField from "@/components/TextField";
 import HeaderText from "@/components/HeaderText";
-import { postAPI } from "./_layout";
-import { saveToStorage } from "./_layout";
+import { postAPI, loginContext, saveToStorage } from "./_layout";
+import { Href } from "expo-router";
 
-async function handleLogin(email: string, password: string, router: Router) {
+async function handleLogin(email: string, password: string, router: Router, navigateToOnSuccess: Href) {
     try {
         const loginResponse = await postAPI("/auth/login", {
             email,
@@ -25,7 +25,7 @@ async function handleLogin(email: string, password: string, router: Router) {
 
             console.log("Saved token:", savedToken);
             console.log("User ID:", userId)
-            if(savedToken && userId) router.navigate("/home"); // Navigate on successful signup
+            if(savedToken && userId) router.navigate(navigateToOnSuccess); // Navigate on successful signup
         }
     } catch (error) {
         console.error("Login error:", error);
@@ -41,6 +41,8 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [savedToken, setSavedToken] = useState<string>();
     const [userId, setUserId] = useState<string>();
+
+    const loginNavigateTo = useContext(loginContext).value;
 
     return (
         <View className="flex-1 items-center justify-center">
@@ -63,7 +65,7 @@ export default function Login() {
                 />
             </View>
             <MedButton label="Login" backgroundColor="#B61601" textColor="white"scale={1}
-            onPress={() => {handleLogin(email, password, router)}}/>
+            onPress={() => {handleLogin(email, password, router, loginNavigateTo)}}/>
             <Link className='underline' href='/signup'>New user? Click here to sign up.</Link>
             <Link className='underline' href='/login'>Forgot password? Click here to reset.</Link>
             </View>
