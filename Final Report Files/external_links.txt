@@ -1,3 +1,4 @@
 Github: https://github.com/RPI-S25-Software-Development/Unilink
 Website location: http://18.119.165.168:8081/
 Jira: https://rpi-s25-softdev-group-3.atlassian.net/jira/software/projects/UNI/boards/1
+All other related information: https://drive.google.com/drive/folders/1ni9-x8Tecb21WWsaQtjiIw_Gx1hHkUKK?usp=sharing
